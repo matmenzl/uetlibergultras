@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function StravaCallback() {
+export default function AuthStravaCallback() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -14,44 +14,47 @@ export default function StravaCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       const code = searchParams.get('code');
-      const state = searchParams.get('state'); // userId
       const error = searchParams.get('error');
 
       if (error) {
         setStatus('error');
         setMessage('Strava-Autorisierung abgebrochen');
         toast.error('Strava-Autorisierung abgebrochen');
-        setTimeout(() => navigate('/'), 3000);
+        setTimeout(() => navigate('/auth'), 3000);
         return;
       }
 
-      if (!code || !state) {
+      if (!code) {
         setStatus('error');
         setMessage('Ungültige Callback-Parameter');
         toast.error('Ungültige Callback-Parameter');
-        setTimeout(() => navigate('/'), 3000);
+        setTimeout(() => navigate('/auth'), 3000);
         return;
       }
 
       try {
-        // Exchange code for tokens via edge function
-        const { data, error: callbackError } = await supabase.functions.invoke('strava-oauth-callback', {
-          body: { code, userId: state }
+        // Exchange code for tokens and get session via edge function
+        const { data, error: exchangeError } = await supabase.functions.invoke('strava-auth-exchange', {
+          body: { code }
         });
 
-        if (callbackError) {
-          throw callbackError;
+        if (exchangeError || !data.success) {
+          throw new Error(data?.error || 'Failed to authenticate with Strava');
         }
 
-        if (!data.success) {
-          throw new Error('Failed to connect Strava account');
+        // Set the session manually
+        if (data.session) {
+          await supabase.auth.setSession({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+          });
         }
 
         setStatus('success');
-        setMessage('Erfolgreich mit Strava verbunden!');
-        toast.success('Strava-Account verbunden');
+        setMessage('Erfolgreich angemeldet!');
+        toast.success('Mit Strava angemeldet');
 
-        // Sync segment efforts
+        // Sync segment efforts in background
         setTimeout(async () => {
           setMessage('Synchronisiere deine Segmente...');
           
@@ -59,20 +62,23 @@ export default function StravaCallback() {
           
           if (syncError) {
             console.error('Sync error:', syncError);
-            toast.error('Fehler beim Synchronisieren');
           } else {
             toast.success('Segmente synchronisiert');
           }
 
-          setTimeout(() => navigate('/'), 1000);
+          // Get return URL or default to home
+          const returnUrl = sessionStorage.getItem('auth_return_url') || '/';
+          sessionStorage.removeItem('auth_return_url');
+          
+          setTimeout(() => navigate(returnUrl), 1000);
         }, 1000);
 
       } catch (err) {
         console.error('Callback error:', err);
         setStatus('error');
-        setMessage('Fehler beim Verbinden mit Strava');
-        toast.error('Fehler beim Verbinden mit Strava');
-        setTimeout(() => navigate('/'), 3000);
+        setMessage('Fehler beim Anmelden');
+        toast.error('Fehler beim Anmelden mit Strava');
+        setTimeout(() => navigate('/auth'), 3000);
       }
     };
 
