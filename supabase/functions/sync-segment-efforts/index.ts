@@ -98,6 +98,7 @@ serve(async (req) => {
 
     for (const activity of activities) {
       if (activity.segment_efforts && activity.segment_efforts.length > 0) {
+        console.log(`Activity "${activity.name}" has ${activity.segment_efforts.length} segment efforts`);
         for (const effort of activity.segment_efforts) {
           effortsToInsert.push({
             user_id: user.id,
@@ -117,17 +118,23 @@ serve(async (req) => {
       }
     }
 
+    console.log(`Total segment efforts found: ${totalEfforts}`);
+
     // Bulk insert efforts (on conflict do nothing to avoid duplicates)
     if (effortsToInsert.length > 0) {
+      console.log(`Attempting to insert ${effortsToInsert.length} segment efforts...`);
       const { error: insertError } = await supabase
         .from('segment_efforts')
         .upsert(effortsToInsert, { onConflict: 'user_id,segment_id,start_date', ignoreDuplicates: true });
 
       if (insertError) {
         console.error('Insert error:', insertError);
+        throw new Error(`Failed to insert efforts: ${insertError.message}`);
       } else {
-        console.log(`Inserted ${effortsToInsert.length} segment efforts`);
+        console.log(`Successfully inserted ${effortsToInsert.length} segment efforts`);
       }
+    } else {
+      console.log('No segment efforts found in recent activities. Make sure you have runs with segment efforts on Strava.');
     }
 
     // Check for achievements
