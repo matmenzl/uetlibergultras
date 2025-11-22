@@ -135,11 +135,13 @@ serve(async (req) => {
             );
 
             if (!leaderboardResponse.ok) {
-              console.log(`Failed to fetch leaderboard for segment ${segmentId}`);
+              const errorText = await leaderboardResponse.text();
+              console.log(`Failed to fetch leaderboard for segment ${segmentId}: ${leaderboardResponse.status} - ${errorText}`);
               continue;
             }
 
             const leaderboardData = await leaderboardResponse.json();
+            console.log(`Segment ${segmentId}: Found ${leaderboardData.entries?.length || 0} entries`);
             
             (leaderboardData.entries || []).forEach((entry: any) => {
               const athleteId = entry.athlete_id;
