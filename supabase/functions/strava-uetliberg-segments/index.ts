@@ -25,7 +25,7 @@ serve(async (req) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        client_id: clientId,
+        client_id: parseInt(clientId, 10),
         client_secret: clientSecret,
         refresh_token: refreshToken,
         grant_type: 'refresh_token',
