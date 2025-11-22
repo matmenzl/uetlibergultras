@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LeaderboardEntry } from "@/types/leaderboard";
 
 interface LeaderboardCardProps {
-  entry: LeaderboardEntry;
+  entry: LeaderboardEntry & { isAppUser?: boolean };
   isCurrentUser?: boolean;
   showUniqueSegments?: boolean;
 }
@@ -39,7 +39,7 @@ export const LeaderboardCard = ({ entry, isCurrentUser, showUniqueSegments }: Le
 
         {/* User Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <p className="font-semibold text-foreground truncate">
               {entry.firstName} {entry.lastName}
             </p>
@@ -48,9 +48,16 @@ export const LeaderboardCard = ({ entry, isCurrentUser, showUniqueSegments }: Le
                 Du
               </span>
             )}
+            {entry.isAppUser === false && (
+              <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full">
+                Strava
+              </span>
+            )}
           </div>
           <p className="text-sm text-muted-foreground">
-            Zuletzt aktiv: {new Date(entry.lastActivity).toLocaleDateString('de-DE')}
+            {entry.lastActivity 
+              ? `Zuletzt aktiv: ${new Date(entry.lastActivity).toLocaleDateString('de-DE')}`
+              : 'Strava Athlete'}
           </p>
         </div>
 

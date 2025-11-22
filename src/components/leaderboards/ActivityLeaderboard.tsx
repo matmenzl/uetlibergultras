@@ -14,7 +14,13 @@ export const ActivityLeaderboard = () => {
     queryKey: ["activity-leaderboard", activeTab],
     queryFn: async () => {
       console.log(`Fetching leaderboard for type: ${activeTab}`);
-      const { data, error } = await supabase.functions.invoke("get-activity-leaderboards", {
+      
+      // Use hybrid leaderboard for overall and unique segments
+      const functionName = (activeTab === 'most-efforts-overall' || activeTab === 'most-unique-segments')
+        ? 'get-hybrid-leaderboard'
+        : 'get-activity-leaderboards';
+      
+      const { data, error } = await supabase.functions.invoke(functionName, {
         body: { type: activeTab },
       });
 
