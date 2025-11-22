@@ -6,11 +6,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Trophy, TrendingUp, Mountain, Clock, Award } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ExternalLink, Trophy, TrendingUp, Mountain, Clock, Award, Users } from "lucide-react";
 import { SegmentData, formatDistance, formatGrade, getDifficultyLevel, calculateElevationGain } from "@/lib/mapUtils";
+import { useState } from "react";
 
 interface SegmentDetailProps {
   segment: SegmentData | null;
@@ -47,6 +50,16 @@ interface Achievement {
   metadata: any;
 }
 
+interface MostActiveEntry {
+  id: string;
+  rank: number;
+  firstName: string;
+  lastName: string;
+  profilePicture?: string;
+  totalEfforts: number;
+  lastActivity: string | null;
+}
+
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
@@ -54,6 +67,7 @@ const formatTime = (seconds: number): string => {
 };
 
 export const SegmentDetail = ({ segment, open, onOpenChange }: SegmentDetailProps) => {
+  const [activeTab, setActiveTab] = useState<'fastest' | 'most-active'>('fastest');
   const { data: detailData, isLoading } = useQuery({
     queryKey: ['segment-detail', segment?.id],
     queryFn: async () => {
@@ -147,6 +161,29 @@ export const SegmentDetail = ({ segment, open, onOpenChange }: SegmentDetailProp
       return (data || []) as Achievement[];
     },
     enabled: open && !!segment,
+  });
+
+  // Fetch "Most Active Athletes" for this segment
+  const { data: mostActiveData, isLoading: mostActiveLoading } = useQuery({
+    queryKey: ['most-active-segment', segment?.id],
+    queryFn: async () => {
+      if (!segment) return [];
+
+      const { data, error } = await supabase.functions.invoke('get-activity-leaderboards', {
+        body: { 
+          type: 'most-efforts-segment',
+          segment_id: segment.id 
+        },
+      });
+
+      if (error) {
+        console.error('Error fetching most active athletes:', error);
+        throw error;
+      }
+
+      return (data?.entries || []) as MostActiveEntry[];
+    },
+    enabled: open && !!segment && activeTab === 'most-active',
   });
 
   if (!segment) return null;
@@ -363,61 +400,136 @@ export const SegmentDetail = ({ segment, open, onOpenChange }: SegmentDetailProp
             )}
           </div>
 
-          {/* Leaderboard */}
+          {/* Leaderboard with Tabs */}
           <div>
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <Trophy size={20} />
-              Top 10 Leaderboard
+              Leaderboard
             </h3>
-            {isLoading ? (
-              <div className="space-y-2">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
-              </div>
-            ) : (() => {
-              // Use Strava leaderboard if available, otherwise use local leaderboard
-              const leaderboardData = detailData?.leaderboard && detailData.leaderboard.length > 0 
-                ? detailData.leaderboard 
-                : localLeaderboard || [];
-              
-              return leaderboardData.length > 0 ? (
-                <>
-                  {!detailData?.leaderboard || detailData.leaderboard.length === 0 ? (
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Zeigt Zeiten von App-Nutzern (Strava-Leaderboard nicht verfügbar)
-                    </p>
-                  ) : null}
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'fastest' | 'most-active')}>
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="fastest">
+                  <Clock className="mr-2 h-4 w-4" />
+                  Schnellste
+                </TabsTrigger>
+                <TabsTrigger value="most-active">
+                  <Users className="mr-2 h-4 w-4" />
+                  Most Active
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Fastest Times Tab */}
+              <TabsContent value="fastest" className="mt-0">
+                {isLoading ? (
                   <div className="space-y-2">
-                    {leaderboardData.map((entry) => (
-                      <Card key={entry.rank} className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                              entry.rank === 1 ? 'bg-yellow-500 text-yellow-950' :
-                              entry.rank === 2 ? 'bg-gray-400 text-gray-950' :
-                              entry.rank === 3 ? 'bg-amber-700 text-amber-50' :
-                              'bg-muted text-muted-foreground'
-                            }`}>
-                              {entry.rank}
-                            </div>
-                            <span className="font-medium">{entry.athlete_name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock size={16} className="text-muted-foreground" />
-                            <span className="font-mono font-bold">{formatTime(entry.elapsed_time)}</span>
-                          </div>
-                        </div>
-                      </Card>
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
                     ))}
                   </div>
-                </>
-              ) : (
-                <Card className="p-8 text-center text-muted-foreground">
-                  Keine Leaderboard-Daten verfügbar
-                </Card>
-              );
-            })()}
+                ) : (() => {
+                  // Use Strava leaderboard if available, otherwise use local leaderboard
+                  const leaderboardData = detailData?.leaderboard && detailData.leaderboard.length > 0 
+                    ? detailData.leaderboard 
+                    : localLeaderboard || [];
+                  
+                  return leaderboardData.length > 0 ? (
+                    <>
+                      {!detailData?.leaderboard || detailData.leaderboard.length === 0 ? (
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Zeigt Zeiten von App-Nutzern (Strava-Leaderboard nicht verfügbar)
+                        </p>
+                      ) : null}
+                      <div className="space-y-2">
+                        {leaderboardData.map((entry) => (
+                          <Card key={entry.rank} className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                                  entry.rank === 1 ? 'bg-yellow-500 text-yellow-950' :
+                                  entry.rank === 2 ? 'bg-gray-400 text-gray-950' :
+                                  entry.rank === 3 ? 'bg-amber-700 text-amber-50' :
+                                  'bg-muted text-muted-foreground'
+                                }`}>
+                                  {entry.rank}
+                                </div>
+                                <span className="font-medium">{entry.athlete_name}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Clock size={16} className="text-muted-foreground" />
+                                <span className="font-mono font-bold">{formatTime(entry.elapsed_time)}</span>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <Card className="p-8 text-center text-muted-foreground">
+                      Keine Leaderboard-Daten verfügbar
+                    </Card>
+                  );
+                })()}
+              </TabsContent>
+
+              {/* Most Active Tab */}
+              <TabsContent value="most-active" className="mt-0">
+                {mostActiveLoading ? (
+                  <div className="space-y-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                ) : mostActiveData && mostActiveData.length > 0 ? (
+                  <>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Wer hat dieses Segment am häufigsten absolviert?
+                    </p>
+                    <div className="space-y-2">
+                      {mostActiveData.map((entry) => (
+                        <Card key={entry.id} className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                                entry.rank === 1 ? 'bg-yellow-500 text-yellow-950' :
+                                entry.rank === 2 ? 'bg-gray-400 text-gray-950' :
+                                entry.rank === 3 ? 'bg-amber-700 text-amber-50' :
+                                'bg-muted text-muted-foreground'
+                              }`}>
+                                {entry.rank}
+                              </div>
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage src={entry.profilePicture} alt={`${entry.firstName} ${entry.lastName}`} />
+                                <AvatarFallback className="bg-primary/10 text-primary">
+                                  {entry.firstName[0]}{entry.lastName[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{entry.firstName} {entry.lastName}</p>
+                                {entry.lastActivity && (
+                                  <p className="text-xs text-muted-foreground">
+                                    Zuletzt: {new Date(entry.lastActivity).toLocaleDateString('de-DE')}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-primary">{entry.totalEfforts}</p>
+                              <p className="text-xs text-muted-foreground">Versuche</p>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <Card className="p-8 text-center text-muted-foreground">
+                    <Users className="mx-auto mb-2 h-8 w-8 opacity-50" />
+                    <p>Noch keine Daten verfügbar</p>
+                    <p className="text-sm mt-1">Sei der Erste, der seine Strava-Daten synchronisiert!</p>
+                  </Card>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </DialogContent>
