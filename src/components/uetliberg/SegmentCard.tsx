@@ -1,15 +1,17 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, TrendingUp, Mountain } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ExternalLink, TrendingUp, Mountain, Info } from 'lucide-react';
 import { SegmentData, formatDistance, formatGrade, getDifficultyLevel, calculateElevationGain } from '@/lib/mapUtils';
 
 interface SegmentCardProps {
   segment: SegmentData;
   onClick?: () => void;
+  onDetailClick?: () => void;
   isSelected?: boolean;
 }
 
-export const SegmentCard = ({ segment, onClick, isSelected }: SegmentCardProps) => {
+export const SegmentCard = ({ segment, onClick, onDetailClick, isSelected }: SegmentCardProps) => {
   const difficulty = getDifficultyLevel(segment.avg_grade);
   const elevationGain = calculateElevationGain(segment.elevation_high, segment.elevation_low);
 
@@ -74,6 +76,21 @@ export const SegmentCard = ({ segment, onClick, isSelected }: SegmentCardProps) 
           <div className="font-medium">{formatGrade(segment.avg_grade)}</div>
         </div>
       </div>
+
+      {onDetailClick && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full mt-3"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDetailClick();
+          }}
+        >
+          <Info size={16} className="mr-2" />
+          Details anzeigen
+        </Button>
+      )}
     </Card>
   );
 };
