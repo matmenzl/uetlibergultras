@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.sync-segment-efforts]
 verify_jwt = true
+
+[functions.get-activity-leaderboards]
+verify_jwt = false
