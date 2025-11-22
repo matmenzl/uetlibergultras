@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { SegmentData, decodePolyline, getDifficultyLevel, getDifficultyColor } from '@/lib/mapUtils';
-
-// TODO: User muss hier seinen Mapbox Token eintragen
-const MAPBOX_TOKEN = 'DEIN_MAPBOX_TOKEN_HIER';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 interface SegmentMapProps {
   segments?: SegmentData[];
@@ -17,12 +17,25 @@ export const SegmentMap = ({ segments = [], isLoading, selectedSegmentId, onSegm
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [mapboxToken, setMapboxToken] = useState<string>(() => {
+    return localStorage.getItem('mapbox_token') || '';
+  });
+  const [tokenInput, setTokenInput] = useState('');
+  const [showTokenPrompt, setShowTokenPrompt] = useState(!mapboxToken);
+
+  const handleTokenSubmit = () => {
+    if (tokenInput.trim()) {
+      localStorage.setItem('mapbox_token', tokenInput.trim());
+      setMapboxToken(tokenInput.trim());
+      setShowTokenPrompt(false);
+    }
+  };
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapContainer.current || map.current || !mapboxToken) return;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    mapboxgl.accessToken = mapboxToken;
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -45,7 +58,7 @@ export const SegmentMap = ({ segments = [], isLoading, selectedSegmentId, onSegm
     return () => {
       map.current?.remove();
     };
-  }, []);
+  }, [mapboxToken]);
 
   // Add segments to map
   useEffect(() => {
@@ -139,12 +152,44 @@ export const SegmentMap = ({ segments = [], isLoading, selectedSegmentId, onSegm
   return (
     <div className="relative w-full h-full min-h-[500px]">
       <div ref={mapContainer} className="absolute inset-0" />
+      
+      {showTokenPrompt && (
+        <div className="absolute inset-0 bg-background/95 flex items-center justify-center p-4 z-50">
+          <Card className="max-w-md w-full p-6 space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Mapbox Token erforderlich</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Bitte gib deinen Mapbox Public Access Token ein. Du findest ihn in deinem Mapbox-Dashboard unter{' '}
+                <a 
+                  href="https://account.mapbox.com/access-tokens/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary underline"
+                >
+                  account.mapbox.com/access-tokens
+                </a>
+              </p>
+            </div>
+            <Input
+              type="text"
+              placeholder="pk.eyJ1Ijoi..."
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleTokenSubmit()}
+            />
+            <Button onClick={handleTokenSubmit} className="w-full">
+              Token speichern
+            </Button>
+          </Card>
+        </div>
+      )}
+
       {isLoading && (
         <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
           <div className="text-lg">Lade Segmente...</div>
         </div>
       )}
-      {!isLoading && segments.length === 0 && (
+      {!isLoading && segments.length === 0 && !showTokenPrompt && (
         <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
           <div className="text-lg">Keine Segmente gefunden</div>
         </div>
