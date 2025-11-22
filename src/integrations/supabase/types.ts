@@ -14,7 +14,136 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          achievement_type: string
+          earned_at: string | null
+          id: string
+          metadata: Json | null
+          segment_id: number | null
+          user_id: string
+        }
+        Insert: {
+          achievement_type: string
+          earned_at?: string | null
+          id?: string
+          metadata?: Json | null
+          segment_id?: number | null
+          user_id: string
+        }
+        Update: {
+          achievement_type?: string
+          earned_at?: string | null
+          id?: string
+          metadata?: Json | null
+          segment_id?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          profile_picture: string | null
+          strava_access_token: string | null
+          strava_id: number | null
+          strava_refresh_token: string | null
+          strava_token_expires_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          profile_picture?: string | null
+          strava_access_token?: string | null
+          strava_id?: number | null
+          strava_refresh_token?: string | null
+          strava_token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          profile_picture?: string | null
+          strava_access_token?: string | null
+          strava_id?: number | null
+          strava_refresh_token?: string | null
+          strava_token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      segment_efforts: {
+        Row: {
+          average_speed: number | null
+          created_at: string | null
+          distance: number
+          elapsed_time: number
+          id: string
+          kom_rank: number | null
+          max_speed: number | null
+          moving_time: number
+          pr_rank: number | null
+          segment_id: number
+          segment_name: string
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          average_speed?: number | null
+          created_at?: string | null
+          distance: number
+          elapsed_time: number
+          id?: string
+          kom_rank?: number | null
+          max_speed?: number | null
+          moving_time: number
+          pr_rank?: number | null
+          segment_id: number
+          segment_name: string
+          start_date: string
+          user_id: string
+        }
+        Update: {
+          average_speed?: number | null
+          created_at?: string | null
+          distance?: number
+          elapsed_time?: number
+          id?: string
+          kom_rank?: number | null
+          max_speed?: number | null
+          moving_time?: number
+          pr_rank?: number | null
+          segment_id?: number
+          segment_name?: string
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "segment_efforts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
