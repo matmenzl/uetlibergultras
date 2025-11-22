@@ -86,7 +86,8 @@ serve(async (req) => {
       }));
       console.log(`Found ${leaderboard.length} leaderboard entries`);
     } else {
-      console.warn('Failed to fetch leaderboard');
+      const errorText = await leaderboardResponse.text();
+      console.error('Leaderboard fetch failed:', leaderboardResponse.status, errorText);
     }
 
     // Fetch streams for elevation profile
@@ -116,6 +117,10 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({
+        segment: {
+          elevation_high: segmentData.elevation_high,
+          elevation_low: segmentData.elevation_low,
+        },
         leaderboard,
         elevation_profile: elevationProfile,
       }),
