@@ -27,7 +27,7 @@ export default function Auth() {
   }, [navigate]);
 
   const handleStravaLogin = () => {
-    const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID || '139053';
+    const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID || '186560';
     const redirectUri = `${window.location.origin}/auth/strava-callback`;
     const scope = 'read,activity:read_all';
     
