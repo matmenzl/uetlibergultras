@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { NavBar } from "@/components/NavBar";
 import { SegmentMap } from "@/components/uetliberg/SegmentMap";
 import { SegmentList } from "@/components/uetliberg/SegmentList";
 import { SegmentDetail } from "@/components/uetliberg/SegmentDetail";
@@ -40,6 +41,9 @@ const Index = () => {
 
   return (
     <main className="min-h-screen flex flex-col">
+      {/* Navigation Bar */}
+      <NavBar />
+
       {/* Hero Header */}
       <section className="bg-gradient-to-r from-primary to-primary/80 py-12 px-4">
         <div className="container mx-auto text-center">
