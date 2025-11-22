@@ -225,7 +225,9 @@ export const SegmentDetail = ({ segment, open, onOpenChange }: SegmentDetailProp
                 <Mountain size={16} className="text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">Höhenmeter</span>
               </div>
-              <div className="text-lg font-bold">{elevationGain}m</div>
+              <div className="text-lg font-bold">
+                {!isNaN(elevationGain) && elevationGain > 0 ? `${elevationGain}m` : 'N/A'}
+              </div>
             </Card>
             <Card className="p-4">
               <div className="flex items-center gap-2 mb-1">
@@ -258,36 +260,58 @@ export const SegmentDetail = ({ segment, open, onOpenChange }: SegmentDetailProp
             </h3>
             {isLoading ? (
               <Skeleton className="h-48 w-full" />
-            ) : detailData?.elevation_profile ? (
+            ) : detailData?.elevation_profile && detailData.elevation_profile.length > 0 ? (
               <Card className="p-4">
                 <svg viewBox="0 0 400 150" className="w-full h-48">
-                  <polyline
-                    points={detailData.elevation_profile
-                      .map((point, idx) => {
-                        const x = (idx / (detailData.elevation_profile.length - 1)) * 380 + 10;
-                        const y = 140 - ((point[1] - segment.elevation_low) / (segment.elevation_high - segment.elevation_low)) * 120;
-                        return `${x},${y}`;
-                      })
-                      .join(' ')}
-                    fill="none"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="2"
-                  />
-                  <polyline
-                    points={`10,140 ${detailData.elevation_profile
-                      .map((point, idx) => {
-                        const x = (idx / (detailData.elevation_profile.length - 1)) * 380 + 10;
-                        const y = 140 - ((point[1] - segment.elevation_low) / (segment.elevation_high - segment.elevation_low)) * 120;
-                        return `${x},${y}`;
-                      })
-                      .join(' ')} 390,140`}
-                    fill="hsl(var(--primary) / 0.1)"
-                  />
+                  {(() => {
+                    const elevations = detailData.elevation_profile.map(p => p[1]);
+                    const minElev = Math.min(...elevations);
+                    const maxElev = Math.max(...elevations);
+                    const elevRange = maxElev - minElev;
+                    
+                    if (elevRange === 0) {
+                      return <text x="200" y="75" textAnchor="middle" className="fill-muted-foreground">Höhenprofil nicht verfügbar</text>;
+                    }
+                    
+                    return (
+                      <>
+                        <polyline
+                          points={detailData.elevation_profile
+                            .map((point, idx) => {
+                              const x = (idx / (detailData.elevation_profile.length - 1)) * 380 + 10;
+                              const y = 140 - ((point[1] - minElev) / elevRange) * 120;
+                              return `${x},${y}`;
+                            })
+                            .join(' ')}
+                          fill="none"
+                          stroke="hsl(var(--primary))"
+                          strokeWidth="2"
+                        />
+                        <polyline
+                          points={`10,140 ${detailData.elevation_profile
+                            .map((point, idx) => {
+                              const x = (idx / (detailData.elevation_profile.length - 1)) * 380 + 10;
+                              const y = 140 - ((point[1] - minElev) / elevRange) * 120;
+                              return `${x},${y}`;
+                            })
+                            .join(' ')} 390,140`}
+                          fill="hsl(var(--primary) / 0.1)"
+                        />
+                      </>
+                    );
+                  })()}
                 </svg>
-                <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                  <span>{segment.elevation_low}m</span>
-                  <span>{segment.elevation_high}m</span>
-                </div>
+                {detailData.elevation_profile.length > 0 && (() => {
+                  const elevations = detailData.elevation_profile.map(p => p[1]);
+                  const minElev = Math.min(...elevations);
+                  const maxElev = Math.max(...elevations);
+                  return (
+                    <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                      <span>{Math.round(minElev)}m</span>
+                      <span>{Math.round(maxElev)}m</span>
+                    </div>
+                  );
+                })()}
               </Card>
             ) : (
               <Card className="p-8 text-center text-muted-foreground">
