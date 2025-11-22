@@ -49,6 +49,81 @@ export type Database = {
           },
         ]
       }
+      comments: {
+        Row: {
+          comment_text: string
+          created_at: string
+          effort_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_text: string
+          created_at?: string
+          effort_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_text?: string
+          created_at?: string
+          effort_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_effort_id_fkey"
+            columns: ["effort_id"]
+            isOneToOne: false
+            referencedRelation: "segment_efforts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kudos: {
+        Row: {
+          created_at: string
+          effort_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          effort_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          effort_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kudos_effort_id_fkey"
+            columns: ["effort_id"]
+            isOneToOne: false
+            referencedRelation: "segment_efforts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kudos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null

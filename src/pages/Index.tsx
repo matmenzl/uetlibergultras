@@ -1,5 +1,6 @@
 import { NavBar } from "@/components/NavBar";
 import { ActivityLeaderboard } from "@/components/leaderboards/ActivityLeaderboard";
+import { ActivityFeed } from "@/components/activity/ActivityFeed";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -70,6 +71,9 @@ const Index = () => {
 
       {/* Community Leaderboards */}
       <ActivityLeaderboard />
+
+      {/* Live Activity Feed */}
+      <ActivityFeed />
 
       {/* Footer */}
       <Footer />
