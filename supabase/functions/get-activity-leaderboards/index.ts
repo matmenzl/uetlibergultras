@@ -16,9 +16,11 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { type = 'most-efforts-overall' } = await req.json().catch(() => ({}));
+    const requestBody = await req.json().catch(() => ({}));
+    const type = requestBody.type || 'most-efforts-overall';
+    const segment_id = requestBody.segment_id;
     
-    console.log(`Fetching leaderboard for type: ${type}`);
+    console.log(`Fetching leaderboard for type: ${type}`, segment_id ? `for segment: ${segment_id}` : '');
 
     interface LeaderboardEntry {
       id: string;
@@ -158,6 +160,72 @@ serve(async (req) => {
           profilePicture: user.profilePicture,
           totalEfforts: user.totalEfforts,
           uniqueSegments: user.uniqueSegments,
+          lastActivity: user.lastActivity,
+        }));
+
+    } else if (type === 'most-efforts-segment') {
+      // Meiste Efforts für ein spezifisches Segment
+      if (!segment_id) {
+        throw new Error('segment_id is required for most-efforts-segment type');
+      }
+
+      const { data, error } = await supabase
+        .from('segment_efforts')
+        .select(`
+          user_id,
+          profiles!inner(first_name, last_name, profile_picture)
+        `)
+        .eq('segment_id', segment_id);
+
+      if (error) {
+        console.error('Error fetching segment efforts:', error);
+        throw error;
+      }
+
+      const userMap = new Map();
+      data.forEach((effort: any) => {
+        const userId = effort.user_id;
+        if (!userMap.has(userId)) {
+          userMap.set(userId, {
+            userId,
+            firstName: effort.profiles.first_name,
+            lastName: effort.profiles.last_name,
+            profilePicture: effort.profiles.profile_picture,
+            totalEfforts: 0,
+            lastActivity: null,
+          });
+        }
+        const user = userMap.get(userId);
+        user.totalEfforts += 1;
+      });
+
+      // Hole last activity separat
+      for (const [userId, user] of userMap.entries()) {
+        const { data: activityData } = await supabase
+          .from('segment_efforts')
+          .select('start_date')
+          .eq('user_id', userId)
+          .eq('segment_id', segment_id)
+          .order('start_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (activityData) {
+          user.lastActivity = activityData.start_date;
+        }
+      }
+
+      leaderboardData = Array.from(userMap.values())
+        .sort((a, b) => b.totalEfforts - a.totalEfforts)
+        .slice(0, 10)
+        .map((user, index) => ({
+          id: user.userId,
+          rank: index + 1,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profilePicture: user.profilePicture,
+          totalEfforts: user.totalEfforts,
+          uniqueSegments: 1, // Not relevant for segment-specific view
           lastActivity: user.lastActivity,
         }));
 
