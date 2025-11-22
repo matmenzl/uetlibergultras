@@ -56,10 +56,7 @@ export type Database = {
           id: string
           last_name: string | null
           profile_picture: string | null
-          strava_access_token: string | null
           strava_id: number | null
-          strava_refresh_token: string | null
-          strava_token_expires_at: string | null
           updated_at: string | null
         }
         Insert: {
@@ -68,10 +65,7 @@ export type Database = {
           id: string
           last_name?: string | null
           profile_picture?: string | null
-          strava_access_token?: string | null
           strava_id?: number | null
-          strava_refresh_token?: string | null
-          strava_token_expires_at?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -80,10 +74,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           profile_picture?: string | null
-          strava_access_token?: string | null
           strava_id?: number | null
-          strava_refresh_token?: string | null
-          strava_token_expires_at?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -144,12 +135,58 @@ export type Database = {
           },
         ]
       }
+      strava_credentials: {
+        Row: {
+          created_at: string | null
+          id: string
+          strava_access_token: string
+          strava_refresh_token: string
+          strava_token_expires_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          strava_access_token: string
+          strava_refresh_token: string
+          strava_token_expires_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          strava_access_token?: string
+          strava_refresh_token?: string
+          strava_token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_strava_credentials: {
+        Args: { _user_id: string }
+        Returns: {
+          strava_access_token: string
+          strava_refresh_token: string
+          strava_token_expires_at: string
+        }[]
+      }
+      upsert_strava_credentials: {
+        Args: {
+          _access_token: string
+          _expires_at: string
+          _refresh_token: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
