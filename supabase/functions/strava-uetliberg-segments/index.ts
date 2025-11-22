@@ -21,12 +21,11 @@ serve(async (req) => {
 
     // Get access token using refresh token
     console.log('Getting Strava access token...');
-    console.log('Client ID:', clientId);
     const tokenResponse = await fetch('https://www.strava.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        client_id: parseInt(clientId, 10),
+        client_id: clientId,
         client_secret: clientSecret,
         refresh_token: refreshToken,
         grant_type: 'refresh_token',
