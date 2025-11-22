@@ -1,1 +1,4 @@
 project_id = "arsetehgavxmkwkieedm"
+
+[functions.strava-uetliberg-segments]
+verify_jwt = false
