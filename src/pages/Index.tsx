@@ -3,11 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SegmentMap } from "@/components/uetliberg/SegmentMap";
 import { SegmentList } from "@/components/uetliberg/SegmentList";
+import { SegmentDetail } from "@/components/uetliberg/SegmentDetail";
 import { Footer } from "@/components/Footer";
 import { SegmentData } from "@/lib/mapUtils";
 
 const Index = () => {
   const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
+  const [detailSegment, setDetailSegment] = useState<SegmentData | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const { data: segments = [], isLoading, error } = useQuery({
     queryKey: ['uetliberg-segments'],
@@ -28,6 +31,11 @@ const Index = () => {
 
   const handleSegmentSelect = (segment: SegmentData) => {
     setSelectedSegmentId(segment.id);
+  };
+
+  const handleSegmentDetail = (segment: SegmentData) => {
+    setDetailSegment(segment);
+    setDetailOpen(true);
   };
 
   return (
@@ -64,10 +72,18 @@ const Index = () => {
             segments={segments}
             isLoading={isLoading}
             onSegmentSelect={handleSegmentSelect}
+            onSegmentDetail={handleSegmentDetail}
             selectedSegmentId={selectedSegmentId}
           />
         </div>
       </section>
+
+      {/* Segment Detail Dialog */}
+      <SegmentDetail
+        segment={detailSegment}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
 
       {/* Footer */}
       <Footer />

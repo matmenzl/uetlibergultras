@@ -2,3 +2,6 @@ project_id = "arsetehgavxmkwkieedm"
 
 [functions.strava-uetliberg-segments]
 verify_jwt = false
+
+[functions.strava-segment-detail]
+verify_jwt = false

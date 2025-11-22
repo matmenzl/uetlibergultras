@@ -8,10 +8,11 @@ interface SegmentListProps {
   segments?: SegmentData[];
   isLoading?: boolean;
   onSegmentSelect?: (segment: SegmentData) => void;
+  onSegmentDetail?: (segment: SegmentData) => void;
   selectedSegmentId?: number | null;
 }
 
-export const SegmentList = ({ segments = [], isLoading, onSegmentSelect, selectedSegmentId }: SegmentListProps) => {
+export const SegmentList = ({ segments = [], isLoading, onSegmentSelect, onSegmentDetail, selectedSegmentId }: SegmentListProps) => {
   const [sortBy, setSortBy] = useState<'popularity' | 'distance'>('popularity');
   const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'easy' | 'medium' | 'hard'>('all');
 
@@ -112,6 +113,7 @@ export const SegmentList = ({ segments = [], isLoading, onSegmentSelect, selecte
               key={segment.id}
               segment={segment}
               onClick={() => onSegmentSelect?.(segment)}
+              onDetailClick={() => onSegmentDetail?.(segment)}
               isSelected={segment.id === selectedSegmentId}
             />
           ))}
