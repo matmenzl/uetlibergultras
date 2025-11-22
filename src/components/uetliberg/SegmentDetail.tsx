@@ -92,6 +92,42 @@ export const SegmentDetail = ({ segment, open, onOpenChange }: SegmentDetailProp
     enabled: open && !!segment,
   });
 
+  // Fetch local leaderboard from database (fallback when Strava API fails)
+  const { data: localLeaderboard } = useQuery({
+    queryKey: ['local-leaderboard', segment?.id],
+    queryFn: async () => {
+      if (!segment) return [];
+      
+      const { data, error } = await supabase
+        .from('segment_efforts')
+        .select(`
+          elapsed_time,
+          user_id,
+          profiles:user_id (
+            first_name,
+            last_name
+          )
+        `)
+        .eq('segment_id', segment.id)
+        .order('elapsed_time', { ascending: true })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching local leaderboard:', error);
+        return [];
+      }
+
+      return (data || []).map((effort: any, index: number) => ({
+        rank: index + 1,
+        athlete_name: effort.profiles 
+          ? `${effort.profiles.first_name || ''} ${effort.profiles.last_name || ''}`.trim() || 'Unbekannt'
+          : 'Unbekannt',
+        elapsed_time: effort.elapsed_time,
+      }));
+    },
+    enabled: open && !!segment,
+  });
+
   // Fetch achievements for this segment
   const { data: achievements } = useQuery({
     queryKey: ['achievements', segment?.id],
@@ -339,35 +375,49 @@ export const SegmentDetail = ({ segment, open, onOpenChange }: SegmentDetailProp
                   <Skeleton key={i} className="h-16 w-full" />
                 ))}
               </div>
-            ) : detailData?.leaderboard && detailData.leaderboard.length > 0 ? (
-              <div className="space-y-2">
-                {detailData.leaderboard.map((entry) => (
-                  <Card key={entry.rank} className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                          entry.rank === 1 ? 'bg-yellow-500 text-yellow-950' :
-                          entry.rank === 2 ? 'bg-gray-400 text-gray-950' :
-                          entry.rank === 3 ? 'bg-amber-700 text-amber-50' :
-                          'bg-muted text-muted-foreground'
-                        }`}>
-                          {entry.rank}
+            ) : (() => {
+              // Use Strava leaderboard if available, otherwise use local leaderboard
+              const leaderboardData = detailData?.leaderboard && detailData.leaderboard.length > 0 
+                ? detailData.leaderboard 
+                : localLeaderboard || [];
+              
+              return leaderboardData.length > 0 ? (
+                <>
+                  {!detailData?.leaderboard || detailData.leaderboard.length === 0 ? (
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Zeigt Zeiten von App-Nutzern (Strava-Leaderboard nicht verfügbar)
+                    </p>
+                  ) : null}
+                  <div className="space-y-2">
+                    {leaderboardData.map((entry) => (
+                      <Card key={entry.rank} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                              entry.rank === 1 ? 'bg-yellow-500 text-yellow-950' :
+                              entry.rank === 2 ? 'bg-gray-400 text-gray-950' :
+                              entry.rank === 3 ? 'bg-amber-700 text-amber-50' :
+                              'bg-muted text-muted-foreground'
+                            }`}>
+                              {entry.rank}
+                            </div>
+                            <span className="font-medium">{entry.athlete_name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock size={16} className="text-muted-foreground" />
+                            <span className="font-mono font-bold">{formatTime(entry.elapsed_time)}</span>
+                          </div>
                         </div>
-                        <span className="font-medium">{entry.athlete_name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock size={16} className="text-muted-foreground" />
-                        <span className="font-mono font-bold">{formatTime(entry.elapsed_time)}</span>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card className="p-8 text-center text-muted-foreground">
-                Keine Leaderboard-Daten verfügbar
-              </Card>
-            )}
+                      </Card>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <Card className="p-8 text-center text-muted-foreground">
+                  Keine Leaderboard-Daten verfügbar
+                </Card>
+              );
+            })()}
           </div>
         </div>
       </DialogContent>
