@@ -13,18 +13,22 @@ const Index = () => {
   const [detailSegment, setDetailSegment] = useState<SegmentData | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
-  const { data: segments = [], isLoading, error } = useQuery({
-    queryKey: ['uetliberg-segments'],
+  const {
+    data: segments = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["uetliberg-segments"],
     queryFn: async () => {
-      console.log('Fetching segments from edge function...');
-      const { data, error } = await supabase.functions.invoke('strava-uetliberg-segments');
-      
+      console.log("Fetching segments from edge function...");
+      const { data, error } = await supabase.functions.invoke("strava-uetliberg-segments");
+
       if (error) {
-        console.error('Error fetching segments:', error);
+        console.error("Error fetching segments:", error);
         throw error;
       }
-      
-      console.log('Segments fetched:', data?.segments?.length || 0);
+
+      console.log("Segments fetched:", data?.segments?.length || 0);
       return data?.segments || [];
     },
     staleTime: 1000 * 60 * 60 * 24, // 24h cache
@@ -47,9 +51,7 @@ const Index = () => {
       {/* Hero Header */}
       <section className="bg-gradient-to-r from-primary to-primary/80 py-12 px-4">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
-            Laufstrecken am Uetliberg
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">Uetliberg Segmente</h1>
           <p className="text-lg md:text-xl text-primary-foreground/90">
             Entdecke die besten Running-Segmente auf Zürichs Hausberg
           </p>
@@ -83,11 +85,7 @@ const Index = () => {
       </section>
 
       {/* Segment Detail Dialog */}
-      <SegmentDetail
-        segment={detailSegment}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
+      <SegmentDetail segment={detailSegment} open={detailOpen} onOpenChange={setDetailOpen} />
 
       {/* Footer */}
       <Footer />
