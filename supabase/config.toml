@@ -9,5 +9,8 @@ verify_jwt = false
 [functions.strava-oauth-callback]
 verify_jwt = false
 
+[functions.strava-auth-exchange]
+verify_jwt = false
+
 [functions.sync-segment-efforts]
 verify_jwt = true

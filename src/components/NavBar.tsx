@@ -72,14 +72,19 @@ export const NavBar = () => {
     }
   };
 
-  const connectStrava = () => {
+  const syncStrava = async () => {
     if (!user) return;
     
-    const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID || '139053';
-    const redirectUri = `${window.location.origin}/strava-callback`;
-    const scope = 'read,activity:read_all';
+    toast.info('Synchronisiere Strava-Daten...');
     
-    window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${user.id}`;
+    const { error } = await supabase.functions.invoke('sync-segment-efforts');
+    
+    if (error) {
+      toast.error('Fehler beim Synchronisieren');
+      console.error('Sync error:', error);
+    } else {
+      toast.success('Strava-Daten synchronisiert');
+    }
   };
 
   return (
@@ -115,16 +120,10 @@ export const NavBar = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {!profile?.strava_id && (
-                  <DropdownMenuItem onClick={connectStrava}>
-                    <Award className="mr-2 h-4 w-4" />
-                    Mit Strava verbinden
-                  </DropdownMenuItem>
-                )}
                 {profile?.strava_id && (
-                  <DropdownMenuItem disabled>
+                  <DropdownMenuItem onClick={syncStrava}>
                     <Award className="mr-2 h-4 w-4" />
-                    Mit Strava verbunden ✓
+                    Strava synchronisieren
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
