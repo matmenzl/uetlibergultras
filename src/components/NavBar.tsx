@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Award, Mountain, RefreshCw } from 'lucide-react';
+import { User, LogOut, Award, Mountain, RefreshCw, Trophy, Map } from 'lucide-react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 
@@ -114,7 +114,25 @@ export const NavBar = () => {
           <span className="text-xl font-bold">Uetliberg Läufe</span>
         </Link>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center gap-2">
+            <Button variant="ghost" asChild>
+              <Link to="/" className="flex items-center gap-2">
+                <Trophy className="h-4 w-4" />
+                Community
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link to="/segments" className="flex items-center gap-2">
+                <Map className="h-4 w-4" />
+                Segmente
+              </Link>
+            </Button>
+          </div>
+
+          {/* User Menu */}
+          <div className="flex items-center gap-4">
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -162,6 +180,7 @@ export const NavBar = () => {
               </Button>
             </div>
           )}
+          </div>
         </div>
       </div>
     </nav>
