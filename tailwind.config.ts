@@ -57,6 +57,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        sunrise: {
+          start: "hsl(var(--sunrise-start))",
+          mid: "hsl(var(--sunrise-mid))",
+          end: "hsl(var(--sunrise-end))",
+        },
+      },
+      backgroundImage: {
+        'gradient-sunrise': 'var(--gradient-sunrise)',
+        'gradient-hero': 'var(--gradient-hero)',
+      },
+      boxShadow: {
+        'warm': 'var(--shadow-warm)',
+        'glow': 'var(--shadow-glow)',
       },
       borderRadius: {
         lg: "var(--radius)",
