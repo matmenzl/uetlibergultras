@@ -74,10 +74,10 @@ serve(async (req) => {
       }
     }
 
-    // Fetch athlete's recent activities
-    console.log('Fetching recent activities...');
-    const activitiesResponse = await fetch(
-      'https://www.strava.com/api/v3/athlete/activities?per_page=50',
+    // Fetch athlete's recent activities (list only)
+    console.log('Fetching recent activities list...');
+    const activitiesListResponse = await fetch(
+      'https://www.strava.com/api/v3/athlete/activities?per_page=30',
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -85,18 +85,36 @@ serve(async (req) => {
       }
     );
 
-    if (!activitiesResponse.ok) {
-      throw new Error('Failed to fetch activities');
+    if (!activitiesListResponse.ok) {
+      throw new Error('Failed to fetch activities list');
     }
 
-    const activities = await activitiesResponse.json();
-    console.log(`Found ${activities.length} recent activities`);
+    const activitiesList = await activitiesListResponse.json();
+    console.log(`Found ${activitiesList.length} recent activities`);
 
-    // Extract segment efforts from activities
+    // Fetch detailed activity data for each activity to get segment efforts
     let totalEfforts = 0;
     const effortsToInsert = [];
 
-    for (const activity of activities) {
+    console.log('Fetching detailed activity data with segment efforts...');
+    for (const activitySummary of activitiesList) {
+      // Fetch detailed activity data
+      const activityDetailResponse = await fetch(
+        `https://www.strava.com/api/v3/activities/${activitySummary.id}?include_all_efforts=true`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!activityDetailResponse.ok) {
+        console.log(`Failed to fetch details for activity ${activitySummary.id}`);
+        continue;
+      }
+
+      const activity = await activityDetailResponse.json();
+
       if (activity.segment_efforts && activity.segment_efforts.length > 0) {
         console.log(`Activity "${activity.name}" has ${activity.segment_efforts.length} segment efforts`);
         for (const effort of activity.segment_efforts) {
@@ -143,7 +161,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        activitiesCount: activities.length,
+        activitiesCount: activitiesList.length,
         effortsCount: totalEfforts 
       }),
       {
