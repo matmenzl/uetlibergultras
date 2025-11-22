@@ -25,6 +25,10 @@ interface LeaderboardEntry {
 }
 
 interface SegmentDetailData {
+  segment?: {
+    elevation_high: number;
+    elevation_low: number;
+  };
   leaderboard: LeaderboardEntry[];
   elevation_profile: number[][];
 }
@@ -112,7 +116,10 @@ export const SegmentDetail = ({ segment, open, onOpenChange }: SegmentDetailProp
   if (!segment) return null;
 
   const difficulty = getDifficultyLevel(segment.avg_grade);
-  const elevationGain = calculateElevationGain(segment.elevation_high, segment.elevation_low);
+  // Use elevation data from detail API if available, fallback to segment data
+  const elevationHigh = detailData?.segment?.elevation_high ?? segment.elevation_high;
+  const elevationLow = detailData?.segment?.elevation_low ?? segment.elevation_low;
+  const elevationGain = calculateElevationGain(elevationHigh, elevationLow);
 
   const difficultyColors = {
     easy: 'bg-green-500',
