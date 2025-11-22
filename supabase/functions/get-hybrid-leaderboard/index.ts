@@ -115,18 +115,24 @@ serve(async (req) => {
         const tokenData = await tokenResponse.json();
         const accessToken = tokenData.access_token;
 
-        console.log('Fetching Strava leaderboards for Uetliberg segments...');
+        console.log('Fetching Strava leaderboards for top Uetliberg segments...');
 
-        // Step 3: Fetch leaderboards for all Uetliberg segments
+        // Step 3: Get top 5 most popular segments by effort count
+        const topSegments = UETLIBERG_SEGMENT_IDS.slice(0, 5); // First 5 are most popular
+
+        // Fetch leaderboards for all Uetliberg segments
         const stravaAthletes = new Map<number, {
           name: string;
           profilePicture?: string;
           segmentEfforts: Map<number, number>; // segment_id -> effort count
         }>();
 
-        // Fetch leaderboards in batches to avoid rate limits
-        for (const segmentId of UETLIBERG_SEGMENT_IDS) {
+        // Fetch leaderboards with better rate limiting
+        for (const segmentId of topSegments) {
           try {
+            // Wait 500ms between requests to respect rate limits
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             const leaderboardResponse = await fetch(
               `https://www.strava.com/api/v3/segments/${segmentId}/leaderboard?per_page=50`,
               {
@@ -164,9 +170,6 @@ serve(async (req) => {
                 athlete.segmentEfforts.set(segmentId, entry.effort_count || 1);
               }
             });
-
-            // Add small delay to respect rate limits
-            await new Promise(resolve => setTimeout(resolve, 100));
           } catch (error) {
             console.error(`Error fetching segment ${segmentId}:`, error);
           }
