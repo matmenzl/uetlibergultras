@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Trophy, TrendingUp, Mountain, Clock } from "lucide-react";
+import { ExternalLink, Trophy, TrendingUp, Mountain, Clock, Award } from "lucide-react";
 import { SegmentData, formatDistance, formatGrade, getDifficultyLevel, calculateElevationGain } from "@/lib/mapUtils";
 
 interface SegmentDetailProps {
@@ -27,6 +27,20 @@ interface LeaderboardEntry {
 interface SegmentDetailData {
   leaderboard: LeaderboardEntry[];
   elevation_profile: number[][];
+}
+
+interface PersonalRecord {
+  elapsed_time: number;
+  moving_time: number;
+  start_date: string;
+  pr_rank: number | null;
+  kom_rank: number | null;
+}
+
+interface Achievement {
+  achievement_type: string;
+  earned_at: string;
+  metadata: any;
 }
 
 const formatTime = (seconds: number): string => {
@@ -47,6 +61,50 @@ export const SegmentDetail = ({ segment, open, onOpenChange }: SegmentDetailProp
       
       if (error) throw error;
       return data as SegmentDetailData;
+    },
+    enabled: open && !!segment,
+  });
+
+  // Fetch user's personal record for this segment
+  const { data: personalRecord, isLoading: prLoading } = useQuery({
+    queryKey: ['personal-record', segment?.id],
+    queryFn: async () => {
+      if (!segment) return null;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('segment_efforts')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('segment_id', segment.id)
+        .order('elapsed_time', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      return data as PersonalRecord | null;
+    },
+    enabled: open && !!segment,
+  });
+
+  // Fetch achievements for this segment
+  const { data: achievements } = useQuery({
+    queryKey: ['achievements', segment?.id],
+    queryFn: async () => {
+      if (!segment) return [];
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('achievements')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('segment_id', segment.id)
+        .order('earned_at', { ascending: false });
+
+      return (data || []) as Achievement[];
     },
     enabled: open && !!segment,
   });
@@ -86,6 +144,73 @@ export const SegmentDetail = ({ segment, open, onOpenChange }: SegmentDetailProp
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Personal Record Section */}
+          {personalRecord && (
+            <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Award className="text-primary" size={24} />
+                Dein Persönlicher Rekord
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Beste Zeit</p>
+                  <p className="text-2xl font-bold text-primary">
+                    {formatTime(personalRecord.elapsed_time)}
+                  </p>
+                </div>
+                {personalRecord.pr_rank && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">PR Rang</p>
+                    <p className="text-2xl font-bold">#{personalRecord.pr_rank}</p>
+                  </div>
+                )}
+                <div className="col-span-2">
+                  <p className="text-sm text-muted-foreground">Erreicht am</p>
+                  <p className="font-medium">
+                    {new Date(personalRecord.start_date).toLocaleDateString('de-DE', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Achievements */}
+          {achievements && achievements.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <Trophy size={20} className="text-yellow-500" />
+                Erfolge
+              </h3>
+              <div className="space-y-2">
+                {achievements.map((achievement, idx) => (
+                  <Card key={idx} className="p-4 bg-yellow-500/5 border-yellow-500/20">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                        <Trophy className="text-yellow-500" size={20} />
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          {achievement.achievement_type === 'personal_record' && 'Persönlicher Rekord!'}
+                          {achievement.achievement_type === 'first_segment' && 'Erstes Segment!'}
+                          {achievement.achievement_type === '10_segments' && '10 Segmente!'}
+                        </p>
+                        {achievement.metadata?.message && (
+                          <p className="text-sm text-muted-foreground">
+                            {achievement.metadata.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Stats Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="p-4">

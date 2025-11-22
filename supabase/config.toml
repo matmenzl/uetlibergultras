@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.strava-segment-detail]
 verify_jwt = false
+
+[functions.strava-oauth-callback]
+verify_jwt = false
+
+[functions.sync-segment-efforts]
+verify_jwt = true
