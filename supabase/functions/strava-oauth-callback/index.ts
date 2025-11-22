@@ -66,15 +66,25 @@ serve(async (req) => {
     const athlete = await athleteResponse.json();
     console.log(`Athlete data fetched: ${athlete.id}`);
 
-    // Store in profiles table
+    // Store Strava tokens securely (server-side only)
+    const { error: credentialsError } = await supabase.rpc('upsert_strava_credentials', {
+      _user_id: userId,
+      _access_token: tokenData.access_token,
+      _refresh_token: tokenData.refresh_token,
+      _expires_at: new Date(tokenData.expires_at * 1000).toISOString(),
+    });
+
+    if (credentialsError) {
+      console.error('Credentials upsert error:', credentialsError);
+      throw new Error('Failed to save credentials');
+    }
+
+    // Store public profile data (without tokens)
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert({
         id: userId,
         strava_id: athlete.id,
-        strava_access_token: tokenData.access_token,
-        strava_refresh_token: tokenData.refresh_token,
-        strava_token_expires_at: new Date(tokenData.expires_at * 1000).toISOString(),
         first_name: athlete.firstname,
         last_name: athlete.lastname,
         profile_picture: athlete.profile,

@@ -31,21 +31,19 @@ serve(async (req) => {
       throw new Error('Not authenticated');
     }
 
-    // Get user's Strava tokens
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('strava_access_token, strava_refresh_token, strava_token_expires_at')
-      .eq('id', user.id)
-      .single();
+    // Get user's Strava tokens from secure storage
+    const { data: credentialsArray, error: credentialsError } = await supabase
+      .rpc('get_strava_credentials', { _user_id: user.id });
 
-    if (profileError || !profile?.strava_access_token) {
+    if (credentialsError || !credentialsArray || credentialsArray.length === 0) {
       throw new Error('Strava account not connected');
     }
 
-    let accessToken = profile.strava_access_token;
+    const credentials = credentialsArray[0];
+    let accessToken = credentials.strava_access_token;
 
     // Check if token needs refresh
-    const expiresAt = new Date(profile.strava_token_expires_at);
+    const expiresAt = new Date(credentials.strava_token_expires_at);
     if (expiresAt <= new Date()) {
       console.log('Refreshing access token...');
       const clientId = Deno.env.get('STRAVA_CLIENT_ID');
@@ -57,7 +55,7 @@ serve(async (req) => {
         body: JSON.stringify({
           client_id: parseInt(clientId!, 10),
           client_secret: clientSecret,
-          refresh_token: profile.strava_refresh_token,
+          refresh_token: credentials.strava_refresh_token,
           grant_type: 'refresh_token',
         }),
       });
@@ -66,15 +64,13 @@ serve(async (req) => {
         const refreshData = await refreshResponse.json();
         accessToken = refreshData.access_token;
 
-        // Update tokens in database
-        await supabase
-          .from('profiles')
-          .update({
-            strava_access_token: refreshData.access_token,
-            strava_refresh_token: refreshData.refresh_token,
-            strava_token_expires_at: new Date(refreshData.expires_at * 1000).toISOString(),
-          })
-          .eq('id', user.id);
+        // Update tokens securely
+        await supabase.rpc('upsert_strava_credentials', {
+          _user_id: user.id,
+          _access_token: refreshData.access_token,
+          _refresh_token: refreshData.refresh_token,
+          _expires_at: new Date(refreshData.expires_at * 1000).toISOString(),
+        });
       }
     }
 
