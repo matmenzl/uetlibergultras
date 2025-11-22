@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LeaderboardCard } from "./LeaderboardCard";
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const ActivityLeaderboard = () => {
   const [activeTab, setActiveTab] = useState<LeaderboardType>("most-efforts-overall");
   
-  const { data: leaderboardData, isLoading } = useQuery({
+  const { data: leaderboardData, isLoading, refetch } = useQuery({
     queryKey: ["activity-leaderboard", activeTab],
     queryFn: async () => {
       console.log(`Fetching leaderboard for type: ${activeTab}`);
@@ -28,6 +28,13 @@ export const ActivityLeaderboard = () => {
     },
     staleTime: 1000 * 60 * 5, // 5 Minuten Cache
   });
+
+  // Listen for refetch events from sync
+  useEffect(() => {
+    const handleRefetch = () => refetch();
+    window.addEventListener('refetch-leaderboard', handleRefetch);
+    return () => window.removeEventListener('refetch-leaderboard', handleRefetch);
+  }, [refetch]);
 
   const currentEntries = leaderboardData || [];
   const showUniqueSegments = activeTab === "most-unique-segments";

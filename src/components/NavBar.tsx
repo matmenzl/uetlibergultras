@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Award, Mountain } from 'lucide-react';
+import { User, LogOut, Award, Mountain, RefreshCw } from 'lucide-react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 
@@ -20,6 +20,7 @@ export const NavBar = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener
@@ -73,17 +74,35 @@ export const NavBar = () => {
   };
 
   const syncStrava = async () => {
-    if (!user) return;
+    if (!user || isSyncing) return;
     
-    toast.info('Synchronisiere Strava-Daten...');
+    setIsSyncing(true);
+    toast.info('Synchronisiere Strava-Daten...', {
+      description: 'Dies kann einige Sekunden dauern',
+    });
     
-    const { error } = await supabase.functions.invoke('sync-segment-efforts');
-    
-    if (error) {
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-segment-efforts');
+      
+      if (error) {
+        console.error('Sync error:', error);
+        toast.error('Fehler beim Synchronisieren', {
+          description: 'Bitte versuche es später erneut',
+        });
+      } else {
+        const effortsCount = data?.effortsCount || 0;
+        toast.success('Strava-Daten synchronisiert!', {
+          description: `${effortsCount} Segment-Efforts geladen`,
+        });
+        
+        // Refresh Leaderboard nach Sync
+        window.dispatchEvent(new CustomEvent('refetch-leaderboard'));
+      }
+    } catch (err) {
+      console.error('Sync error:', err);
       toast.error('Fehler beim Synchronisieren');
-      console.error('Sync error:', error);
-    } else {
-      toast.success('Strava-Daten synchronisiert');
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -121,9 +140,9 @@ export const NavBar = () => {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {profile?.strava_id && (
-                  <DropdownMenuItem onClick={syncStrava}>
-                    <Award className="mr-2 h-4 w-4" />
-                    Strava synchronisieren
+                  <DropdownMenuItem onClick={syncStrava} disabled={isSyncing}>
+                    <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                    {isSyncing ? 'Synchronisiere...' : 'Strava synchronisieren'}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
