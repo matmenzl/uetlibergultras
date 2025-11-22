@@ -5,6 +5,7 @@ import { NavBar } from "@/components/NavBar";
 import { SegmentMap } from "@/components/uetliberg/SegmentMap";
 import { SegmentList } from "@/components/uetliberg/SegmentList";
 import { SegmentDetail } from "@/components/uetliberg/SegmentDetail";
+import { ActivityLeaderboard } from "@/components/leaderboards/ActivityLeaderboard";
 import { Footer } from "@/components/Footer";
 import { SegmentData } from "@/lib/mapUtils";
 
@@ -86,6 +87,9 @@ const Index = () => {
 
       {/* Segment Detail Dialog */}
       <SegmentDetail segment={detailSegment} open={detailOpen} onOpenChange={setDetailOpen} />
+
+      {/* Community Leaderboards */}
+      <ActivityLeaderboard />
 
       {/* Footer */}
       <Footer />
