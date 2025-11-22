@@ -1,157 +1,35 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { LeaderboardCard } from "./LeaderboardCard";
 import { LeaderboardTabs } from "./LeaderboardTabs";
 import { LeaderboardType, LeaderboardEntry } from "@/types/leaderboard";
-import { Trophy } from "lucide-react";
-
-// Mock-Daten für verschiedene Leaderboard-Typen
-const mockLeaderboards: Record<LeaderboardType, LeaderboardEntry[]> = {
-  "most-efforts-overall": [
-    {
-      id: "1",
-      rank: 1,
-      firstName: "Marco",
-      lastName: "Müller",
-      totalEfforts: 156,
-      uniqueSegments: 23,
-      lastActivity: "2025-01-20",
-    },
-    {
-      id: "2",
-      rank: 2,
-      firstName: "Sarah",
-      lastName: "Schmidt",
-      totalEfforts: 142,
-      uniqueSegments: 19,
-      lastActivity: "2025-01-19",
-    },
-    {
-      id: "3",
-      rank: 3,
-      firstName: "Thomas",
-      lastName: "Weber",
-      totalEfforts: 128,
-      uniqueSegments: 21,
-      lastActivity: "2025-01-18",
-    },
-    {
-      id: "4",
-      rank: 4,
-      firstName: "Anna",
-      lastName: "Fischer",
-      totalEfforts: 115,
-      uniqueSegments: 18,
-      lastActivity: "2025-01-17",
-    },
-    {
-      id: "5",
-      rank: 5,
-      firstName: "Michael",
-      lastName: "Bauer",
-      totalEfforts: 98,
-      uniqueSegments: 16,
-      lastActivity: "2025-01-16",
-    },
-  ],
-  "most-efforts-monthly": [
-    {
-      id: "1",
-      rank: 1,
-      firstName: "Sarah",
-      lastName: "Schmidt",
-      totalEfforts: 45,
-      uniqueSegments: 12,
-      lastActivity: "2025-01-20",
-    },
-    {
-      id: "2",
-      rank: 2,
-      firstName: "Marco",
-      lastName: "Müller",
-      totalEfforts: 38,
-      uniqueSegments: 10,
-      lastActivity: "2025-01-19",
-    },
-    {
-      id: "3",
-      rank: 3,
-      firstName: "Anna",
-      lastName: "Fischer",
-      totalEfforts: 32,
-      uniqueSegments: 9,
-      lastActivity: "2025-01-18",
-    },
-    {
-      id: "4",
-      rank: 4,
-      firstName: "Thomas",
-      lastName: "Weber",
-      totalEfforts: 28,
-      uniqueSegments: 8,
-      lastActivity: "2025-01-17",
-    },
-    {
-      id: "5",
-      rank: 5,
-      firstName: "Julia",
-      lastName: "Koch",
-      totalEfforts: 24,
-      uniqueSegments: 7,
-      lastActivity: "2025-01-16",
-    },
-  ],
-  "most-unique-segments": [
-    {
-      id: "1",
-      rank: 1,
-      firstName: "Thomas",
-      lastName: "Weber",
-      totalEfforts: 128,
-      uniqueSegments: 25,
-      lastActivity: "2025-01-20",
-    },
-    {
-      id: "2",
-      rank: 2,
-      firstName: "Marco",
-      lastName: "Müller",
-      totalEfforts: 156,
-      uniqueSegments: 23,
-      lastActivity: "2025-01-19",
-    },
-    {
-      id: "3",
-      rank: 3,
-      firstName: "Julia",
-      lastName: "Koch",
-      totalEfforts: 89,
-      uniqueSegments: 22,
-      lastActivity: "2025-01-18",
-    },
-    {
-      id: "4",
-      rank: 4,
-      firstName: "Sarah",
-      lastName: "Schmidt",
-      totalEfforts: 142,
-      uniqueSegments: 19,
-      lastActivity: "2025-01-17",
-    },
-    {
-      id: "5",
-      rank: 5,
-      firstName: "Anna",
-      lastName: "Fischer",
-      totalEfforts: 115,
-      uniqueSegments: 18,
-      lastActivity: "2025-01-16",
-    },
-  ],
-};
+import { Trophy, Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const ActivityLeaderboard = () => {
   const [activeTab, setActiveTab] = useState<LeaderboardType>("most-efforts-overall");
-  const currentEntries = mockLeaderboards[activeTab];
+  
+  const { data: leaderboardData, isLoading } = useQuery({
+    queryKey: ["activity-leaderboard", activeTab],
+    queryFn: async () => {
+      console.log(`Fetching leaderboard for type: ${activeTab}`);
+      const { data, error } = await supabase.functions.invoke("get-activity-leaderboards", {
+        body: { type: activeTab },
+      });
+
+      if (error) {
+        console.error("Error fetching leaderboard:", error);
+        throw error;
+      }
+
+      console.log("Leaderboard data received:", data);
+      return data?.entries || [];
+    },
+    staleTime: 1000 * 60 * 5, // 5 Minuten Cache
+  });
+
+  const currentEntries = leaderboardData || [];
   const showUniqueSegments = activeTab === "most-unique-segments";
 
   return (
@@ -170,15 +48,30 @@ export const ActivityLeaderboard = () => {
 
         {/* Tabs */}
         <LeaderboardTabs activeTab={activeTab} onTabChange={setActiveTab}>
-          <div className="space-y-3">
-            {currentEntries.map((entry) => (
-              <LeaderboardCard
-                key={entry.id}
-                entry={entry}
-                showUniqueSegments={showUniqueSegments}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          ) : currentEntries.length === 0 ? (
+            <div className="text-center py-12">
+              <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">
+                Noch keine Daten verfügbar. Sei der Erste, der seine Strava-Daten synchronisiert!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {currentEntries.map((entry: LeaderboardEntry) => (
+                <LeaderboardCard
+                  key={entry.id}
+                  entry={entry}
+                  showUniqueSegments={showUniqueSegments}
+                />
+              ))}
+            </div>
+          )}
         </LeaderboardTabs>
 
         {/* Footer Note */}
