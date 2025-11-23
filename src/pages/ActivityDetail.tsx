@@ -32,14 +32,19 @@ export default function ActivityDetail() {
         `)
         .order("start_date", { ascending: true });
 
+      let userId: string | null = null;
+      let date: string | null = null;
+      let realActivityId: number | null = null;
+
       // Handle both real activity_id and legacy format
       if (activityId?.startsWith("legacy_")) {
         const parts = activityId.split("_");
-        const userId = parts[1];
-        const date = parts[2];
+        userId = parts[1];
+        date = parts[2];
         query = query.eq("user_id", userId).gte("start_date", `${date}T00:00:00`).lt("start_date", `${date}T23:59:59`);
       } else {
-        query = query.eq("activity_id", parseInt(activityId || "0"));
+        realActivityId = parseInt(activityId || "0");
+        query = query.eq("activity_id", realActivityId);
       }
 
       const { data, error } = await query;
@@ -47,15 +52,40 @@ export default function ActivityDetail() {
       if (error) throw error;
       if (!data || data.length === 0) return null;
 
-      // Aggregate activity data
-      const totalDistance = data.reduce((sum, e) => sum + e.distance, 0);
-      const totalTime = data.reduce((sum, e) => sum + e.elapsed_time, 0);
-      const activityName = data.find(e => e.activity_name)?.activity_name || 
+      // Try to get real activity data from Strava
+      let activityData = null;
+      try {
+        const payload: any = {
+          userId: data[0].user_id,
+        };
+
+        if (realActivityId) {
+          payload.activityId = realActivityId;
+        } else if (date) {
+          payload.date = date;
+        }
+
+        const { data: stravaData, error: stravaError } = await supabase.functions.invoke(
+          'strava-activity-details',
+          { body: payload }
+        );
+
+        if (!stravaError && stravaData?.activity) {
+          activityData = stravaData.activity;
+        }
+      } catch (error) {
+        console.error('Failed to fetch activity details from Strava:', error);
+      }
+
+      // Use Strava data if available, otherwise aggregate from segments
+      const totalDistance = activityData?.distance || data.reduce((sum, e) => sum + e.distance, 0);
+      const totalTime = activityData?.moving_time || data.reduce((sum, e) => sum + e.elapsed_time, 0);
+      const activityName = activityData?.name || data.find(e => e.activity_name)?.activity_name || 
         `Lauf am ${new Date(data[0].start_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}`;
 
       return {
         id: activityId,
-        activity_id: data[0].activity_id,
+        activity_id: activityData?.id || data[0].activity_id,
         activity_name: activityName,
         user_id: data[0].user_id,
         start_date: data[0].start_date,
