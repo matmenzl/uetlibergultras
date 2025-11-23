@@ -17,3 +17,6 @@ verify_jwt = true
 
 [functions.get-activity-leaderboards]
 verify_jwt = false
+
+[functions.strava-activity-details]
+verify_jwt = true
