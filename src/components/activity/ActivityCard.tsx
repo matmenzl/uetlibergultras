@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Clock, Mountain } from "lucide-react";
@@ -55,55 +56,49 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
   });
 
   return (
-    <Card className="p-6 hover:shadow-lg transition-shadow">
-      {/* User Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <Avatar className="h-12 w-12">
-          <AvatarImage
-            src={activity.profiles.profile_picture || undefined}
-            alt={`${activity.profiles.first_name} ${activity.profiles.last_name}`}
-          />
-          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-            {activity.profiles.first_name[0]}
-            {activity.profiles.last_name[0]}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <p className="font-semibold text-foreground">
-            {activity.profiles.first_name} {activity.profiles.last_name}
-          </p>
-          <p className="text-sm text-muted-foreground">{timeAgo}</p>
+    <Link to={`/activity/${activity.id}`}>
+      <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+        {/* User Header */}
+        <div className="flex items-center gap-3 mb-4">
+          <Avatar className="h-12 w-12">
+            <AvatarImage
+              src={activity.profiles.profile_picture || undefined}
+              alt={`${activity.profiles.first_name} ${activity.profiles.last_name}`}
+            />
+            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+              {activity.profiles.first_name[0]}
+              {activity.profiles.last_name[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <p className="font-semibold text-foreground">
+              {activity.profiles.first_name} {activity.profiles.last_name}
+            </p>
+            <p className="text-sm text-muted-foreground">{timeAgo}</p>
+          </div>
         </div>
-      </div>
 
-      {/* Activity Details - Clickable to Strava */}
-      <a
-        href={activity.activity_id ? `https://www.strava.com/activities/${activity.activity_id}` : undefined}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={activity.activity_id ? "block hover:opacity-80 transition-opacity cursor-pointer" : "block"}
-      >
-        <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
-          {activity.activity_name}
-          {activity.activity_id && (
-            <span className="text-xs text-muted-foreground">↗</span>
-          )}
-        </h3>
-        <div className="flex gap-4 text-sm text-muted-foreground mb-2">
-          <div className="flex items-center gap-1">
-            <Clock className="w-4 h-4" />
-            <span>{formatTime(activity.total_time)}</span>
+        {/* Activity Details */}
+        <div>
+          <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+            {activity.activity_name}
+          </h3>
+          <div className="flex gap-4 text-sm text-muted-foreground mb-2">
+            <div className="flex items-center gap-1">
+              <Clock className="w-4 h-4" />
+              <span>{formatTime(activity.total_time)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Mountain className="w-4 h-4" />
+              <span>{formatDistanceValue(activity.total_distance)}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Mountain className="w-4 h-4" />
-            <span>{formatDistanceValue(activity.total_distance)}</span>
+          <div className="text-xs text-muted-foreground">
+            {activity.segment_count} Uetliberg-{activity.segment_count === 1 ? 'Segment' : 'Segmente'}: {activity.segments.slice(0, 2).join(', ')}
+            {activity.segments.length > 2 && ` +${activity.segments.length - 2} weitere`}
           </div>
         </div>
-        <div className="text-xs text-muted-foreground">
-          {activity.segment_count} Uetliberg-{activity.segment_count === 1 ? 'Segment' : 'Segmente'}: {activity.segments.slice(0, 2).join(', ')}
-          {activity.segments.length > 2 && ` +${activity.segments.length - 2} weitere`}
-        </div>
-      </a>
-    </Card>
+      </Card>
+    </Link>
   );
 };
