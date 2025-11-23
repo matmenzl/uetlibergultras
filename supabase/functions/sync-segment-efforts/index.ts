@@ -12,30 +12,45 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const authHeader = req.headers.get('Authorization');
-
-    if (!supabaseUrl || !supabaseServiceKey || !authHeader) {
-      throw new Error('Missing required configuration');
+    
+    if (!authHeader) {
+      throw new Error('No authorization header');
     }
 
-    // Create Supabase client with user's auth
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
+    // Create Supabase client with user's auth token
+    const supabase = createClient(
+      supabaseUrl,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
 
-    // Get current user
+    // Get authenticated user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
     if (userError || !user) {
+      console.error('Auth error:', userError);
       throw new Error('Not authenticated');
     }
 
-    // Get user's Strava tokens from secure storage
-    const { data: credentialsArray, error: credentialsError } = await supabase
+    console.log(`Syncing segment efforts for user ${user.id}...`);
+
+    // Get user's Strava tokens using service role
+    const supabaseAdmin = createClient(
+      supabaseUrl,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+    
+    const { data: credentialsArray, error: credentialsError } = await supabaseAdmin
       .rpc('get_strava_credentials', { _user_id: user.id });
 
     if (credentialsError || !credentialsArray || credentialsArray.length === 0) {
+      console.error('Credentials error:', credentialsError);
       throw new Error('Strava account not connected');
     }
 
@@ -65,7 +80,7 @@ serve(async (req) => {
         accessToken = refreshData.access_token;
 
         // Update tokens securely
-        await supabase.rpc('upsert_strava_credentials', {
+        await supabaseAdmin.rpc('upsert_strava_credentials', {
           _user_id: user.id,
           _access_token: refreshData.access_token,
           _refresh_token: refreshData.refresh_token,
@@ -143,7 +158,7 @@ serve(async (req) => {
     // Bulk insert efforts (on conflict do nothing to avoid duplicates)
     if (effortsToInsert.length > 0) {
       console.log(`Attempting to insert ${effortsToInsert.length} segment efforts...`);
-      const { error: insertError } = await supabase
+      const { error: insertError } = await supabaseAdmin
         .from('segment_efforts')
         .upsert(effortsToInsert, { onConflict: 'user_id,segment_id,start_date', ignoreDuplicates: true });
 
@@ -158,7 +173,7 @@ serve(async (req) => {
     }
 
     // Check for achievements
-    await checkAchievements(supabase, user.id, effortsToInsert);
+    await checkAchievements(supabaseAdmin, user.id, effortsToInsert);
 
     return new Response(
       JSON.stringify({ 
