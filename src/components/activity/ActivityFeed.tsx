@@ -52,7 +52,16 @@ export const ActivityFeed = () => {
       const activityMap = new Map<string, Activity>();
       
       data?.forEach((effort: any) => {
-        const activityKey = effort.activity_id ? `${effort.activity_id}` : `${effort.user_id}_${effort.start_date}`;
+        // Only use activity_id for grouping to ensure one entry per activity
+        // For old data without activity_id, group by date (without time)
+        let activityKey: string;
+        if (effort.activity_id) {
+          activityKey = `${effort.activity_id}`;
+        } else {
+          // Group by user and date (YYYY-MM-DD) for legacy data
+          const dateOnly = effort.start_date.split('T')[0];
+          activityKey = `legacy_${effort.user_id}_${dateOnly}`;
+        }
         
         if (!activityMap.has(activityKey)) {
           activityMap.set(activityKey, {
@@ -73,7 +82,9 @@ export const ActivityFeed = () => {
         activity.total_distance += effort.distance;
         activity.total_time += effort.elapsed_time;
         activity.segment_count += 1;
-        activity.segments.push(effort.segment_name);
+        if (!activity.segments.includes(effort.segment_name)) {
+          activity.segments.push(effort.segment_name);
+        }
       });
 
       // Convert to array and sort by date, limit to 20
