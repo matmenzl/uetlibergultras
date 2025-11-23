@@ -228,13 +228,26 @@ serve(async (req) => {
     if (!activitiesResponse.ok) {
       const errorText = await activitiesResponse.text();
       console.error(`Failed to fetch activities from Strava: ${activitiesResponse.status} - ${errorText}`);
+      
+      // Handle rate limiting specifically
+      if (activitiesResponse.status === 429) {
+        return new Response(
+          JSON.stringify({
+            error: 'Strava API Rate Limit erreicht',
+            message: 'Bitte warte ein paar Minuten und versuche es dann erneut. Strava limitiert die Anzahl der API-Anfragen.',
+            status: 429,
+          }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({
           error: 'Failed to fetch activities from Strava',
           details: errorText,
           status: activitiesResponse.status,
         }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: activitiesResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -279,6 +292,12 @@ serve(async (req) => {
         if (!detailResponse.ok) {
           const errorText = await detailResponse.text();
           console.error(`Failed to fetch details for activity ${run.id}: ${detailResponse.status} - ${errorText}`);
+          
+          // If rate limited, stop processing and return what we have
+          if (detailResponse.status === 429) {
+            console.log('Rate limit hit during detail fetch, returning partial results');
+            break;
+          }
           continue;
         }
 

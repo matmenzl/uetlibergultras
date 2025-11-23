@@ -150,9 +150,11 @@ export default function Index() {
           ) : error ? (
             <Card className="p-8 text-center border-destructive">
               <p className="text-destructive mb-4">
-                Fehler beim Laden der Aktivitäten
+                {error instanceof Error && error.message.includes('429') 
+                  ? 'Strava API Rate Limit erreicht. Bitte warte ein paar Minuten.'
+                  : 'Fehler beim Laden der Aktivitäten'}
               </p>
-              <Button onClick={() => window.location.reload()}>
+              <Button onClick={() => refetch()}>
                 Erneut versuchen
               </Button>
             </Card>
