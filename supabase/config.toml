@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.strava-activity-details]
 verify_jwt = true
+
+[functions.get-my-strava-activities]
+verify_jwt = true
