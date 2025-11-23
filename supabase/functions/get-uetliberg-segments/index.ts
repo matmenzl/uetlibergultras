@@ -45,9 +45,9 @@ serve(async (req) => {
       );
     }
 
-    console.log('Fetching credentials for user:', user.id);
+    console.log('Fetching Uetliberg segments for user:', user.id);
 
-    // Get Strava credentials using admin client
+    // Get Strava credentials
     const { data: credentials, error: credsError } = await supabaseAdmin.rpc(
       'get_strava_credentials',
       { _user_id: user.id }
@@ -94,7 +94,7 @@ serve(async (req) => {
       const refreshData = await refreshResponse.json();
       accessToken = refreshData.access_token;
 
-      // Update credentials in database using admin client
+      // Update credentials in database
       const newExpiresAt = new Date(refreshData.expires_at * 1000);
       await supabaseAdmin.rpc('upsert_strava_credentials', {
         _user_id: user.id,
@@ -106,11 +106,16 @@ serve(async (req) => {
       console.log('Token refreshed successfully');
     }
 
-    // Fetch activities from Strava for 2025 (January 1, 2025 = 1735689600 Unix timestamp)
-    console.log('Fetching activities from Strava for 2025...');
-    const after2025 = 1735689600; // January 1, 2025, 00:00:00 UTC
-    const activitiesResponse = await fetch(
-      `https://www.strava.com/api/v3/athlete/activities?per_page=200&after=${after2025}`,
+    // Uetliberg coordinates (approximate bounds for segment search)
+    // Southwest: 47.33, 8.47 | Northeast: 47.37, 8.51
+    const bounds = '47.33,8.47,47.37,8.51';
+    
+    console.log('Fetching Uetliberg segments from Strava API...');
+    
+    // Note: Strava Segment Explorer API returns max 10 segments per request
+    // To get more segments, we would need multiple requests with different parameters
+    const segmentsResponse = await fetch(
+      `https://www.strava.com/api/v3/segments/explore?bounds=${bounds}&activity_type=running`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -118,19 +123,61 @@ serve(async (req) => {
       }
     );
 
-    if (!activitiesResponse.ok) {
-      console.error('Failed to fetch activities from Strava');
+    if (!segmentsResponse.ok) {
+      console.error('Failed to fetch segments from Strava');
+      const errorText = await segmentsResponse.text();
+      console.error('Error response:', errorText);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch activities from Strava' }),
+        JSON.stringify({ error: 'Failed to fetch segments from Strava' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const activities = await activitiesResponse.json();
-    console.log(`Fetched ${activities.length} activities from Strava`);
+    const segmentsData = await segmentsResponse.json();
+    const segments = segmentsData.segments || [];
+    
+    console.log(`Fetched ${segments.length} Uetliberg segments from Strava`);
+
+    // Store segments in database
+    for (const segment of segments) {
+      const { error: insertError } = await supabaseAdmin
+        .from('uetliberg_segments')
+        .upsert({
+          segment_id: segment.id,
+          name: segment.name,
+          distance: segment.distance,
+          avg_grade: segment.avg_grade,
+          elevation_high: segment.elev_high,
+          elevation_low: segment.elev_low,
+          climb_category: segment.climb_category,
+          start_latlng: `(${segment.start_latlng[0]},${segment.start_latlng[1]})`,
+          end_latlng: `(${segment.end_latlng[0]},${segment.end_latlng[1]})`,
+          polyline: segment.points,
+          effort_count: segment.effort_count || 0,
+        }, {
+          onConflict: 'segment_id',
+        });
+
+      if (insertError) {
+        console.error('Error inserting segment:', insertError);
+      }
+    }
+
+    console.log('Segments stored in database');
 
     return new Response(
-      JSON.stringify({ activities }),
+      JSON.stringify({ 
+        segments: segments.map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          distance: s.distance,
+          avg_grade: s.avg_grade,
+          elevation_high: s.elev_high,
+          elevation_low: s.elev_low,
+          climb_category: s.climb_category,
+        })),
+        count: segments.length,
+      }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
