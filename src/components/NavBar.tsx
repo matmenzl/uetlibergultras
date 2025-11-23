@@ -129,6 +129,12 @@ export const NavBar = () => {
                 Segmente
               </Link>
             </Button>
+            <Button variant="ghost" asChild>
+              <Link to="/my-activities" className="flex items-center gap-2">
+                <Award className="h-4 w-4" />
+                Meine Aktivitäten
+              </Link>
+            </Button>
           </div>
 
           {/* User Menu */}
