@@ -25,28 +25,17 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase admin client (service role)
+    // Extract JWT token from "Bearer <token>"
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Create Supabase admin client to verify JWT
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Create regular client to get user from JWT
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
-    );
-
-    // Get authenticated user from JWT
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseClient.auth.getUser();
+    // Verify JWT and get user
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
 
     if (userError || !user) {
       console.error('Auth error:', userError);
