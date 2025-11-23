@@ -5,11 +5,12 @@ import { User } from '@supabase/supabase-js';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery } from '@tanstack/react-query';
+import { MapPin, TrendingUp } from 'lucide-react';
 
 interface StravaActivity {
   id: number;
@@ -19,12 +20,16 @@ interface StravaActivity {
   type: string;
   start_date: string;
   total_elevation_gain: number;
+  uetliberg_score?: number;
+  in_region?: boolean;
+  primary_segments?: any[];
+  secondary_segments?: any[];
+  uetliberg_segments?: any[];
 }
 
 export default function Index() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [segmentIds, setSegmentIds] = useState('');
   const [isLoadingSegments, setIsLoadingSegments] = useState(false);
   const { toast } = useToast();
 
@@ -70,15 +75,6 @@ export default function Index() {
   });
 
   const handleLoadSegments = async () => {
-    if (!segmentIds.trim()) {
-      toast({
-        title: 'Fehler',
-        description: 'Bitte gib mindestens eine Segment-ID ein',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     setIsLoadingSegments(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -87,19 +83,12 @@ export default function Index() {
         throw new Error('Keine aktive Sitzung gefunden');
       }
 
-      // Parse segment IDs (comma or space separated)
-      const ids = segmentIds
-        .split(/[\s,]+/)
-        .map(id => parseInt(id.trim()))
-        .filter(id => !isNaN(id));
-
-      console.log('Loading segments:', ids);
+      console.log('Loading segments automatically from Uetliberg region...');
 
       const { data, error } = await supabase.functions.invoke('get-uetliberg-segments', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: { segment_ids: ids },
       });
 
       if (error) {
@@ -109,7 +98,7 @@ export default function Index() {
 
       toast({
         title: 'Erfolgreich!',
-        description: `${data.count} Segmente geladen`,
+        description: `${data.count} Segmente geladen (${data.high_priority_count} am Uetliberg, ${data.medium_priority_count} in der Region)`,
       });
 
       // Refetch runs after segments are loaded
@@ -144,36 +133,42 @@ export default function Index() {
     });
   };
 
+  const getScoreBadgeVariant = (score: number) => {
+    if (score >= 4) return 'default';
+    if (score >= 2) return 'secondary';
+    return 'outline';
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-foreground">
-            Uetliberg Läufe 2025
-          </h1>
+          <div className="flex items-center gap-3 mb-8">
+            <MapPin className="w-10 h-10 text-primary" />
+            <h1 className="text-4xl font-bold text-foreground">
+              Uetliberg Läufe 2025
+            </h1>
+          </div>
           
           {user && (
-            <Card className="p-6 mb-6">
-              <h2 className="text-xl font-bold mb-4">Segment-IDs konfigurieren</h2>
+            <Card className="p-6 mb-6 bg-card">
+              <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Segmente automatisch laden
+              </h2>
               <p className="text-sm text-muted-foreground mb-4">
-                Gib die Strava Segment-IDs ein, die du als Uetliberg-Segmente verwenden möchtest (kommagetrennt).
+                Lade automatisch alle Lauf-Segmente im Umkreis von 2km rund um den Uetliberg (47.350, 8.490). 
+                Segmente, die am Uetliberg enden, werden priorisiert.
               </p>
-              <div className="flex gap-2">
-                <Input 
-                  placeholder="z.B. 2803527, 4072914, 5762702"
-                  value={segmentIds}
-                  onChange={(e) => setSegmentIds(e.target.value)}
-                  className="flex-1"
-                />
-                <Button 
-                  onClick={handleLoadSegments}
-                  disabled={isLoadingSegments}
-                >
-                  {isLoadingSegments ? 'Laden...' : 'Segmente laden'}
-                </Button>
-              </div>
+              <Button 
+                onClick={handleLoadSegments}
+                disabled={isLoadingSegments}
+                className="w-full sm:w-auto"
+              >
+                {isLoadingSegments ? 'Segmente werden geladen...' : 'Uetliberg-Segmente laden'}
+              </Button>
             </Card>
           )}
           
@@ -184,6 +179,12 @@ export default function Index() {
                 von insgesamt {activitiesData.total_runs} Läufen 
                 ({activitiesData.total_activities} Aktivitäten gesamt)
               </p>
+              {activitiesData.high_priority_segments !== undefined && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  🎯 {activitiesData.high_priority_segments} Segmente am Uetliberg • 
+                  📍 {activitiesData.medium_priority_segments} Segmente in der Region
+                </p>
+              )}
             </div>
           )}
 
@@ -218,11 +219,19 @@ export default function Index() {
             </Card>
           ) : activitiesData?.activities?.length > 0 ? (
             <div className="space-y-4">
-              {activitiesData.activities.map((activity: any) => (
+              {activitiesData.activities.map((activity: StravaActivity) => (
                 <Card key={activity.id} className="p-6 hover:shadow-lg transition-shadow">
-                  <h3 className="text-xl font-bold mb-2 text-foreground">
-                    {activity.name}
-                  </h3>
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-xl font-bold text-foreground flex-1">
+                      {activity.name}
+                    </h3>
+                    {activity.uetliberg_score !== undefined && (
+                      <Badge variant={getScoreBadgeVariant(activity.uetliberg_score)}>
+                        Score: {activity.uetliberg_score.toFixed(1)}
+                      </Badge>
+                    )}
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-4">
                     <div>
                       <p><strong>Typ:</strong> {activity.type}</p>
@@ -232,14 +241,41 @@ export default function Index() {
                     <div>
                       <p><strong>Höhenmeter:</strong> {Math.round(activity.total_elevation_gain)}m</p>
                       <p><strong>Datum:</strong> {formatDate(activity.start_date)}</p>
+                      {activity.in_region && (
+                        <Badge variant="outline" className="mt-1">
+                          <MapPin className="w-3 h-3 mr-1" />
+                          In Uetliberg-Region
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   
-                  {activity.uetliberg_segments && activity.uetliberg_segments.length > 0 && (
+                  {activity.primary_segments && activity.primary_segments.length > 0 && (
                     <div className="mt-4 pt-4 border-t border-border">
-                      <p className="font-semibold mb-2 text-sm">Uetliberg Segmente:</p>
+                      <p className="font-semibold mb-2 text-sm flex items-center gap-2">
+                        🎯 Haupt-Segmente (am Uetliberg):
+                      </p>
                       <div className="space-y-2">
-                        {activity.uetliberg_segments.map((segment: any) => (
+                        {activity.primary_segments.map((segment: any) => (
+                          <div key={segment.segment_id} className="text-xs bg-primary/10 p-2 rounded">
+                            <p className="font-medium">{segment.segment_name}</p>
+                            <p className="text-muted-foreground">
+                              {formatDistance(segment.distance)} • {formatTime(segment.moving_time)} • 
+                              Steigung: {segment.average_grade.toFixed(1)}%
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {activity.secondary_segments && activity.secondary_segments.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <p className="font-semibold mb-2 text-sm flex items-center gap-2">
+                        📍 Zusätzliche Segmente (in der Region):
+                      </p>
+                      <div className="space-y-2">
+                        {activity.secondary_segments.map((segment: any) => (
                           <div key={segment.segment_id} className="text-xs bg-accent/10 p-2 rounded">
                             <p className="font-medium">{segment.segment_name}</p>
                             <p className="text-muted-foreground">

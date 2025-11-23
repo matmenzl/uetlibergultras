@@ -80,12 +80,15 @@ export type Database = {
           climb_category: number
           created_at: string | null
           distance: number
+          distance_to_center: number | null
           effort_count: number | null
           elevation_high: number | null
           elevation_low: number | null
           end_latlng: unknown
+          ends_at_uetliberg: boolean | null
           name: string
           polyline: string
+          priority: string | null
           segment_id: number
           start_latlng: unknown
           updated_at: string | null
@@ -95,12 +98,15 @@ export type Database = {
           climb_category: number
           created_at?: string | null
           distance: number
+          distance_to_center?: number | null
           effort_count?: number | null
           elevation_high?: number | null
           elevation_low?: number | null
           end_latlng: unknown
+          ends_at_uetliberg?: boolean | null
           name: string
           polyline: string
+          priority?: string | null
           segment_id: number
           start_latlng: unknown
           updated_at?: string | null
@@ -110,12 +116,15 @@ export type Database = {
           climb_category?: number
           created_at?: string | null
           distance?: number
+          distance_to_center?: number | null
           effort_count?: number | null
           elevation_high?: number | null
           elevation_low?: number | null
           end_latlng?: unknown
+          ends_at_uetliberg?: boolean | null
           name?: string
           polyline?: string
+          priority?: string | null
           segment_id?: number
           start_latlng?: unknown
           updated_at?: string | null
