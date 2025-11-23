@@ -81,8 +81,8 @@ export type Database = {
           created_at: string | null
           distance: number
           effort_count: number | null
-          elevation_high: number
-          elevation_low: number
+          elevation_high: number | null
+          elevation_low: number | null
           end_latlng: unknown
           name: string
           polyline: string
@@ -96,8 +96,8 @@ export type Database = {
           created_at?: string | null
           distance: number
           effort_count?: number | null
-          elevation_high: number
-          elevation_low: number
+          elevation_high?: number | null
+          elevation_low?: number | null
           end_latlng: unknown
           name: string
           polyline: string
@@ -111,8 +111,8 @@ export type Database = {
           created_at?: string | null
           distance?: number
           effort_count?: number | null
-          elevation_high?: number
-          elevation_low?: number
+          elevation_high?: number | null
+          elevation_low?: number | null
           end_latlng?: unknown
           name?: string
           polyline?: string
