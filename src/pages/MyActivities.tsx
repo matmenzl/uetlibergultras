@@ -22,7 +22,6 @@ interface StravaActivity {
 const MyActivities = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
-  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -42,27 +41,10 @@ const MyActivities = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Check if user has Strava connected
-  useEffect(() => {
-    const checkStravaConnection = async () => {
-      if (!user) return;
-      
-      const { data } = await supabase
-        .from('strava_credentials')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-      
-      setIsConnected(!!data);
-    };
-    
-    checkStravaConnection();
-  }, [user]);
-
   const { data: activitiesData, isLoading, error } = useQuery({
     queryKey: ['my-strava-activities', user?.id],
     queryFn: async () => {
-      if (!user || !isConnected) return null;
+      if (!user) return null;
 
       const { data, error } = await supabase.functions.invoke('get-my-strava-activities', {
         headers: {
@@ -73,7 +55,8 @@ const MyActivities = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!user && isConnected,
+    enabled: !!user,
+    retry: false,
   });
 
   const handleStravaLogin = () => {
@@ -106,6 +89,9 @@ const MyActivities = () => {
     return null;
   }
 
+  const isConnected = activitiesData !== null && !error;
+  const needsConnection = error?.message?.includes('No Strava credentials found');
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -116,7 +102,7 @@ const MyActivities = () => {
             Deine letzten 10 Strava-Aktivitäten
           </p>
 
-          {!isConnected ? (
+          {(needsConnection || (!isLoading && !isConnected && !activitiesData)) ? (
             <Card>
               <CardHeader>
                 <CardTitle>Strava verbinden</CardTitle>
