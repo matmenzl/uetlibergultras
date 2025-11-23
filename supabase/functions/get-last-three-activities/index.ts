@@ -106,10 +106,11 @@ serve(async (req) => {
       console.log('Token refreshed successfully');
     }
 
-    // Fetch activities from Strava (try to get up to 50)
-    console.log('Fetching activities from Strava...');
+    // Fetch activities from Strava for 2025 (January 1, 2025 = 1735689600 Unix timestamp)
+    console.log('Fetching activities from Strava for 2025...');
+    const after2025 = 1735689600; // January 1, 2025, 00:00:00 UTC
     const activitiesResponse = await fetch(
-      'https://www.strava.com/api/v3/athlete/activities?per_page=50',
+      `https://www.strava.com/api/v3/athlete/activities?per_page=200&after=${after2025}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
