@@ -120,6 +120,8 @@ serve(async (req) => {
         for (const effort of activity.segment_efforts) {
           effortsToInsert.push({
             user_id: user.id,
+            activity_id: activity.id,
+            activity_name: activity.name,
             segment_id: effort.segment.id,
             segment_name: effort.segment.name,
             elapsed_time: effort.elapsed_time,

@@ -36,6 +36,8 @@ vi.mock('@/components/ui/use-toast', () => ({
 
 const mockActivity = {
   id: 'test-activity-id',
+  activity_id: 123456789,
+  activity_name: 'Morning Run',
   user_id: 'test-user-id',
   start_date: new Date().toISOString(),
   total_distance: 5000,

@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 
 interface Activity {
   id: string;
+  activity_id: number | null;
+  activity_name: string;
   user_id: string;
   start_date: string;
   total_distance: number;
@@ -46,15 +48,17 @@ export const ActivityFeed = () => {
         throw error;
       }
 
-      // Group by user_id and start_date to get unique activities
+      // Group by activity_id to get unique activities
       const activityMap = new Map<string, Activity>();
       
       data?.forEach((effort: any) => {
-        const activityKey = `${effort.user_id}_${effort.start_date}`;
+        const activityKey = effort.activity_id ? `${effort.activity_id}` : `${effort.user_id}_${effort.start_date}`;
         
         if (!activityMap.has(activityKey)) {
           activityMap.set(activityKey, {
             id: activityKey,
+            activity_id: effort.activity_id,
+            activity_name: effort.activity_name || 'Lauf',
             user_id: effort.user_id,
             start_date: effort.start_date,
             total_distance: 0,

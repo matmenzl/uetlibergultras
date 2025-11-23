@@ -20,6 +20,8 @@ const CommentSchema = z.object({
 interface ActivityCardProps {
   activity: {
     id: string;
+    activity_id: number | null;
+    activity_name: string;
     user_id: string;
     start_date: string;
     total_distance: number;
@@ -275,10 +277,18 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
         </div>
       </div>
 
-      {/* Activity Details */}
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-foreground mb-2">
-          Lauf mit {activity.segment_count} Uetliberg-{activity.segment_count === 1 ? 'Segment' : 'Segmenten'}
+      {/* Activity Details - Clickable to Strava */}
+      <a
+        href={activity.activity_id ? `https://www.strava.com/activities/${activity.activity_id}` : undefined}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={activity.activity_id ? "block mb-4 hover:opacity-80 transition-opacity cursor-pointer" : "block mb-4"}
+      >
+        <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+          {activity.activity_name}
+          {activity.activity_id && (
+            <span className="text-xs text-muted-foreground">↗</span>
+          )}
         </h3>
         <div className="flex gap-4 text-sm text-muted-foreground mb-2">
           <div className="flex items-center gap-1">
@@ -291,10 +301,10 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
           </div>
         </div>
         <div className="text-xs text-muted-foreground">
-          Segmente: {activity.segments.slice(0, 3).join(', ')}
-          {activity.segments.length > 3 && ` +${activity.segments.length - 3} weitere`}
+          {activity.segment_count} Uetliberg-{activity.segment_count === 1 ? 'Segment' : 'Segmente'}: {activity.segments.slice(0, 2).join(', ')}
+          {activity.segments.length > 2 && ` +${activity.segments.length - 2} weitere`}
         </div>
-      </div>
+      </a>
 
       {/* Actions */}
       <div className="flex items-center gap-4 pt-4 border-t">
