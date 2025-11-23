@@ -34,7 +34,7 @@ export default function Auth() {
     // Store return URL for after auth
     sessionStorage.setItem('auth_return_url', '/');
     
-    window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+    window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&approval_prompt=force&scope=${scope}`;
   };
 
   return (
