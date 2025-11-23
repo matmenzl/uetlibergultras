@@ -37,10 +37,11 @@ vi.mock('@/components/ui/use-toast', () => ({
 const mockActivity = {
   id: 'test-activity-id',
   user_id: 'test-user-id',
-  segment_name: 'Test Segment',
-  elapsed_time: 300,
-  distance: 1000,
   start_date: new Date().toISOString(),
+  total_distance: 5000,
+  total_time: 1800,
+  segment_count: 3,
+  segments: ['Segment 1', 'Segment 2', 'Segment 3'],
   profiles: {
     first_name: 'Test',
     last_name: 'User',

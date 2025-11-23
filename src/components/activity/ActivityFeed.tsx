@@ -5,14 +5,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Activity, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface SegmentEffort {
+interface Activity {
   id: string;
   user_id: string;
-  segment_id: number;
-  segment_name: string;
-  elapsed_time: number;
-  distance: number;
   start_date: string;
+  total_distance: number;
+  total_time: number;
+  segment_count: number;
+  segments: string[];
   profiles: {
     first_name: string;
     last_name: string;
@@ -23,7 +23,7 @@ interface SegmentEffort {
 export const ActivityFeed = () => {
   const [realtimeKey, setRealtimeKey] = useState(0);
 
-  // Fetch recent activities (segment efforts) with profile data
+  // Fetch recent activities grouped by start_date
   const { data: activities, isLoading, refetch } = useQuery({
     queryKey: ["activity-feed", realtimeKey],
     queryFn: async () => {
@@ -39,14 +39,45 @@ export const ActivityFeed = () => {
           )
         `)
         .order("start_date", { ascending: false })
-        .limit(20);
+        .limit(100);
 
       if (error) {
         console.error("Error fetching activities:", error);
         throw error;
       }
 
-      return (data || []) as SegmentEffort[];
+      // Group by user_id and start_date to get unique activities
+      const activityMap = new Map<string, Activity>();
+      
+      data?.forEach((effort: any) => {
+        const activityKey = `${effort.user_id}_${effort.start_date}`;
+        
+        if (!activityMap.has(activityKey)) {
+          activityMap.set(activityKey, {
+            id: activityKey,
+            user_id: effort.user_id,
+            start_date: effort.start_date,
+            total_distance: 0,
+            total_time: 0,
+            segment_count: 0,
+            segments: [],
+            profiles: effort.profiles,
+          });
+        }
+        
+        const activity = activityMap.get(activityKey)!;
+        activity.total_distance += effort.distance;
+        activity.total_time += effort.elapsed_time;
+        activity.segment_count += 1;
+        activity.segments.push(effort.segment_name);
+      });
+
+      // Convert to array and sort by date, limit to 20
+      const groupedActivities = Array.from(activityMap.values())
+        .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime())
+        .slice(0, 20);
+
+      return groupedActivities;
     },
     staleTime: 1000 * 30, // 30 seconds
   });

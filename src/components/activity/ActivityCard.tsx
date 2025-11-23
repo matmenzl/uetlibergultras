@@ -21,10 +21,11 @@ interface ActivityCardProps {
   activity: {
     id: string;
     user_id: string;
-    segment_name: string;
-    elapsed_time: number;
-    distance: number;
     start_date: string;
+    total_distance: number;
+    total_time: number;
+    segment_count: number;
+    segments: string[];
     profiles: {
       first_name: string;
       last_name: string;
@@ -277,17 +278,21 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
       {/* Activity Details */}
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-foreground mb-2">
-          {activity.segment_name}
+          Lauf mit {activity.segment_count} Uetliberg-{activity.segment_count === 1 ? 'Segment' : 'Segmenten'}
         </h3>
-        <div className="flex gap-4 text-sm text-muted-foreground">
+        <div className="flex gap-4 text-sm text-muted-foreground mb-2">
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
-            <span>{formatTime(activity.elapsed_time)}</span>
+            <span>{formatTime(activity.total_time)}</span>
           </div>
           <div className="flex items-center gap-1">
             <Mountain className="w-4 h-4" />
-            <span>{formatDistanceValue(activity.distance)}</span>
+            <span>{formatDistanceValue(activity.total_distance)}</span>
           </div>
+        </div>
+        <div className="text-xs text-muted-foreground">
+          Segmente: {activity.segments.slice(0, 3).join(', ')}
+          {activity.segments.length > 3 && ` +${activity.segments.length - 3} weitere`}
         </div>
       </div>
 
