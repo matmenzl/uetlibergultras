@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.84.0';
+import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { checkRateLimit, getClientIdentifier } from '../_shared/rateLimit.ts';
+import { validateRequest, StravaAuthExchangeSchema } from '../_shared/validation.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,11 +15,44 @@ serve(async (req) => {
   }
 
   try {
-    const { code } = await req.json();
+    // Rate limiting - 10 requests per minute per IP
+    const rateLimitClientId = getClientIdentifier(req);
+    const rateCheck = await checkRateLimit(rateLimitClientId, {
+      requests: 10,
+      windowMs: 60000
+    });
     
-    if (!code) {
-      throw new Error('Authorization code is required');
+    if (!rateCheck.allowed) {
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: 'Rate limit exceeded. Please try again later.' 
+        }),
+        { 
+          status: 429, 
+          headers: {
+            ...corsHeaders,
+            'Retry-After': '60'
+          } 
+        }
+      );
     }
+
+    // Input validation
+    const body = await req.json().catch(() => ({}));
+    const validation = validateRequest(StravaAuthExchangeSchema, body);
+    
+    if (!validation.success) {
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: validation.error 
+        }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+    
+    const { code } = validation.data;
 
     const clientId = Deno.env.get('STRAVA_CLIENT_ID');
     const clientSecret = Deno.env.get('STRAVA_CLIENT_SECRET');
@@ -54,7 +90,10 @@ serve(async (req) => {
 
     // Create unique email for Strava user
     const stravaEmail = `strava_${athlete.id}@strava.user`;
-    const stravaPassword = `strava_${athlete.id}_${clientSecret.slice(0, 10)}`;
+    
+    // SECURITY: Generate cryptographically secure random password (32 bytes = 256 bits)
+    const randomBytes = crypto.getRandomValues(new Uint8Array(32));
+    const stravaPassword = base64Encode(randomBytes.buffer);
 
     // Try to sign in first
     let userId: string;
@@ -86,6 +125,23 @@ serve(async (req) => {
       console.log(`New user created: ${userId}`);
     } else {
       userId = signInData.user!.id;
+      
+      // SECURITY: Rotate password for existing user to random one
+      const rotationBytes = crypto.getRandomValues(new Uint8Array(32));
+      const newPassword = base64Encode(rotationBytes.buffer);
+      
+      const { error: updateError } = await supabase.auth.admin.updateUserById(
+        userId,
+        { password: newPassword }
+      );
+      
+      if (updateError) {
+        console.error('Password rotation error:', updateError);
+        // Continue anyway - existing password still works for this session
+      } else {
+        console.log(`Password rotated for existing user: ${userId}`);
+      }
+      
       console.log(`Existing user signed in: ${userId}`);
     }
 

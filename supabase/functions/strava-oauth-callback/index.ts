@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.84.0';
+import { checkRateLimit, getClientIdentifier } from '../_shared/rateLimit.ts';
+import { validateRequest, StravaOAuthCallbackSchema } from '../_shared/validation.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,11 +14,39 @@ serve(async (req) => {
   }
 
   try {
-    const { code, userId } = await req.json();
+    // Rate limiting - 10 requests per minute per IP
+    const rateLimitClientId = getClientIdentifier(req);
+    const rateCheck = await checkRateLimit(rateLimitClientId, {
+      requests: 10,
+      windowMs: 60000
+    });
     
-    if (!code || !userId) {
-      throw new Error('Code and userId are required');
+    if (!rateCheck.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+        { 
+          status: 429, 
+          headers: {
+            ...corsHeaders,
+            'Retry-After': '60',
+            'X-RateLimit-Remaining': '0'
+          } 
+        }
+      );
     }
+
+    // Input validation
+    const body = await req.json().catch(() => ({}));
+    const validation = validateRequest(StravaOAuthCallbackSchema, body);
+    
+    if (!validation.success) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+    
+    const { code, userId } = validation.data;
 
     const clientId = Deno.env.get('STRAVA_CLIENT_ID');
     const clientSecret = Deno.env.get('STRAVA_CLIENT_SECRET');
