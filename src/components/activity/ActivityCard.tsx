@@ -8,6 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { formatDistance } from "date-fns";
 import { de } from "date-fns/locale";
+import { z } from "zod";
+
+const CommentSchema = z.object({
+  comment_text: z.string()
+    .min(2, "Kommentar muss mindestens 2 Zeichen lang sein")
+    .max(1000, "Kommentar darf maximal 1000 Zeichen lang sein")
+    .trim()
+});
 
 interface ActivityCardProps {
   activity: {
@@ -197,14 +205,27 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
       return;
     }
 
-    if (!commentText.trim()) return;
+    // Validate comment with zod
+    const validationResult = CommentSchema.safeParse({ 
+      comment_text: commentText 
+    });
+    
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.issues[0].message;
+      toast({
+        title: "Ungültiger Kommentar",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from("comments").insert({
         effort_id: activity.id,
         user_id: currentUserId,
-        comment_text: commentText.trim(),
+        comment_text: validationResult.data.comment_text,
       });
 
       if (error) throw error;
@@ -323,20 +344,26 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
 
           {/* Add Comment */}
           {currentUserId && (
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Schreibe einen Kommentar..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                className="flex-1"
-                rows={2}
-              />
-              <Button
-                onClick={handleCommentSubmit}
-                disabled={!commentText.trim() || isSubmitting}
-              >
-                Posten
-              </Button>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="Schreibe einen Kommentar..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="flex-1"
+                  rows={2}
+                  maxLength={1000}
+                />
+                <Button
+                  onClick={handleCommentSubmit}
+                  disabled={!commentText.trim() || isSubmitting}
+                >
+                  Posten
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {commentText.length}/1000 Zeichen
+              </p>
             </div>
           )}
         </div>

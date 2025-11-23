@@ -1,10 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.84.0";
+import { checkRateLimit, getClientIdentifier } from '../_shared/rateLimit.ts';
+import { validateRequest, ActivityLeaderboardSchema } from '../_shared/validation.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Simple in-memory cache
+const cache = new Map<string, { data: any; expiresAt: number }>();
+const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,13 +18,56 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting - 30 requests per minute per IP
+    const rateLimitClientId = getClientIdentifier(req);
+    const rateCheck = await checkRateLimit(rateLimitClientId, {
+      requests: 30,
+      windowMs: 60000
+    });
+    
+    if (!rateCheck.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+        { 
+          status: 429, 
+          headers: {
+            ...corsHeaders,
+            'Retry-After': '60',
+            'X-RateLimit-Remaining': '0'
+          } 
+        }
+      );
+    }
+
+    // Input validation
+    const requestBody = await req.json().catch(() => ({}));
+    const validation = validateRequest(ActivityLeaderboardSchema, requestBody);
+    
+    if (!validation.success) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+    
+    const { type, segment_id } = validation.data;
+    
+    // Check cache
+    const cacheKey = `leaderboard_${type}_${segment_id || 'all'}`;
+    const cached = cache.get(cacheKey);
+    
+    if (cached && Date.now() < cached.expiresAt) {
+      console.log('Returning cached leaderboard data');
+      return new Response(
+        JSON.stringify(cached.data),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'HIT' } }
+      );
+    }
+
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const requestBody = await req.json().catch(() => ({}));
-    const type = requestBody.type || 'most-efforts-overall';
-    const segment_id = requestBody.segment_id;
     
     console.log(`Fetching leaderboard for type: ${type}`, segment_id ? `for segment: ${segment_id}` : '');
 
@@ -287,9 +336,15 @@ serve(async (req) => {
 
     console.log(`Found ${leaderboardData.length} entries for leaderboard type: ${type}`);
 
+    // Cache the response
+    cache.set(cacheKey, {
+      data: { entries: leaderboardData },
+      expiresAt: Date.now() + CACHE_TTL
+    });
+
     return new Response(
       JSON.stringify({ entries: leaderboardData }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'MISS' } }
     );
 
   } catch (error) {
