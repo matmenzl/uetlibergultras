@@ -13,7 +13,13 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client
+    // Create Supabase admin client (service role)
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Create regular client to get user from JWT
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -24,7 +30,7 @@ serve(async (req) => {
       }
     );
 
-    // Get authenticated user
+    // Get authenticated user from JWT
     const {
       data: { user },
       error: userError,
@@ -40,8 +46,8 @@ serve(async (req) => {
 
     console.log('Fetching credentials for user:', user.id);
 
-    // Get Strava credentials
-    const { data: credentials, error: credsError } = await supabaseClient.rpc(
+    // Get Strava credentials using admin client
+    const { data: credentials, error: credsError } = await supabaseAdmin.rpc(
       'get_strava_credentials',
       { _user_id: user.id }
     );
@@ -87,9 +93,9 @@ serve(async (req) => {
       const refreshData = await refreshResponse.json();
       accessToken = refreshData.access_token;
 
-      // Update credentials in database
+      // Update credentials in database using admin client
       const newExpiresAt = new Date(refreshData.expires_at * 1000);
-      await supabaseClient.rpc('upsert_strava_credentials', {
+      await supabaseAdmin.rpc('upsert_strava_credentials', {
         _user_id: user.id,
         _access_token: accessToken,
         _refresh_token: refreshData.refresh_token,
