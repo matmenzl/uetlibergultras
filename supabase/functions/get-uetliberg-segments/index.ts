@@ -118,15 +118,20 @@ serve(async (req) => {
     }
 
     console.log(`Fetching details for ${segmentIds.length} manual segments from Strava API...`);
+    console.log(`Segment IDs (as strings):`, segmentIds);
 
     const segments = [];
     const errors = [];
 
-    // Fetch details for each segment ID
+    // Fetch details for each segment ID (keep as string to preserve precision)
     for (const segmentId of segmentIds) {
       try {
+        // Ensure segment ID is a string
+        const segmentIdStr = String(segmentId);
+        console.log(`Fetching segment ${segmentIdStr} from Strava...`);
+        
         const segmentResponse = await fetch(
-          `https://www.strava.com/api/v3/segments/${segmentId}`,
+          `https://www.strava.com/api/v3/segments/${segmentIdStr}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -134,9 +139,12 @@ serve(async (req) => {
           }
         );
 
+        console.log(`Strava API response status for segment ${segmentIdStr}: ${segmentResponse.status}`);
+
         if (!segmentResponse.ok) {
-          console.error(`Failed to fetch segment ${segmentId}`);
-          errors.push({ segment_id: segmentId, error: 'Failed to fetch from Strava' });
+          const errorText = await segmentResponse.text();
+          console.error(`Failed to fetch segment ${segmentIdStr}: ${segmentResponse.status} - ${errorText}`);
+          errors.push({ segment_id: segmentIdStr, error: `Strava API error: ${segmentResponse.status}`, details: errorText });
           continue;
         }
 
