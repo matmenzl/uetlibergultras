@@ -64,10 +64,14 @@ export const ActivityFeed = () => {
         }
         
         if (!activityMap.has(activityKey)) {
+          // Generate a better fallback name if activity_name is missing
+          const fallbackName = effort.activity_name || 
+            `Lauf am ${new Date(effort.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}`;
+          
           activityMap.set(activityKey, {
             id: activityKey,
             activity_id: effort.activity_id,
-            activity_name: effort.activity_name || 'Lauf',
+            activity_name: fallbackName,
             user_id: effort.user_id,
             start_date: effort.start_date,
             total_distance: 0,
