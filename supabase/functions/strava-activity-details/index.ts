@@ -13,9 +13,6 @@ serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
@@ -24,8 +21,19 @@ serve(async (req) => {
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    // Create Supabase client with the user's auth token
+    const supabase = createClient(
+      supabaseUrl,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
+
+    // Get authenticated user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
       console.error('Auth error:', userError);
@@ -40,8 +48,13 @@ serve(async (req) => {
 
     console.log(`Fetching activity details for user ${userId}, activity ${activityId || 'date: ' + date}`);
 
-    // Get user's Strava credentials
-    const { data: credentials } = await supabase.rpc('get_strava_credentials', {
+    // Get user's Strava credentials using service role
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+    
+    const { data: credentials } = await supabaseAdmin.rpc('get_strava_credentials', {
       _user_id: userId,
     });
 
@@ -81,7 +94,7 @@ serve(async (req) => {
       accessToken = tokenData.access_token;
 
       // Update token in database
-      await supabase.rpc('upsert_strava_credentials', {
+      await supabaseAdmin.rpc('upsert_strava_credentials', {
         _user_id: userId,
         _access_token: tokenData.access_token,
         _refresh_token: tokenData.refresh_token,
