@@ -35,8 +35,9 @@ export default function Index() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const { data: activitiesData, isLoading, error } = useQuery({
-    queryKey: ['last-three-activities', user?.id],
+  // Fetch Uetliberg segments first (only once)
+  const { data: segmentsData } = useQuery({
+    queryKey: ['uetliberg-segments', user?.id],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -44,9 +45,39 @@ export default function Index() {
         throw new Error('Keine aktive Sitzung gefunden');
       }
 
-      console.log('Calling get-last-three-activities with user:', user?.id);
+      console.log('Fetching Uetliberg segments...');
       
-      const { data, error } = await supabase.functions.invoke('get-last-three-activities', {
+      const { data, error } = await supabase.functions.invoke('get-uetliberg-segments', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      
+      if (error) {
+        console.error('Segments fetch error:', error);
+        throw error;
+      }
+      
+      return data;
+    },
+    enabled: !!user,
+    retry: false,
+    staleTime: Infinity, // Only fetch segments once per session
+  });
+
+  // Fetch Uetliberg runs
+  const { data: activitiesData, isLoading, error, refetch } = useQuery({
+    queryKey: ['uetliberg-runs', user?.id],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('Keine aktive Sitzung gefunden');
+      }
+
+      console.log('Calling get-uetliberg-runs with user:', user?.id);
+      
+      const { data, error } = await supabase.functions.invoke('get-uetliberg-runs', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
@@ -59,7 +90,7 @@ export default function Index() {
       
       return data;
     },
-    enabled: !!user,
+    enabled: !!user && !!segmentsData, // Only fetch runs after segments are loaded
     retry: false,
   });
 
@@ -88,8 +119,18 @@ export default function Index() {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold mb-8 text-foreground">
-            Meine letzten Aktivitäten
+            Uetliberg Läufe 2025
           </h1>
+          
+          {activitiesData && (
+            <div className="mb-6 p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                <strong>Statistik:</strong> {activitiesData.uetliberg_runs} Uetliberg-Läufe 
+                von insgesamt {activitiesData.total_runs} Läufen 
+                ({activitiesData.total_activities} Aktivitäten gesamt)
+              </p>
+            </div>
+          )}
 
           {!user ? (
             <Card className="p-8 text-center">
@@ -122,12 +163,12 @@ export default function Index() {
             </Card>
           ) : activitiesData?.activities?.length > 0 ? (
             <div className="space-y-4">
-              {activitiesData.activities.map((activity: StravaActivity) => (
+              {activitiesData.activities.map((activity: any) => (
                 <Card key={activity.id} className="p-6 hover:shadow-lg transition-shadow">
                   <h3 className="text-xl font-bold mb-2 text-foreground">
                     {activity.name}
                   </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                  <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-4">
                     <div>
                       <p><strong>Typ:</strong> {activity.type}</p>
                       <p><strong>Distanz:</strong> {formatDistance(activity.distance)}</p>
@@ -138,14 +179,36 @@ export default function Index() {
                       <p><strong>Datum:</strong> {formatDate(activity.start_date)}</p>
                     </div>
                   </div>
+                  
+                  {activity.uetliberg_segments && activity.uetliberg_segments.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <p className="font-semibold mb-2 text-sm">Uetliberg Segmente:</p>
+                      <div className="space-y-2">
+                        {activity.uetliberg_segments.map((segment: any) => (
+                          <div key={segment.segment_id} className="text-xs bg-accent/10 p-2 rounded">
+                            <p className="font-medium">{segment.segment_name}</p>
+                            <p className="text-muted-foreground">
+                              {formatDistance(segment.distance)} • {formatTime(segment.moving_time)} • 
+                              Steigung: {segment.average_grade.toFixed(1)}%
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </Card>
               ))}
             </div>
           ) : (
             <Card className="p-8 text-center">
-              <p className="text-muted-foreground">
-                Keine Aktivitäten gefunden
+              <p className="text-muted-foreground mb-4">
+                Keine Uetliberg-Läufe gefunden
               </p>
+              {activitiesData?.message && (
+                <p className="text-sm text-muted-foreground">
+                  {activitiesData.message}
+                </p>
+              )}
             </Card>
           )}
         </div>

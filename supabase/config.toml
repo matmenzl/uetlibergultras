@@ -6,5 +6,8 @@ verify_jwt = false
 [functions.strava-auth-exchange]
 verify_jwt = false
 
-[functions.get-last-three-activities]
+[functions.get-uetliberg-segments]
+verify_jwt = true
+
+[functions.get-uetliberg-runs]
 verify_jwt = true

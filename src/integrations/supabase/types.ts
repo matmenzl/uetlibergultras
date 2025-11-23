@@ -74,6 +74,54 @@ export type Database = {
         }
         Relationships: []
       }
+      uetliberg_segments: {
+        Row: {
+          avg_grade: number
+          climb_category: number
+          created_at: string | null
+          distance: number
+          effort_count: number | null
+          elevation_high: number
+          elevation_low: number
+          end_latlng: unknown
+          name: string
+          polyline: string
+          segment_id: number
+          start_latlng: unknown
+          updated_at: string | null
+        }
+        Insert: {
+          avg_grade: number
+          climb_category: number
+          created_at?: string | null
+          distance: number
+          effort_count?: number | null
+          elevation_high: number
+          elevation_low: number
+          end_latlng: unknown
+          name: string
+          polyline: string
+          segment_id: number
+          start_latlng: unknown
+          updated_at?: string | null
+        }
+        Update: {
+          avg_grade?: number
+          climb_category?: number
+          created_at?: string | null
+          distance?: number
+          effort_count?: number | null
+          elevation_high?: number
+          elevation_low?: number
+          end_latlng?: unknown
+          name?: string
+          polyline?: string
+          segment_id?: number
+          start_latlng?: unknown
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
