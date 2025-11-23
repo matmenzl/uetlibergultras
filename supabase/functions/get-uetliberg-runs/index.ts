@@ -148,10 +148,13 @@ serve(async (req) => {
       }
     );
 
+    console.log(`Activities API response status: ${activitiesResponse.status}`);
+
     if (!activitiesResponse.ok) {
-      console.error('Failed to fetch activities from Strava');
+      const errorText = await activitiesResponse.text();
+      console.error(`Failed to fetch activities from Strava: ${activitiesResponse.status} - ${errorText}`);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch activities from Strava' }),
+        JSON.stringify({ error: 'Failed to fetch activities from Strava', details: errorText, status: activitiesResponse.status }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -191,7 +194,8 @@ serve(async (req) => {
         );
 
         if (!detailResponse.ok) {
-          console.error(`Failed to fetch details for activity ${run.id}: ${detailResponse.status}`);
+          const errorText = await detailResponse.text();
+          console.error(`Failed to fetch details for activity ${run.id}: ${detailResponse.status} - ${errorText}`);
           continue;
         }
 
