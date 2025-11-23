@@ -54,24 +54,11 @@ export default function AuthStravaCallback() {
         setMessage('Erfolgreich angemeldet!');
         toast.success('Mit Strava angemeldet');
 
-        // Sync segment efforts in background
-        setTimeout(async () => {
-          setMessage('Synchronisiere deine Segmente...');
-          
-          const { error: syncError } = await supabase.functions.invoke('sync-segment-efforts');
-          
-          if (syncError) {
-            console.error('Sync error:', syncError);
-          } else {
-            toast.success('Segmente synchronisiert');
-          }
-
-          // Get return URL or default to home
-          const returnUrl = sessionStorage.getItem('auth_return_url') || '/';
-          sessionStorage.removeItem('auth_return_url');
-          
-          setTimeout(() => navigate(returnUrl), 1000);
-        }, 1000);
+        // Get return URL or default to home
+        const returnUrl = sessionStorage.getItem('auth_return_url') || '/';
+        sessionStorage.removeItem('auth_return_url');
+        
+        setTimeout(() => navigate(returnUrl), 1000);
 
       } catch (err) {
         console.error('Callback error:', err);

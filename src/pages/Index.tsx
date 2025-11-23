@@ -38,7 +38,17 @@ export default function Index() {
   const { data: activitiesData, isLoading, error } = useQuery({
     queryKey: ['last-three-activities', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('get-last-three-activities');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No active session');
+      }
+
+      const { data, error } = await supabase.functions.invoke('get-last-three-activities', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
       
       if (error) throw error;
       return data;
