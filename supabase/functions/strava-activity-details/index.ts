@@ -28,13 +28,15 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
     if (userError || !user) {
+      console.error('Auth error:', userError);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const { activityId, userId, date } = await req.json();
+    const { activityId, date } = await req.json();
+    const userId = user.id; // Use authenticated user's ID for security
 
     console.log(`Fetching activity details for user ${userId}, activity ${activityId || 'date: ' + date}`);
 

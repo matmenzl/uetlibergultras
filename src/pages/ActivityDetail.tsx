@@ -52,29 +52,31 @@ export default function ActivityDetail() {
       if (error) throw error;
       if (!data || data.length === 0) return null;
 
-      // Try to get real activity data from Strava
+      // Try to get real activity data from Strava (only if it's the current user's activity)
       let activityData = null;
-      try {
-        const payload: any = {
-          userId: data[0].user_id,
-        };
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user && user.id === data[0].user_id) {
+        try {
+          const payload: any = {};
 
-        if (realActivityId) {
-          payload.activityId = realActivityId;
-        } else if (date) {
-          payload.date = date;
+          if (realActivityId) {
+            payload.activityId = realActivityId;
+          } else if (date) {
+            payload.date = date;
+          }
+
+          const { data: stravaData, error: stravaError } = await supabase.functions.invoke(
+            'strava-activity-details',
+            { body: payload }
+          );
+
+          if (!stravaError && stravaData?.activity) {
+            activityData = stravaData.activity;
+          }
+        } catch (error) {
+          console.error('Failed to fetch activity details from Strava:', error);
         }
-
-        const { data: stravaData, error: stravaError } = await supabase.functions.invoke(
-          'strava-activity-details',
-          { body: payload }
-        );
-
-        if (!stravaError && stravaData?.activity) {
-          activityData = stravaData.activity;
-        }
-      } catch (error) {
-        console.error('Failed to fetch activity details from Strava:', error);
       }
 
       // Use Strava data if available, otherwise aggregate from segments
