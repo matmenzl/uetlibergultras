@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 import { Mountain, TrendingUp, Users } from "lucide-react";
 
 const Index = () => {
-
   return (
     <main className="min-h-screen flex flex-col">
       {/* Navigation Bar */}
@@ -17,20 +16,23 @@ const Index = () => {
       <section className="bg-gradient-to-r from-primary to-primary/80 py-16 px-4">
         <div className="container mx-auto text-center">
           <Mountain className="w-16 h-16 text-primary-foreground mx-auto mb-4" />
-          <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-4">
-            Uetliberg Running Community
-          </h1>
+          <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-4">Uetliberg Ultras</h1>
           <p className="text-lg md:text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-            Werde Teil der aktivsten Lauf-Community auf Zürichs Hausberg. Tracke deine Fortschritte, vergleiche dich mit anderen und sammle Achievements.
+            Wer, wo und wie oft rennt.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Button asChild size="lg" variant="secondary">
               <Link to="/segments">
                 <Mountain className="mr-2 h-5 w-5" />
-                Segmente entdecken
+                Segmente entdecken, Leaderboard erklimmen
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="bg-white/10 border-white/20 text-primary-foreground hover:bg-white/20">
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="bg-white/10 border-white/20 text-primary-foreground hover:bg-white/20"
+            >
               <Link to="/auth">
                 <Users className="mr-2 h-5 w-5" />
                 Jetzt beitreten
