@@ -63,9 +63,9 @@ export const LeaderboardCard = ({ entry, isCurrentUser, showUniqueSegments }: Le
 
         {/* Stats */}
         <div className="text-right shrink-0">
-          <p className="text-2xl font-bold text-primary">{entry.totalEfforts}</p>
+          <p className="text-2xl font-bold text-primary">{entry.totalActivities}</p>
           <p className="text-xs text-muted-foreground">
-            {showUniqueSegments ? `${entry.uniqueSegments} Segmente` : 'Efforts'}
+            {showUniqueSegments ? `${entry.uniqueSegments} Segmente` : 'Läufe'}
           </p>
         </div>
       </div>

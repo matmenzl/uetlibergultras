@@ -4,7 +4,7 @@ export interface LeaderboardEntry {
   firstName: string;
   lastName: string;
   profilePicture?: string;
-  totalEfforts: number;
+  totalActivities: number;
   uniqueSegments: number;
   lastActivity: string;
 }

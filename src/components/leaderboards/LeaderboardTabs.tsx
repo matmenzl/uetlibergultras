@@ -12,7 +12,7 @@ export const LeaderboardTabs = ({ activeTab, onTabChange, children }: Leaderboar
     <Tabs value={activeTab} onValueChange={(value) => onTabChange(value as LeaderboardType)}>
       <TabsList className="grid w-full grid-cols-3 mb-6">
         <TabsTrigger value="most-efforts-overall" className="text-sm">
-          Meiste Efforts
+          Meiste Läufe
         </TabsTrigger>
         <TabsTrigger value="most-efforts-monthly" className="text-sm">
           Diesen Monat
