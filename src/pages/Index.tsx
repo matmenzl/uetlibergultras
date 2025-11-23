@@ -40,20 +40,27 @@ export default function Index() {
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session) {
-        throw new Error('No active session');
+      if (!session?.access_token) {
+        throw new Error('Keine aktive Sitzung gefunden');
       }
 
+      console.log('Calling get-last-three-activities with user:', user?.id);
+      
       const { data, error } = await supabase.functions.invoke('get-last-three-activities', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
+      
       return data;
     },
     enabled: !!user,
+    retry: false,
   });
 
   const formatDistance = (meters: number) => {
