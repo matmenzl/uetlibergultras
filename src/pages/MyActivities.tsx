@@ -77,7 +77,7 @@ const MyActivities = () => {
   });
 
   const handleStravaLogin = () => {
-    const clientId = '137865';
+    const clientId = '186560';
     const redirectUri = `${window.location.origin}/auth/strava-callback`;
     const scope = 'read,activity:read_all,activity:read';
     
