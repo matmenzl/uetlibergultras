@@ -95,14 +95,39 @@ serve(async (req) => {
     const randomBytes = crypto.getRandomValues(new Uint8Array(32));
     const stravaPassword = base64Encode(randomBytes.buffer);
 
-    // Try to sign in first
+    // Check if user exists by looking up Strava ID in profiles
     let userId: string;
-    let { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email: stravaEmail,
-      password: stravaPassword,
-    });
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('strava_id', athlete.id)
+      .single();
 
-    if (signInError) {
+    if (existingProfile) {
+      // User exists - update their password and metadata
+      userId = existingProfile.id;
+      console.log(`Existing user found: ${userId}`);
+      
+      // SECURITY: Update to new random password
+      const { error: updateError } = await supabase.auth.admin.updateUserById(
+        userId,
+        { 
+          password: stravaPassword,
+          user_metadata: {
+            strava_id: athlete.id,
+            first_name: athlete.firstname,
+            last_name: athlete.lastname,
+          }
+        }
+      );
+      
+      if (updateError) {
+        console.error('User update error:', updateError);
+        throw new Error('Failed to update user account');
+      }
+      
+      console.log(`User credentials updated: ${userId}`);
+    } else {
       // User doesn't exist, create new user
       console.log('Creating new user account...');
       const { data: signUpData, error: signUpError } = await supabase.auth.admin.createUser({
@@ -123,26 +148,6 @@ serve(async (req) => {
 
       userId = signUpData.user.id;
       console.log(`New user created: ${userId}`);
-    } else {
-      userId = signInData.user!.id;
-      
-      // SECURITY: Rotate password for existing user to random one
-      const rotationBytes = crypto.getRandomValues(new Uint8Array(32));
-      const newPassword = base64Encode(rotationBytes.buffer);
-      
-      const { error: updateError } = await supabase.auth.admin.updateUserById(
-        userId,
-        { password: newPassword }
-      );
-      
-      if (updateError) {
-        console.error('Password rotation error:', updateError);
-        // Continue anyway - existing password still works for this session
-      } else {
-        console.log(`Password rotated for existing user: ${userId}`);
-      }
-      
-      console.log(`Existing user signed in: ${userId}`);
     }
 
     // Store Strava tokens securely (server-side only)
