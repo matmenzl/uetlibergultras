@@ -49,7 +49,7 @@ export const ActivityLeaderboard = () => {
             <h2 className="text-3xl font-bold text-foreground">Community Leaderboards</h2>
           </div>
           <p className="text-muted-foreground text-lg">
-            Die aktivsten Athletes auf dem Uetliberg
+            Die meisten Läufe mit Uetliberg-Segmenten
           </p>
         </div>
 

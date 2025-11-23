@@ -77,7 +77,7 @@ serve(async (req) => {
       firstName: string;
       lastName: string;
       profilePicture?: string;
-      totalEfforts: number;
+      totalActivities: number;
       uniqueSegments: number;
       lastActivity: string | null;
     }
@@ -85,11 +85,13 @@ serve(async (req) => {
     let leaderboardData: LeaderboardEntry[] = [];
 
     if (type === 'most-efforts-overall') {
-      // Gesamtzahl aller Efforts pro User
+      // Gesamtzahl aller Aktivitäten (Läufe) pro User
       const { data, error } = await supabase
         .from('segment_efforts')
         .select(`
           user_id,
+          start_date,
+          segment_id,
           profiles!inner(first_name, last_name, profile_picture)
         `);
 
@@ -98,7 +100,7 @@ serve(async (req) => {
         throw error;
       }
 
-      // Aggregiere die Daten manuell
+      // Gruppiere nach User und zähle einzigartige Aktivitäten (start_date)
       const userMap = new Map();
       data.forEach((effort: any) => {
         const userId = effort.user_id;
@@ -108,31 +110,21 @@ serve(async (req) => {
             firstName: effort.profiles.first_name,
             lastName: effort.profiles.last_name,
             profilePicture: effort.profiles.profile_picture,
-            totalEfforts: 0,
+            activityDates: new Set(), // Eindeutige Aktivitäten (nach Datum)
             segmentIds: new Set(),
             lastActivity: null,
           });
         }
         const user = userMap.get(userId);
-        user.totalEfforts += 1;
+        user.activityDates.add(effort.start_date);
+        user.segmentIds.add(effort.segment_id);
+        if (!user.lastActivity || effort.start_date > user.lastActivity) {
+          user.lastActivity = effort.start_date;
+        }
       });
 
-      // Hole unique segments und last activity separat
-      for (const [userId, user] of userMap.entries()) {
-        const { data: segmentData } = await supabase
-          .from('segment_efforts')
-          .select('segment_id, start_date')
-          .eq('user_id', userId)
-          .order('start_date', { ascending: false });
-
-        if (segmentData && segmentData.length > 0) {
-          user.uniqueSegments = new Set(segmentData.map((e: any) => e.segment_id)).size;
-          user.lastActivity = segmentData[0].start_date;
-        }
-      }
-
       leaderboardData = Array.from(userMap.values())
-        .sort((a, b) => b.totalEfforts - a.totalEfforts)
+        .sort((a, b) => b.activityDates.size - a.activityDates.size)
         .slice(0, 10)
         .map((user, index) => ({
           id: user.userId,
@@ -140,13 +132,13 @@ serve(async (req) => {
           firstName: user.firstName,
           lastName: user.lastName,
           profilePicture: user.profilePicture,
-          totalEfforts: user.totalEfforts,
-          uniqueSegments: user.uniqueSegments,
+          totalActivities: user.activityDates.size,
+          uniqueSegments: user.segmentIds.size,
           lastActivity: user.lastActivity,
         }));
 
     } else if (type === 'most-efforts-monthly') {
-      // Efforts im aktuellen Monat
+      // Aktivitäten im aktuellen Monat
       const now = new Date();
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
@@ -155,6 +147,7 @@ serve(async (req) => {
         .select(`
           user_id,
           start_date,
+          segment_id,
           profiles!inner(first_name, last_name, profile_picture)
         `)
         .gte('start_date', firstDayOfMonth);
@@ -173,33 +166,21 @@ serve(async (req) => {
             firstName: effort.profiles.first_name,
             lastName: effort.profiles.last_name,
             profilePicture: effort.profiles.profile_picture,
-            totalEfforts: 0,
+            activityDates: new Set(),
             segmentIds: new Set(),
             lastActivity: null,
           });
         }
         const user = userMap.get(userId);
-        user.totalEfforts += 1;
+        user.activityDates.add(effort.start_date);
+        user.segmentIds.add(effort.segment_id);
         if (!user.lastActivity || effort.start_date > user.lastActivity) {
           user.lastActivity = effort.start_date;
         }
       });
 
-      // Hole unique segments für diesen Monat
-      for (const [userId, user] of userMap.entries()) {
-        const { data: segmentData } = await supabase
-          .from('segment_efforts')
-          .select('segment_id')
-          .eq('user_id', userId)
-          .gte('start_date', firstDayOfMonth);
-
-        if (segmentData) {
-          user.uniqueSegments = new Set(segmentData.map((e: any) => e.segment_id)).size;
-        }
-      }
-
       leaderboardData = Array.from(userMap.values())
-        .sort((a, b) => b.totalEfforts - a.totalEfforts)
+        .sort((a, b) => b.activityDates.size - a.activityDates.size)
         .slice(0, 10)
         .map((user, index) => ({
           id: user.userId,
@@ -207,8 +188,8 @@ serve(async (req) => {
           firstName: user.firstName,
           lastName: user.lastName,
           profilePicture: user.profilePicture,
-          totalEfforts: user.totalEfforts,
-          uniqueSegments: user.uniqueSegments,
+          totalActivities: user.activityDates.size,
+          uniqueSegments: user.segmentIds.size,
           lastActivity: user.lastActivity,
         }));
 
@@ -273,7 +254,7 @@ serve(async (req) => {
           firstName: user.firstName,
           lastName: user.lastName,
           profilePicture: user.profilePicture,
-          totalEfforts: user.totalEfforts,
+          totalActivities: user.totalEfforts,
           uniqueSegments: 1, // Not relevant for segment-specific view
           lastActivity: user.lastActivity,
         }));
@@ -322,7 +303,7 @@ serve(async (req) => {
           firstName: user.firstName,
           lastName: user.lastName,
           profilePicture: user.profilePicture,
-          totalEfforts: user.totalEfforts,
+          totalActivities: user.totalEfforts,
           uniqueSegments: user.segmentIds.size,
           lastActivity: user.lastActivity,
         }))
