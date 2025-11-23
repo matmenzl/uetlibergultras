@@ -156,6 +156,8 @@ export type Database = {
       }
       segment_efforts: {
         Row: {
+          activity_id: number | null
+          activity_name: string | null
           average_speed: number | null
           created_at: string | null
           distance: number
@@ -171,6 +173,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          activity_id?: number | null
+          activity_name?: string | null
           average_speed?: number | null
           created_at?: string | null
           distance: number
@@ -186,6 +190,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          activity_id?: number | null
+          activity_name?: string | null
           average_speed?: number | null
           created_at?: string | null
           distance?: number
