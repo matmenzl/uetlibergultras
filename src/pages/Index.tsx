@@ -64,13 +64,23 @@ export default function Index() {
       
       if (error) {
         console.error('Edge function error:', error);
+        // Check if it's a rate limit error
+        if (error.message?.includes('429') || error.context?.status === 429) {
+          throw new Error('RATE_LIMIT');
+        }
         throw error;
       }
       
       return data;
     },
     enabled: !!user,
-    retry: false,
+    retry: (failureCount, error) => {
+      // Don't retry on rate limit errors
+      if (error instanceof Error && error.message === 'RATE_LIMIT') {
+        return false;
+      }
+      return failureCount < 2;
+    },
   });
 
 
@@ -149,10 +159,15 @@ export default function Index() {
             </div>
           ) : error ? (
             <Card className="p-8 text-center border-destructive">
-              <p className="text-destructive mb-4">
-                {error instanceof Error && error.message.includes('429') 
-                  ? 'Strava API Rate Limit erreicht. Bitte warte ein paar Minuten.'
+              <p className="text-destructive mb-4 font-semibold">
+                {error instanceof Error && error.message === 'RATE_LIMIT'
+                  ? '🕒 Strava API Rate Limit erreicht'
                   : 'Fehler beim Laden der Aktivitäten'}
+              </p>
+              <p className="text-sm text-muted-foreground mb-6">
+                {error instanceof Error && error.message === 'RATE_LIMIT'
+                  ? 'Strava limitiert die Anzahl der API-Anfragen. Bitte warte 10-15 Minuten und versuche es dann erneut.'
+                  : 'Es ist ein Fehler beim Laden der Daten aufgetreten.'}
               </p>
               <Button onClick={() => refetch()}>
                 Erneut versuchen
