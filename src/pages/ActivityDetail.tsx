@@ -85,6 +85,9 @@ export default function ActivityDetail() {
       const activityName = activityData?.name || data.find(e => e.activity_name)?.activity_name || 
         `Lauf am ${new Date(data[0].start_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}`;
 
+      console.log('Activity data from Strava:', activityData);
+      console.log('Using distance:', totalDistance, 'time:', totalTime, 'name:', activityName);
+
       return {
         id: activityId,
         activity_id: activityData?.id || data[0].activity_id,

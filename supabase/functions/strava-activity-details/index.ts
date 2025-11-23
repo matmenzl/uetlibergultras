@@ -168,6 +168,8 @@ serve(async (req) => {
       // For now, return the first running activity
       const runningActivity = activities.find((a: any) => a.type === 'Run') || activities[0];
 
+      console.log(`Found activity: ${runningActivity.name}, distance: ${runningActivity.distance}m, time: ${runningActivity.moving_time}s`);
+
       return new Response(
         JSON.stringify({
           activity: {
