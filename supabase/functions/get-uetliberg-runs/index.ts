@@ -163,51 +163,68 @@ serve(async (req) => {
     const runs = allActivities.filter((activity: any) => activity.type === 'Run');
     console.log(`Filtered to ${runs.length} runs`);
 
+    // Helper function to add delay between requests
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
     // For each run, check if it contains any Uetliberg segments
     const uetlibergRuns = [];
+    let requestCount = 0;
     
     for (const run of runs) {
-      // Fetch detailed activity with segment efforts
-      const detailResponse = await fetch(
-        `https://www.strava.com/api/v3/activities/${run.id}?include_all_efforts=true`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!detailResponse.ok) {
-        console.error(`Failed to fetch details for activity ${run.id}`);
-        continue;
+      // Rate limiting: Add delay every 10 requests to avoid hitting Strava's rate limit
+      // Strava allows 100 requests per 15 minutes, 1000 per day
+      requestCount++;
+      if (requestCount % 10 === 0) {
+        console.log(`Processed ${requestCount} requests, adding delay...`);
+        await delay(2000); // 2 second delay every 10 requests
       }
 
-      const detailedActivity = await detailResponse.json();
-      const segmentEfforts = detailedActivity.segment_efforts || [];
-      
-      // Check if any segment effort matches our Uetliberg segments
-      const hasUetlibergSegment = segmentEfforts.some((effort: any) => 
-        uetlibergSegmentIds.has(effort.segment.id)
-      );
+      try {
+        // Fetch detailed activity with segment efforts
+        const detailResponse = await fetch(
+          `https://www.strava.com/api/v3/activities/${run.id}?include_all_efforts=true`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
 
-      if (hasUetlibergSegment) {
-        const uetlibergEfforts = segmentEfforts.filter((effort: any) => 
+        if (!detailResponse.ok) {
+          console.error(`Failed to fetch details for activity ${run.id}: ${detailResponse.status}`);
+          continue;
+        }
+
+        const detailedActivity = await detailResponse.json();
+        const segmentEfforts = detailedActivity.segment_efforts || [];
+        
+        // Check if any segment effort matches our Uetliberg segments
+        const hasUetlibergSegment = segmentEfforts.some((effort: any) => 
           uetlibergSegmentIds.has(effort.segment.id)
         );
-        
-        uetlibergRuns.push({
-          ...run,
-          uetliberg_segments: uetlibergEfforts.map((effort: any) => ({
-            segment_id: effort.segment.id,
-            segment_name: effort.segment.name,
-            elapsed_time: effort.elapsed_time,
-            moving_time: effort.moving_time,
-            distance: effort.distance,
-            average_grade: effort.segment.average_grade,
-          })),
-        });
-        
-        console.log(`Activity ${run.id} has ${uetlibergEfforts.length} Uetliberg segments`);
+
+        if (hasUetlibergSegment) {
+          const uetlibergEfforts = segmentEfforts.filter((effort: any) => 
+            uetlibergSegmentIds.has(effort.segment.id)
+          );
+          
+          uetlibergRuns.push({
+            ...run,
+            uetliberg_segments: uetlibergEfforts.map((effort: any) => ({
+              segment_id: effort.segment.id,
+              segment_name: effort.segment.name,
+              elapsed_time: effort.elapsed_time,
+              moving_time: effort.moving_time,
+              distance: effort.distance,
+              average_grade: effort.segment.average_grade,
+            })),
+          });
+          
+          console.log(`Activity ${run.id} has ${uetlibergEfforts.length} Uetliberg segments`);
+        }
+      } catch (error) {
+        console.error(`Error processing activity ${run.id}:`, error);
+        continue;
       }
     }
 

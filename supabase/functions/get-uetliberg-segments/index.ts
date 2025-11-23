@@ -106,64 +106,76 @@ serve(async (req) => {
       console.log('Token refreshed successfully');
     }
 
-    // Uetliberg coordinates (approximate bounds for segment search)
-    // Southwest: 47.33, 8.47 | Northeast: 47.37, 8.51
-    const bounds = '47.33,8.47,47.37,8.51';
-    
-    console.log('Fetching Uetliberg segments from Strava API...');
-    
-    // Note: Strava Segment Explorer API returns max 10 segments per request
-    // To get more segments, we would need multiple requests with different parameters
-    const segmentsResponse = await fetch(
-      `https://www.strava.com/api/v3/segments/explore?bounds=${bounds}&activity_type=running`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    // Get segment IDs from request body
+    const body = await req.json().catch(() => ({}));
+    const segmentIds = body.segment_ids || [];
 
-    if (!segmentsResponse.ok) {
-      console.error('Failed to fetch segments from Strava');
-      const errorText = await segmentsResponse.text();
-      console.error('Error response:', errorText);
+    if (segmentIds.length === 0) {
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch segments from Strava' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'No segment IDs provided. Please provide segment_ids array in request body.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const segmentsData = await segmentsResponse.json();
-    const segments = segmentsData.segments || [];
-    
-    console.log(`Fetched ${segments.length} Uetliberg segments from Strava`);
+    console.log(`Fetching details for ${segmentIds.length} manual segments from Strava API...`);
 
-    // Store segments in database
-    for (const segment of segments) {
-      const { error: insertError } = await supabaseAdmin
-        .from('uetliberg_segments')
-        .upsert({
-          segment_id: segment.id,
-          name: segment.name,
-          distance: segment.distance,
-          avg_grade: segment.avg_grade,
-          elevation_high: segment.elev_high,
-          elevation_low: segment.elev_low,
-          climb_category: segment.climb_category,
-          start_latlng: `(${segment.start_latlng[0]},${segment.start_latlng[1]})`,
-          end_latlng: `(${segment.end_latlng[0]},${segment.end_latlng[1]})`,
-          polyline: segment.points,
-          effort_count: segment.effort_count || 0,
-        }, {
-          onConflict: 'segment_id',
-        });
+    const segments = [];
+    const errors = [];
 
-      if (insertError) {
-        console.error('Error inserting segment:', insertError);
+    // Fetch details for each segment ID
+    for (const segmentId of segmentIds) {
+      try {
+        const segmentResponse = await fetch(
+          `https://www.strava.com/api/v3/segments/${segmentId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (!segmentResponse.ok) {
+          console.error(`Failed to fetch segment ${segmentId}`);
+          errors.push({ segment_id: segmentId, error: 'Failed to fetch from Strava' });
+          continue;
+        }
+
+        const segment = await segmentResponse.json();
+        segments.push(segment);
+
+        // Store segment in database
+        const { error: insertError } = await supabaseAdmin
+          .from('uetliberg_segments')
+          .upsert({
+            segment_id: segment.id,
+            name: segment.name,
+            distance: segment.distance,
+            avg_grade: segment.average_grade,
+            elevation_high: segment.elevation_high,
+            elevation_low: segment.elevation_low,
+            climb_category: segment.climb_category,
+            start_latlng: `(${segment.start_latlng[0]},${segment.start_latlng[1]})`,
+            end_latlng: `(${segment.end_latlng[0]},${segment.end_latlng[1]})`,
+            polyline: segment.map.polyline,
+            effort_count: segment.effort_count || 0,
+          }, {
+            onConflict: 'segment_id',
+          });
+
+        if (insertError) {
+          console.error('Error inserting segment:', insertError);
+          errors.push({ segment_id: segmentId, error: insertError.message });
+        } else {
+          console.log(`Segment ${segment.id} (${segment.name}) stored successfully`);
+        }
+      } catch (error) {
+        console.error(`Error processing segment ${segmentId}:`, error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        errors.push({ segment_id: segmentId, error: errorMessage });
       }
     }
 
-    console.log('Segments stored in database');
+    console.log(`Successfully fetched and stored ${segments.length} segments`);
 
     return new Response(
       JSON.stringify({ 
@@ -171,12 +183,13 @@ serve(async (req) => {
           id: s.id,
           name: s.name,
           distance: s.distance,
-          avg_grade: s.avg_grade,
-          elevation_high: s.elev_high,
-          elevation_low: s.elev_low,
+          avg_grade: s.average_grade,
+          elevation_high: s.elevation_high,
+          elevation_low: s.elevation_low,
           climb_category: s.climb_category,
         })),
         count: segments.length,
+        errors: errors.length > 0 ? errors : undefined,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

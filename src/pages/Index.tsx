@@ -5,6 +5,8 @@ import { User } from '@supabase/supabase-js';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery } from '@tanstack/react-query';
@@ -22,6 +24,9 @@ interface StravaActivity {
 export default function Index() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [segmentIds, setSegmentIds] = useState('');
+  const [isLoadingSegments, setIsLoadingSegments] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -34,36 +39,6 @@ export default function Index() {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // Fetch Uetliberg segments first (only once)
-  const { data: segmentsData } = useQuery({
-    queryKey: ['uetliberg-segments', user?.id],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.access_token) {
-        throw new Error('Keine aktive Sitzung gefunden');
-      }
-
-      console.log('Fetching Uetliberg segments...');
-      
-      const { data, error } = await supabase.functions.invoke('get-uetliberg-segments', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-      
-      if (error) {
-        console.error('Segments fetch error:', error);
-        throw error;
-      }
-      
-      return data;
-    },
-    enabled: !!user,
-    retry: false,
-    staleTime: Infinity, // Only fetch segments once per session
-  });
 
   // Fetch Uetliberg runs
   const { data: activitiesData, isLoading, error, refetch } = useQuery({
@@ -90,9 +65,66 @@ export default function Index() {
       
       return data;
     },
-    enabled: !!user && !!segmentsData, // Only fetch runs after segments are loaded
+    enabled: !!user,
     retry: false,
   });
+
+  const handleLoadSegments = async () => {
+    if (!segmentIds.trim()) {
+      toast({
+        title: 'Fehler',
+        description: 'Bitte gib mindestens eine Segment-ID ein',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoadingSegments(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('Keine aktive Sitzung gefunden');
+      }
+
+      // Parse segment IDs (comma or space separated)
+      const ids = segmentIds
+        .split(/[\s,]+/)
+        .map(id => parseInt(id.trim()))
+        .filter(id => !isNaN(id));
+
+      console.log('Loading segments:', ids);
+
+      const { data, error } = await supabase.functions.invoke('get-uetliberg-segments', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: { segment_ids: ids },
+      });
+
+      if (error) {
+        console.error('Error loading segments:', error);
+        throw error;
+      }
+
+      toast({
+        title: 'Erfolgreich!',
+        description: `${data.count} Segmente geladen`,
+      });
+
+      // Refetch runs after segments are loaded
+      refetch();
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Fehler',
+        description: error instanceof Error ? error.message : 'Fehler beim Laden der Segmente',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingSegments(false);
+    }
+  };
 
   const formatDistance = (meters: number) => {
     return (meters / 1000).toFixed(2) + ' km';
@@ -121,6 +153,29 @@ export default function Index() {
           <h1 className="text-4xl font-bold mb-8 text-foreground">
             Uetliberg Läufe 2025
           </h1>
+          
+          {user && (
+            <Card className="p-6 mb-6">
+              <h2 className="text-xl font-bold mb-4">Segment-IDs konfigurieren</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Gib die Strava Segment-IDs ein, die du als Uetliberg-Segmente verwenden möchtest (kommagetrennt).
+              </p>
+              <div className="flex gap-2">
+                <Input 
+                  placeholder="z.B. 2803527, 4072914, 5762702"
+                  value={segmentIds}
+                  onChange={(e) => setSegmentIds(e.target.value)}
+                  className="flex-1"
+                />
+                <Button 
+                  onClick={handleLoadSegments}
+                  disabled={isLoadingSegments}
+                >
+                  {isLoadingSegments ? 'Laden...' : 'Segmente laden'}
+                </Button>
+              </div>
+            </Card>
+          )}
           
           {activitiesData && (
             <div className="mb-6 p-4 bg-muted rounded-lg">
