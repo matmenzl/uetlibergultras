@@ -64,14 +64,10 @@ export const ActivityFeed = () => {
         }
         
         if (!activityMap.has(activityKey)) {
-          // Generate a better fallback name if activity_name is missing
-          const fallbackName = effort.activity_name || 
-            `Lauf am ${new Date(effort.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}`;
-          
           activityMap.set(activityKey, {
             id: activityKey,
             activity_id: effort.activity_id,
-            activity_name: fallbackName,
+            activity_name: effort.activity_name || "",
             user_id: effort.user_id,
             start_date: effort.start_date,
             total_distance: 0,
@@ -83,11 +79,24 @@ export const ActivityFeed = () => {
         }
         
         const activity = activityMap.get(activityKey)!;
+        
+        // Update activity_name if current effort has a better name
+        if (effort.activity_name && !activity.activity_name) {
+          activity.activity_name = effort.activity_name;
+        }
+        
         activity.total_distance += effort.distance;
         activity.total_time += effort.elapsed_time;
         activity.segment_count += 1;
         if (!activity.segments.includes(effort.segment_name)) {
           activity.segments.push(effort.segment_name);
+        }
+      });
+
+      // Add fallback names for activities without a name
+      Array.from(activityMap.values()).forEach(activity => {
+        if (!activity.activity_name) {
+          activity.activity_name = `Lauf am ${new Date(activity.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}`;
         }
       });
 
