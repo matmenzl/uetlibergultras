@@ -1,86 +1,140 @@
-import { NavBar } from "@/components/NavBar";
-import { ActivityLeaderboard } from "@/components/leaderboards/ActivityLeaderboard";
-import { ActivityFeed } from "@/components/activity/ActivityFeed";
-import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Mountain, TrendingUp, Users } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import NavBar from '@/components/NavBar';
+import { Footer } from '@/components/Footer';
+import { useQuery } from '@tanstack/react-query';
 
-const Index = () => {
+interface StravaActivity {
+  id: number;
+  name: string;
+  distance: number;
+  moving_time: number;
+  type: string;
+  start_date: string;
+  total_elevation_gain: number;
+}
+
+export default function Index() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const { data: activitiesData, isLoading, error } = useQuery({
+    queryKey: ['last-three-activities', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('get-last-three-activities');
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const formatDistance = (meters: number) => {
+    return (meters / 1000).toFixed(2) + ' km';
+  };
+
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('de-DE', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
-    <main className="min-h-screen flex flex-col">
-      {/* Navigation Bar */}
+    <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
+      
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl font-bold mb-8 text-foreground">
+            Meine letzten Aktivitäten
+          </h1>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary to-primary/80 py-16 px-4">
-        <div className="container mx-auto text-center">
-          <Mountain className="w-16 h-16 text-primary-foreground mx-auto mb-4" />
-          <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-4">Uetliberg Ultras</h1>
-          <p className="text-lg md:text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-            Wer, wo und wie oft rennt.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button asChild size="lg" variant="secondary">
-              <Link to="/segments">
-                <Mountain className="mr-2 h-5 w-5" />
-                Segmente entdecken, Leaderboard erklimmen
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="bg-white/10 border-white/20 text-primary-foreground hover:bg-white/20"
-            >
-              <Link to="/auth">
-                <Users className="mr-2 h-5 w-5" />
-                Jetzt beitreten
-              </Link>
-            </Button>
-          </div>
+          {!user ? (
+            <Card className="p-8 text-center">
+              <h2 className="text-2xl font-bold mb-4">Willkommen!</h2>
+              <p className="text-muted-foreground mb-6">
+                Melde dich mit Strava an, um deine Aktivitäten zu sehen
+              </p>
+              <Button onClick={() => navigate('/auth')}>
+                Mit Strava anmelden
+              </Button>
+            </Card>
+          ) : isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="p-6">
+                  <Skeleton className="h-6 w-3/4 mb-4" />
+                  <Skeleton className="h-4 w-1/2 mb-2" />
+                  <Skeleton className="h-4 w-1/3" />
+                </Card>
+              ))}
+            </div>
+          ) : error ? (
+            <Card className="p-8 text-center border-destructive">
+              <p className="text-destructive mb-4">
+                Fehler beim Laden der Aktivitäten
+              </p>
+              <Button onClick={() => window.location.reload()}>
+                Erneut versuchen
+              </Button>
+            </Card>
+          ) : activitiesData?.activities?.length > 0 ? (
+            <div className="space-y-4">
+              {activitiesData.activities.map((activity: StravaActivity) => (
+                <Card key={activity.id} className="p-6 hover:shadow-lg transition-shadow">
+                  <h3 className="text-xl font-bold mb-2 text-foreground">
+                    {activity.name}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                    <div>
+                      <p><strong>Typ:</strong> {activity.type}</p>
+                      <p><strong>Distanz:</strong> {formatDistance(activity.distance)}</p>
+                      <p><strong>Zeit:</strong> {formatTime(activity.moving_time)}</p>
+                    </div>
+                    <div>
+                      <p><strong>Höhenmeter:</strong> {Math.round(activity.total_elevation_gain)}m</p>
+                      <p><strong>Datum:</strong> {formatDate(activity.start_date)}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="p-8 text-center">
+              <p className="text-muted-foreground">
+                Keine Aktivitäten gefunden
+              </p>
+            </Card>
+          )}
         </div>
-      </section>
+      </main>
 
-      {/* Features Section - Hidden */}
-      {/* <section className="py-12 px-4 bg-muted/30">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center p-6">
-              <TrendingUp className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Progress Tracking</h3>
-              <p className="text-muted-foreground">
-                Verfolge deine Zeiten über Zeit und sieh deine Verbesserungen
-              </p>
-            </div>
-            <div className="text-center p-6">
-              <Users className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Community Leaderboards</h3>
-              <p className="text-muted-foreground">
-                Vergleiche dich mit anderen Athletes und entdecke neue Motivation
-              </p>
-            </div>
-            <div className="text-center p-6">
-              <Mountain className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">25+ Segmente</h3>
-              <p className="text-muted-foreground">
-                Erkunde alle Running-Strecken auf dem Uetliberg
-              </p>
-            </div>
-          </div>
-        </div>
-      </section> */}
-
-      {/* Community Leaderboards */}
-      <ActivityLeaderboard />
-
-      {/* Live Activity Feed */}
-      <ActivityFeed />
-
-      {/* Footer */}
       <Footer />
-    </main>
+    </div>
   );
-};
-
-export default Index;
+}
