@@ -40,8 +40,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-12 px-4 bg-muted/30">
+      {/* Features Section - Hidden */}
+      {/* <section className="py-12 px-4 bg-muted/30">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="text-center p-6">
@@ -67,7 +67,7 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Community Leaderboards */}
       <ActivityLeaderboard />
