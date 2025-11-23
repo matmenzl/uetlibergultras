@@ -106,10 +106,10 @@ serve(async (req) => {
       console.log('Token refreshed successfully');
     }
 
-    // Fetch last 3 activities from Strava
+    // Fetch activities from Strava (try to get up to 50)
     console.log('Fetching activities from Strava...');
     const activitiesResponse = await fetch(
-      'https://www.strava.com/api/v3/athlete/activities?per_page=3',
+      'https://www.strava.com/api/v3/athlete/activities?per_page=50',
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -126,7 +126,7 @@ serve(async (req) => {
     }
 
     const activities = await activitiesResponse.json();
-    console.log(`Fetched ${activities.length} activities`);
+    console.log(`Fetched ${activities.length} activities from Strava`);
 
     return new Response(
       JSON.stringify({ activities }),
