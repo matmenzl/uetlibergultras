@@ -235,9 +235,9 @@ export default function Admin() {
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">Segmentdaten aktualisieren</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Lade die neuesten Details für alle Platzhalter-Segmente von Strava.
+              Lädt Details von Strava für alle Segmente, die noch unvollständige Daten haben (z.B. fehlende Höhendaten).
             </p>
-            <Button variant="outline" onClick={handleRefreshAll} disabled={isRefreshing}>
+            <Button onClick={handleRefreshAll} disabled={isRefreshing}>
               {isRefreshing ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
