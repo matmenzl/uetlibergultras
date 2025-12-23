@@ -298,8 +298,8 @@ export default function Index() {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
-            <Mountain className="w-10 h-10 text-primary" />
-            <h1 className="text-4xl font-bold text-foreground">
+            <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">
               Din Uetli, dini Uetli Runs 🏔️
             </h1>
           </div>
@@ -320,20 +320,20 @@ export default function Index() {
               </Card>
 
               {/* Demo Stats */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
                   <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold text-primary">12</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-primary">12</p>
                   <p className="text-sm text-muted-foreground">Uetli Runs</p>
                 </Card>
                 <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
                   <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold text-primary">5</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-primary">5</p>
                   <p className="text-sm text-muted-foreground">Uetli Segmente</p>
                 </Card>
                 <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
                   <Flame className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-                  <p className="text-3xl font-bold text-orange-500">3</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-orange-500">3</p>
                   <p className="text-sm text-muted-foreground">Wochen-Streak</p>
                 </Card>
               </div>
@@ -371,15 +371,15 @@ export default function Index() {
               </Card>
 
               {/* Stats - count activities as check-ins */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
                   <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
                   <p className="text-sm text-muted-foreground">Uetli Runs</p>
                 </Card>
                 <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
                   <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold text-primary">
+                  <p className="text-2xl sm:text-3xl font-bold text-primary">
                     {new Set(validCheckIns.map(c => c.segment_id)).size}
                   </p>
                   <p className="text-sm text-muted-foreground">Uetli Segmente</p>

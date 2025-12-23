@@ -109,8 +109,8 @@ export default function Segments() {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
-            <Mountain className="w-10 h-10 text-primary" />
-            <h1 className="text-4xl font-bold text-foreground">
+            <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">
               Uetliberg Segmente
             </h1>
           </div>
@@ -119,19 +119,19 @@ export default function Segments() {
           </p>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             <Card className="p-4 text-center">
-              <p className="text-3xl font-bold text-primary">{validSegments.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-primary">{validSegments.length}</p>
               <p className="text-sm text-muted-foreground">Segmente</p>
             </Card>
             <Card className="p-4 text-center">
-              <p className="text-3xl font-bold text-primary">
+              <p className="text-2xl sm:text-3xl font-bold text-primary">
                 {validSegments.filter(s => s.priority === 'high').length}
               </p>
               <p className="text-sm text-muted-foreground">Hohe Priorität</p>
             </Card>
             <Card className="p-4 text-center">
-              <p className="text-3xl font-bold text-primary">
+              <p className="text-2xl sm:text-3xl font-bold text-primary">
                 {validSegments.filter(s => s.ends_at_uetliberg).length}
               </p>
               <p className="text-sm text-muted-foreground">Enden am Uetliberg</p>
@@ -160,38 +160,38 @@ export default function Segments() {
                   <Skeleton className="h-4 w-1/2" />
                 </Card>)}
             </div> : validSegments.length > 0 ? <div className="space-y-4">
-              {validSegments.map(segment => <Card key={segment.segment_id} className="p-5 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between gap-4">
+              {validSegments.map(segment => <Card key={segment.segment_id} className="p-4 sm:p-5 hover:shadow-md transition-shadow">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-lg truncate">{segment.name}</h3>
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-base sm:text-lg">{segment.name}</h3>
                         {segment.ends_at_uetliberg && <Badge variant="secondary" className="flex-shrink-0">
                             <MapPin className="w-3 h-3 mr-1" />
                             Uetliberg
                           </Badge>}
                       </div>
                       
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap gap-3 sm:gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Ruler className="w-4 h-4" />
                           {formatDistance(segment.distance)}
                         </span>
                         <span className="flex items-center gap-1">
                           <TrendingUp className="w-4 h-4" />
-                          {segment.avg_grade.toFixed(1)}% Steigung
+                          {segment.avg_grade.toFixed(1)}%
                         </span>
                         <span className="flex items-center gap-1">
                           <Mountain className="w-4 h-4" />
-                          {formatElevation(segment.elevation_high, segment.elevation_low)} Höhe
+                          {formatElevation(segment.elevation_high, segment.elevation_low)}
                         </span>
                         {segment.effort_count && segment.effort_count > 0 && <span className="flex items-center gap-1">
                             <Users className="w-4 h-4" />
-                            {segment.effort_count.toLocaleString()} Versuche
+                            {segment.effort_count.toLocaleString()}
                           </span>}
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                    <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2 flex-shrink-0">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Badge className={`${getPriorityColor(segment.priority)} cursor-help`}>
