@@ -29,7 +29,7 @@ export default function Auth() {
   const handleStravaLogin = () => {
     const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID || '186560';
     const redirectUri = `${window.location.origin}/auth/strava-callback`;
-    const scope = 'read,activity:read_all';
+    const scope = 'read,read_all,activity:read_all';
     
     // Store return URL for after auth
     sessionStorage.setItem('auth_return_url', '/');
