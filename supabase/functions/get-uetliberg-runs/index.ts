@@ -380,7 +380,6 @@ serve(async (req) => {
                   activity_elapsed_time: run.elapsed_time,
                 }, {
                   onConflict: 'user_id,segment_id,activity_id',
-                  ignoreDuplicates: true,
                 });
               
               if (checkInError) {
