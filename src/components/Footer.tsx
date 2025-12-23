@@ -8,7 +8,7 @@ export const Footer = () => {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Mountain className="h-6 w-6" />
-              <h3 className="text-2xl font-bold">Gipfelsturm</h3>
+              <h3 className="text-2xl font-bold">Uetliberg Ultras</h3>
             </div>
             <p className="text-background/80 text-sm">
               Dein Üetli. Deine Runs. 🏔️
