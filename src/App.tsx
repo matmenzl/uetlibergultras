@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AuthStravaCallback from "./pages/AuthStravaCallback";
 import Segments from "./pages/Segments";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -19,7 +20,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/segments" element={<Segments />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/strava-callback" element={<AuthStravaCallback />} />
           <Route path="/auth/strava-callback" element={<AuthStravaCallback />} />
         </Routes>
       </BrowserRouter>

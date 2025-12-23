@@ -1,25 +1,12 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Award, Mountain } from 'lucide-react';
-import { User } from '@supabase/supabase-js';
+import { Award, Mountain, Shield } from 'lucide-react';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export default function NavBar() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { user, isAdmin } = useUserRole();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -42,6 +29,12 @@ export default function NavBar() {
             <Mountain className="h-4 w-4 mr-2" />
             Segmente
           </Button>
+          {isAdmin && (
+            <Button variant="ghost" onClick={() => navigate('/admin')}>
+              <Shield className="h-4 w-4 mr-2" />
+              Admin
+            </Button>
+          )}
           {user ? (
             <Button variant="outline" onClick={handleSignOut}>
               Abmelden
