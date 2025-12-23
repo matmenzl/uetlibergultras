@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      check_ins: {
+        Row: {
+          activity_id: number
+          activity_name: string | null
+          checked_in_at: string
+          created_at: string
+          distance: number | null
+          elapsed_time: number | null
+          id: string
+          segment_id: number
+          user_id: string
+        }
+        Insert: {
+          activity_id: number
+          activity_name?: string | null
+          checked_in_at?: string
+          created_at?: string
+          distance?: number | null
+          elapsed_time?: number | null
+          id?: string
+          segment_id: number
+          user_id: string
+        }
+        Update: {
+          activity_id?: number
+          activity_name?: string | null
+          checked_in_at?: string
+          created_at?: string
+          distance?: number | null
+          elapsed_time?: number | null
+          id?: string
+          segment_id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null

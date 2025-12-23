@@ -10,28 +10,29 @@ import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin } from 'lucide-react';
+import { MapPin, CheckCircle2, Clock, RefreshCw } from 'lucide-react';
 
-interface StravaActivity {
-  id: number;
+interface CheckIn {
+  id: string;
+  segment_id: number;
+  activity_id: number;
+  activity_name: string | null;
+  elapsed_time: number | null;
+  distance: number | null;
+  checked_in_at: string;
+  created_at: string;
+}
+
+interface SegmentInfo {
+  segment_id: number;
   name: string;
-  distance: number;
-  moving_time: number;
-  type: string;
-  start_date: string;
-  total_elevation_gain: number;
-  uetliberg_score?: number;
-  in_region?: boolean;
-  primary_segments?: any[];
-  secondary_segments?: any[];
-  uetliberg_segments?: any[];
+  priority: string;
 }
 
 export default function Index() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [page, setPage] = useState(1);
-  const [allActivities, setAllActivities] = useState<StravaActivity[]>([]);
+  const [isScanning, setIsScanning] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,244 +47,252 @@ export default function Index() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch Uetliberg runs with pagination
-  const { data: activitiesData, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ['uetliberg-runs', user?.id, page],
+  // Fetch check-in history
+  const { data: checkIns, isLoading: checkInsLoading, refetch: refetchCheckIns } = useQuery({
+    queryKey: ['check-ins', user?.id],
     queryFn: async () => {
+      const { data, error } = await supabase
+        .from('check_ins')
+        .select('*')
+        .order('checked_in_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as CheckIn[];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch segment info for names
+  const { data: segments } = useQuery({
+    queryKey: ['segments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('uetliberg_segments')
+        .select('segment_id, name, priority');
+      
+      if (error) throw error;
+      return data as SegmentInfo[];
+    },
+  });
+
+  // Scan for new activities
+  const scanForActivities = async () => {
+    if (!user) return;
+    
+    setIsScanning(true);
+    try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.access_token) {
         throw new Error('Keine aktive Sitzung gefunden');
       }
 
-      console.log(`Calling get-uetliberg-runs with user: ${user?.id}, page: ${page}`);
-      
-      const { data, error } = await supabase.functions.invoke('get-uetliberg-runs', {
+      const { error } = await supabase.functions.invoke('get-uetliberg-runs', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: { page, limit: 5 },
+        body: { page: 1, limit: 10 },
       });
       
-      if (error) {
-        console.error('Edge function error:', error);
-        if (error.message?.includes('429') || error.context?.status === 429) {
-          throw new Error('RATE_LIMIT');
-        }
-        throw error;
-      }
+      if (error) throw error;
       
-      return data;
-    },
-    enabled: !!user,
-    retry: (failureCount, error) => {
-      if (error instanceof Error && error.message === 'RATE_LIMIT') {
-        return false;
-      }
-      return failureCount < 2;
-    },
-  });
-
-  // Accumulate activities when new data arrives
-  useEffect(() => {
-    if (activitiesData?.activities) {
-      if (page === 1) {
-        setAllActivities(activitiesData.activities);
-      } else {
-        setAllActivities(prev => [...prev, ...activitiesData.activities]);
-      }
+      await refetchCheckIns();
+      toast({
+        title: 'Scan abgeschlossen',
+        description: 'Neue Aktivitäten wurden gescannt und Check-ins erstellt.',
+      });
+    } catch (error) {
+      console.error('Scan error:', error);
+      toast({
+        title: 'Fehler beim Scannen',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsScanning(false);
     }
-  }, [activitiesData, page]);
-
-  // Reset activities when user changes
-  useEffect(() => {
-    setPage(1);
-    setAllActivities([]);
-  }, [user?.id]);
-
-
-  const formatDistance = (meters: number) => {
-    return (meters / 1000).toFixed(2) + ' km';
   };
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  const getSegmentName = (segmentId: number) => {
+    const segment = segments?.find(s => s.segment_id === segmentId);
+    return segment?.name || `Segment ${segmentId}`;
+  };
+
+  const formatTime = (seconds: number | null) => {
+    if (!seconds) return '-';
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('de-DE', {
       year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
-  const getScoreBadgeVariant = (score: number) => {
-    if (score >= 4) return 'default';
-    if (score >= 2) return 'secondary';
-    return 'outline';
+  const formatDistance = (meters: number | null) => {
+    if (!meters) return '-';
+    return (meters / 1000).toFixed(2) + ' km';
   };
+
+  // Group check-ins by date
+  const groupedCheckIns = checkIns?.reduce((groups, checkIn) => {
+    const date = new Date(checkIn.checked_in_at).toLocaleDateString('de-DE', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(checkIn);
+    return groups;
+  }, {} as Record<string, CheckIn[]>) || {};
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <MapPin className="w-10 h-10 text-primary" />
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center gap-3 mb-2">
+            <CheckCircle2 className="w-10 h-10 text-primary" />
             <h1 className="text-4xl font-bold text-foreground">
-              Uetliberg Läufe 2025
+              Uetliberg Check-in
             </h1>
           </div>
-          
-          {allActivities.length > 0 && (
-            <div className="mb-6 p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                <strong>Geladen:</strong> {allActivities.length} Uetliberg-Läufe
-              </p>
-              {activitiesData?.high_priority_segments !== undefined && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  🎯 {activitiesData.high_priority_segments} Segmente am Uetliberg • 
-                  📍 {activitiesData.medium_priority_segments} Segmente in der Region
-                </p>
-              )}
-            </div>
-          )}
+          <p className="text-muted-foreground mb-8">
+            Automatische Check-ins für deine Uetliberg-Segmente
+          </p>
 
           {!user ? (
             <Card className="p-8 text-center">
+              <CheckCircle2 className="w-16 h-16 text-primary mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-4">Willkommen!</h2>
               <p className="text-muted-foreground mb-6">
-                Melde dich mit Strava an, um deine Aktivitäten zu sehen
+                Verbinde dich mit Strava, um automatische Check-ins für deine Uetliberg-Läufe zu erhalten.
               </p>
-              <Button onClick={() => navigate('/auth')}>
-                Mit Strava anmelden
+              <Button onClick={() => navigate('/auth')} size="lg">
+                <MapPin className="w-4 h-4 mr-2" />
+                Mit Strava verbinden
               </Button>
             </Card>
-          ) : isLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="p-6">
-                  <Skeleton className="h-6 w-3/4 mb-4" />
-                  <Skeleton className="h-4 w-1/2 mb-2" />
-                  <Skeleton className="h-4 w-1/3" />
-                </Card>
-              ))}
-            </div>
-          ) : error ? (
-            <Card className="p-8 text-center border-destructive">
-              <p className="text-destructive mb-4 font-semibold">
-                {error instanceof Error && error.message === 'RATE_LIMIT'
-                  ? '🕒 Strava API Rate Limit erreicht'
-                  : 'Fehler beim Laden der Aktivitäten'}
-              </p>
-              <p className="text-sm text-muted-foreground mb-6">
-                {error instanceof Error && error.message === 'RATE_LIMIT'
-                  ? 'Strava limitiert die Anzahl der API-Anfragen. Bitte warte 10-15 Minuten und versuche es dann erneut.'
-                  : 'Es ist ein Fehler beim Laden der Daten aufgetreten.'}
-              </p>
-              <Button onClick={() => refetch()}>
-                Erneut versuchen
-              </Button>
-            </Card>
-          ) : allActivities.length > 0 || activitiesData?.activities?.length > 0 ? (
-            <div className="space-y-4">
-              {allActivities.map((activity: StravaActivity) => (
-                <Card key={activity.id} className="p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-xl font-bold text-foreground flex-1">
-                      {activity.name}
-                    </h3>
-                    {activity.uetliberg_score !== undefined && (
-                      <Badge variant={getScoreBadgeVariant(activity.uetliberg_score)}>
-                        Score: {activity.uetliberg_score.toFixed(1)}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-4">
-                    <div>
-                      <p><strong>Typ:</strong> {activity.type}</p>
-                      <p><strong>Distanz:</strong> {formatDistance(activity.distance)}</p>
-                      <p><strong>Zeit:</strong> {formatTime(activity.moving_time)}</p>
-                    </div>
-                    <div>
-                      <p><strong>Höhenmeter:</strong> {Math.round(activity.total_elevation_gain)}m</p>
-                      <p><strong>Datum:</strong> {formatDate(activity.start_date)}</p>
-                      {activity.in_region && (
-                        <Badge variant="outline" className="mt-1">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          In Uetliberg-Region
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {activity.primary_segments && activity.primary_segments.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <p className="font-semibold mb-2 text-sm flex items-center gap-2">
-                        🎯 Haupt-Segmente (am Uetliberg):
-                      </p>
-                      <div className="space-y-2">
-                        {activity.primary_segments.map((segment: any) => (
-                          <div key={segment.segment_id} className="text-xs bg-primary/10 p-2 rounded">
-                            <p className="font-medium">{segment.segment_name}</p>
-                            <p className="text-muted-foreground">
-                              {formatDistance(segment.distance)} • {formatTime(segment.moving_time)} • 
-                              Steigung: {segment.average_grade.toFixed(1)}%
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {activity.secondary_segments && activity.secondary_segments.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <p className="font-semibold mb-2 text-sm flex items-center gap-2">
-                        📍 Zusätzliche Segmente (in der Region):
-                      </p>
-                      <div className="space-y-2">
-                        {activity.secondary_segments.map((segment: any) => (
-                          <div key={segment.segment_id} className="text-xs bg-accent/10 p-2 rounded">
-                            <p className="font-medium">{segment.segment_name}</p>
-                            <p className="text-muted-foreground">
-                              {formatDistance(segment.distance)} • {formatTime(segment.moving_time)} • 
-                              Steigung: {segment.average_grade.toFixed(1)}%
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </Card>
-              ))}
-              
-              {activitiesData?.has_more && (
-                <Button 
-                  onClick={() => setPage(p => p + 1)}
-                  variant="outline"
-                  className="w-full"
-                  disabled={isFetching}
-                >
-                  {isFetching ? 'Lade weitere Läufe...' : 'Weitere Läufe laden'}
-                </Button>
-              )}
-            </div>
           ) : (
-            <Card className="p-8 text-center">
-              <p className="text-muted-foreground mb-4">
-                Keine Uetliberg-Läufe gefunden
-              </p>
-              {activitiesData?.message && (
-                <p className="text-sm text-muted-foreground">
-                  {activitiesData.message}
-                </p>
+            <>
+              {/* Scan Button */}
+              <Card className="p-6 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-lg">Aktivitäten scannen</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Scanne deine neuesten Strava-Aktivitäten nach Uetliberg-Segmenten
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={scanForActivities} 
+                    disabled={isScanning}
+                    size="lg"
+                  >
+                    {isScanning ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        Scanne...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Jetzt scannen
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Stats */}
+              {checkIns && checkIns.length > 0 && (
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <Card className="p-4 text-center">
+                    <p className="text-3xl font-bold text-primary">{checkIns.length}</p>
+                    <p className="text-sm text-muted-foreground">Check-ins gesamt</p>
+                  </Card>
+                  <Card className="p-4 text-center">
+                    <p className="text-3xl font-bold text-primary">
+                      {new Set(checkIns.map(c => c.segment_id)).size}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Verschiedene Segmente</p>
+                  </Card>
+                </div>
               )}
-            </Card>
+
+              {/* Check-in History */}
+              <h2 className="text-xl font-bold mb-4">Check-in Historie</h2>
+              
+              {checkInsLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="p-4">
+                      <Skeleton className="h-5 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </Card>
+                  ))}
+                </div>
+              ) : checkIns && checkIns.length > 0 ? (
+                <div className="space-y-6">
+                  {Object.entries(groupedCheckIns).map(([date, dayCheckIns]) => (
+                    <div key={date}>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        {date}
+                      </h3>
+                      <div className="space-y-2">
+                        {dayCheckIns.map((checkIn) => (
+                          <Card key={checkIn.id} className="p-4 hover:shadow-md transition-shadow">
+                            <div className="flex items-start gap-3">
+                              <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium truncate">
+                                  {getSegmentName(checkIn.segment_id)}
+                                </p>
+                                {checkIn.activity_name && (
+                                  <p className="text-sm text-muted-foreground truncate">
+                                    {checkIn.activity_name}
+                                  </p>
+                                )}
+                                <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+                                  <span>{formatDistance(checkIn.distance)}</span>
+                                  <span>{formatTime(checkIn.elapsed_time)}</span>
+                                </div>
+                              </div>
+                              <Badge variant="outline" className="flex-shrink-0">
+                                {new Date(checkIn.checked_in_at).toLocaleTimeString('de-DE', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </Badge>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <Card className="p-8 text-center">
+                  <CheckCircle2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">
+                    Noch keine Check-ins vorhanden
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Klicke auf "Jetzt scannen" um deine Strava-Aktivitäten zu durchsuchen
+                  </p>
+                </Card>
+              )}
+            </>
           )}
         </div>
       </main>
