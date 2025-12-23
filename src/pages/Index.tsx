@@ -33,6 +33,7 @@ export default function Index() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [isRefreshingSegments, setIsRefreshingSegments] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -63,7 +64,7 @@ export default function Index() {
   });
 
   // Fetch segment info for names
-  const { data: segments } = useQuery({
+  const { data: segments, refetch: refetchSegments } = useQuery({
     queryKey: ['segments'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -74,6 +75,46 @@ export default function Index() {
       return data as SegmentInfo[];
     },
   });
+
+  // Check if any segments need refreshing (have placeholder names)
+  const hasPlaceholderSegments = segments?.some(s => s.name.startsWith('Segment ') && /^\d+$/.test(s.name.replace('Segment ', '')));
+
+  // Refresh segment details from Strava
+  const refreshSegmentDetails = async () => {
+    if (!user) return;
+    
+    setIsRefreshingSegments(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('Keine aktive Sitzung gefunden');
+      }
+
+      const { data, error } = await supabase.functions.invoke('refresh-segment-details', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      
+      if (error) throw error;
+      
+      await refetchSegments();
+      toast({
+        title: 'Segmente aktualisiert',
+        description: `${data.updated_count} Segment(e) wurden aktualisiert.`,
+      });
+    } catch (error) {
+      console.error('Refresh error:', error);
+      toast({
+        title: 'Fehler beim Aktualisieren',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRefreshingSegments(false);
+    }
+  };
 
   // Scan for new activities
   const scanForActivities = async () => {
@@ -184,6 +225,37 @@ export default function Index() {
             </Card>
           ) : (
             <>
+              {/* Refresh Segments Banner - only show if there are placeholder segments */}
+              {hasPlaceholderSegments && (
+                <Card className="p-4 mb-4 border-amber-500/50 bg-amber-500/10">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                        Einige Segmente haben noch keine Namen
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Klicke auf "Namen abrufen" um die Details von Strava zu laden
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={refreshSegmentDetails} 
+                      disabled={isRefreshingSegments}
+                    >
+                      {isRefreshingSegments ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Lade...
+                        </>
+                      ) : (
+                        'Namen abrufen'
+                      )}
+                    </Button>
+                  </div>
+                </Card>
+              )}
+
               {/* Scan Button */}
               <Card className="p-6 mb-6">
                 <div className="flex items-center justify-between">
