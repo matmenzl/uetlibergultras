@@ -89,6 +89,39 @@ export type Database = {
         }
         Relationships: []
       }
+      segment_suggestions: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["suggestion_status"]
+          strava_segment_url: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["suggestion_status"]
+          strava_segment_url: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["suggestion_status"]
+          strava_segment_url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       strava_credentials: {
         Row: {
           created_at: string | null
@@ -273,6 +306,7 @@ export type Database = {
         | "early_bird"
         | "night_owl"
       app_role: "admin" | "user"
+      suggestion_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -415,6 +449,7 @@ export const Constants = {
         "night_owl",
       ],
       app_role: ["admin", "user"],
+      suggestion_status: ["pending", "approved", "rejected"],
     },
   },
 } as const
