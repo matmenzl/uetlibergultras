@@ -59,6 +59,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          display_name: string | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -68,6 +69,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          display_name?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
@@ -77,6 +79,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          display_name?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -173,6 +176,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement: Database["public"]["Enums"]["achievement_type"]
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement: Database["public"]["Enums"]["achievement_type"]
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement?: Database["public"]["Enums"]["achievement_type"]
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -196,7 +220,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard_stats: {
+        Row: {
+          achievement_count: number | null
+          display_name: string | null
+          profile_picture: string | null
+          total_runs: number | null
+          unique_segments: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_strava_credentials: {
@@ -225,6 +259,19 @@ export type Database = {
       }
     }
     Enums: {
+      achievement_type:
+        | "first_run"
+        | "runs_5"
+        | "runs_10"
+        | "runs_25"
+        | "runs_50"
+        | "runs_100"
+        | "all_segments"
+        | "streak_2"
+        | "streak_4"
+        | "streak_8"
+        | "early_bird"
+        | "night_owl"
       app_role: "admin" | "user"
     }
     CompositeTypes: {
@@ -353,6 +400,20 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      achievement_type: [
+        "first_run",
+        "runs_5",
+        "runs_10",
+        "runs_25",
+        "runs_50",
+        "runs_100",
+        "all_segments",
+        "streak_2",
+        "streak_4",
+        "streak_8",
+        "early_bird",
+        "night_owl",
+      ],
       app_role: ["admin", "user"],
     },
   },
