@@ -132,6 +132,25 @@ serve(async (req) => {
       console.log('Token refreshed successfully');
     }
 
+    // Quick token sanity check (helps debug missing scopes / permissions)
+    let athleteStatus: number | null = null;
+    let athleteId: number | null = null;
+    try {
+      const athleteResp = await fetch('https://www.strava.com/api/v3/athlete', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      athleteStatus = athleteResp.status;
+      if (athleteResp.ok) {
+        const athlete = await athleteResp.json();
+        athleteId = athlete?.id ?? null;
+      } else {
+        const t = await athleteResp.text();
+        console.error(`Strava athlete check failed: ${athleteResp.status} - ${t}`);
+      }
+    } catch (e) {
+      console.error('Strava athlete check error:', e);
+    }
+
     // Get Uetliberg segments from database (prioritize high priority ones)
     const { data: uetlibergSegments, error: segmentsError } = await supabaseAdmin
       .from('uetliberg_segments')
@@ -275,6 +294,10 @@ serve(async (req) => {
         date_range: dateRange,
         segments_fetched: fetchedCount,
         total_entries: allLeaderboardEntries.length,
+        strava_athlete_check: {
+          status: athleteStatus,
+          athlete_id: athleteId,
+        },
         errors: errors.length > 0 ? errors : undefined,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
