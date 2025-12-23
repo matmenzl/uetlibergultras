@@ -334,14 +334,14 @@ export default function Index() {
                   <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
                     <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
                     <p className="text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
-                    <p className="text-sm text-muted-foreground">Gipfelsiege 🏆</p>
+                    <p className="text-sm text-muted-foreground">Uetli Runs</p>
                   </Card>
                   <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
                     <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
                     <p className="text-3xl font-bold text-primary">
                       {new Set(validCheckIns.map(c => c.segment_id)).size}
                     </p>
-                    <p className="text-sm text-muted-foreground">Eroberte Strecken ⛰️</p>
+                    <p className="text-sm text-muted-foreground">Uetli Segmente</p>
                   </Card>
                 </div>
               )}
