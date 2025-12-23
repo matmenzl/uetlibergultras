@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
+import { AddSegmentDialog } from '@/components/AddSegmentDialog';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, CheckCircle2, Clock, RefreshCw } from 'lucide-react';
 
@@ -63,7 +64,7 @@ export default function Index() {
   });
 
   // Fetch segment info for names
-  const { data: segments } = useQuery({
+  const { data: segments, refetch: refetchSegments } = useQuery({
     queryKey: ['segments'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -193,23 +194,26 @@ export default function Index() {
                       Scanne deine neuesten Strava-Aktivitäten nach Uetliberg-Segmenten
                     </p>
                   </div>
-                  <Button 
-                    onClick={scanForActivities} 
-                    disabled={isScanning}
-                    size="lg"
-                  >
-                    {isScanning ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                        Scanne...
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Jetzt scannen
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex gap-2">
+                    <AddSegmentDialog onSegmentAdded={() => refetchSegments()} />
+                    <Button 
+                      onClick={scanForActivities} 
+                      disabled={isScanning}
+                      size="lg"
+                    >
+                      {isScanning ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Scanne...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Jetzt scannen
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </Card>
 
