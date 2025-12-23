@@ -1,4 +1,4 @@
-import { Instagram, Facebook, Mail, Mountain, Settings, Map } from "lucide-react";
+import { Mountain, Settings, Map } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -8,7 +8,7 @@ export const Footer = () => {
   return (
     <footer className="bg-foreground text-background py-12">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-8 items-center">
+        <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Mountain className="h-6 w-6" />
@@ -19,32 +19,6 @@ export const Footer = () => {
             </p>
           </div>
           
-          <div className="text-center">
-            <p className="text-sm text-background/80 mb-2">Folge uns</p>
-            <div className="flex justify-center gap-4">
-              <a 
-                href="#" 
-                className="hover:text-primary transition-colors hover:scale-110 transform"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-6 w-6" />
-              </a>
-              <a 
-                href="#" 
-                className="hover:text-primary transition-colors hover:scale-110 transform"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-6 w-6" />
-              </a>
-              <a 
-                href="mailto:info@morningrun.ch" 
-                className="hover:text-primary transition-colors hover:scale-110 transform"
-                aria-label="Email"
-              >
-                <Mail className="h-6 w-6" />
-              </a>
-            </div>
-          </div>
           
           <div className="text-center md:text-right">
             <p className="text-sm text-background/60">
