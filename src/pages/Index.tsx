@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity } from 'lucide-react';
+import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Mountain, Trophy, Flame } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const MONTHS_FULL_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -42,6 +42,16 @@ interface ActivityGroup {
   activityDistance: number | null;
   activityElapsedTime: number | null;
 }
+
+// Get time-based greeting
+const getGreeting = (): string => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 11) return "Guten Morgen, Bergläufer! ☀️";
+  if (hour >= 11 && hour < 14) return "Mittags-Power! 🌤️";
+  if (hour >= 14 && hour < 18) return "Nachmittags-Energy! 🏃";
+  if (hour >= 18 && hour < 22) return "Abend-Session! 🌅";
+  return "Nachtläufer unterwegs! 🌙";
+};
 
 export default function Index() {
   const navigate = useNavigate();
@@ -168,14 +178,14 @@ export default function Index() {
       
       await refetchCheckIns();
       toast({
-        title: 'Scan abgeschlossen',
-        description: `${MONTHS_FULL_DE[month - 1]} ${year} wurde gescannt.`,
+        title: 'Boom! 💥 Gecheckt!',
+        description: `${MONTHS_FULL_DE[month - 1]} ${year} erfolgreich synchronisiert.`,
       });
     } catch (error) {
       console.error('Scan error:', error);
       toast({
-        title: 'Fehler beim Scannen',
-        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        title: 'Oops! 😅',
+        description: error instanceof Error ? error.message : 'Da lief etwas schief...',
         variant: 'destructive',
       });
     } finally {
@@ -268,41 +278,41 @@ export default function Index() {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
-            <CheckCircle2 className="w-10 h-10 text-primary" />
+            <Mountain className="w-10 h-10 text-primary" />
             <h1 className="text-4xl font-bold text-foreground">
-              Uetliberg Check-in
+              Gipfelsturm
             </h1>
           </div>
           <p className="text-muted-foreground mb-8">
-            Automatische Check-ins für deine Uetliberg-Segmente
+            Dein Üetli. Deine Runs. 🏔️
           </p>
 
           {!user ? (
-            <Card className="p-8 text-center">
-              <CheckCircle2 className="w-16 h-16 text-primary mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-4">Willkommen!</h2>
+            <Card className="p-8 text-center animate-fade-in">
+              <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
+              <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
               <p className="text-muted-foreground mb-6">
-                Verbinde dich mit Strava, um automatische Check-ins für deine Uetliberg-Läufe zu erhalten.
+                Der Üetli wartet auf dich! Verbinde dich mit Strava und sammle deine Gipfelsiege.
               </p>
-              <Button onClick={() => navigate('/auth')} size="lg">
+              <Button onClick={() => navigate('/auth')} size="lg" className="animate-pulse-subtle">
                 <MapPin className="w-4 h-4 mr-2" />
-                Mit Strava verbinden
+                Los geht's mit Strava! 🏃
               </Button>
             </Card>
           ) : (
             <>
               {/* Hero Check-In Button */}
-              <Card className="p-8 mb-6 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                <CheckCircle2 className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Uetliberg-Run einchecken</h2>
+              <Card className="p-8 mb-6 text-center bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/5 border-primary/20 animate-fade-in">
+                <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
+                <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
                 <p className="text-muted-foreground mb-6">
-                  Synchronisiere deinen letzten Lauf mit Uetliberg-Segmenten
+                  Bereit für deinen nächsten Gipfelsieg?
                 </p>
                 <Button 
                   onClick={() => scanMonth(currentYear, currentMonth)} 
                   disabled={isScanning}
                   size="lg"
-                  className="text-lg px-8 py-6"
+                  className="text-lg px-8 py-6 animate-pulse-subtle hover:scale-105 transition-transform"
                 >
                   {isScanning ? (
                     <>
@@ -311,8 +321,8 @@ export default function Index() {
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-5 h-5 mr-2" />
-                      Jetzt einchecken
+                      <Flame className="w-5 h-5 mr-2" />
+                      Run einchecken 💪
                     </>
                   )}
                 </Button>
@@ -321,21 +331,26 @@ export default function Index() {
               {/* Stats - count activities as check-ins */}
               {Object.keys(activitiesMap).length > 0 && (
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  <Card className="p-4 text-center">
+                  <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
+                    <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
                     <p className="text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
-                    <p className="text-sm text-muted-foreground">Check-ins gesamt</p>
+                    <p className="text-sm text-muted-foreground">Gipfelsiege 🏆</p>
                   </Card>
-                  <Card className="p-4 text-center">
+                  <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
+                    <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
                     <p className="text-3xl font-bold text-primary">
                       {new Set(validCheckIns.map(c => c.segment_id)).size}
                     </p>
-                    <p className="text-sm text-muted-foreground">Verschiedene Segmente</p>
+                    <p className="text-sm text-muted-foreground">Eroberte Strecken ⛰️</p>
                   </Card>
                 </div>
               )}
 
               {/* Check-in History */}
-              <h2 className="text-xl font-bold mb-4">Check-in Historie</h2>
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-primary" />
+                Deine Runs
+              </h2>
               
               {checkInsLoading ? (
                 <div className="space-y-4">
@@ -349,7 +364,7 @@ export default function Index() {
               ) : validCheckIns.length > 0 ? (
                 <div className="space-y-6">
                   {sortedDateEntries.map(([date, activities]) => (
-                    <div key={date}>
+                    <div key={date} className="animate-fade-in">
                       <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
                         <Clock className="w-4 h-4" />
                         {date}
@@ -357,7 +372,7 @@ export default function Index() {
                       <div className="space-y-3">
                         {activities.map((activity) => (
                           <Collapsible key={activity.activity_id}>
-                            <Card className="overflow-hidden">
+                            <Card className="overflow-hidden hover:shadow-md transition-shadow">
                               <CollapsibleTrigger className="w-full">
                                 <div className="p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors">
                                   <Activity className="w-5 h-5 text-primary flex-shrink-0" />
@@ -402,13 +417,14 @@ export default function Index() {
                   ))}
                 </div>
               ) : (
-                <Card className="p-8 text-center">
-                  <CheckCircle2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <Card className="p-8 text-center animate-fade-in">
+                  <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-bold mb-2">Der Üetli wartet auf dich! 🏔️</h3>
                   <p className="text-muted-foreground mb-4">
-                    Noch keine Check-ins vorhanden
+                    Mach deinen ersten Run und check ihn ein.
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Klicke auf "Jetzt scannen" um deine Strava-Aktivitäten zu durchsuchen
+                    Klick auf "Run einchecken" um loszulegen!
                   </p>
                 </Card>
               )}
