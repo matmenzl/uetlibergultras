@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Award } from 'lucide-react';
+import { Award, Mountain } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
 export default function NavBar() {
@@ -38,6 +38,10 @@ export default function NavBar() {
         </div>
 
         <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => navigate('/segments')}>
+            <Mountain className="h-4 w-4 mr-2" />
+            Segmente
+          </Button>
           {user ? (
             <Button variant="outline" onClick={handleSignOut}>
               Abmelden
