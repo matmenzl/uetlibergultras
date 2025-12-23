@@ -27,7 +27,7 @@ export default function NavBar() {
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => navigate('/segments')} className="hover:scale-105 transition-transform">
             <Mountain className="h-4 w-4 mr-2" />
-            Strecken
+            Segmente
           </Button>
           {isAdmin && (
             <Button variant="ghost" onClick={() => navigate('/admin')}>
