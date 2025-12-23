@@ -62,30 +62,36 @@ export type Database = {
           display_name: string | null
           first_name: string | null
           id: string
+          is_founding_member: boolean | null
           last_name: string | null
           profile_picture: string | null
           strava_id: number | null
           updated_at: string | null
+          user_number: number | null
         }
         Insert: {
           created_at?: string | null
           display_name?: string | null
           first_name?: string | null
           id: string
+          is_founding_member?: boolean | null
           last_name?: string | null
           profile_picture?: string | null
           strava_id?: number | null
           updated_at?: string | null
+          user_number?: number | null
         }
         Update: {
           created_at?: string | null
           display_name?: string | null
           first_name?: string | null
           id?: string
+          is_founding_member?: boolean | null
           last_name?: string | null
           profile_picture?: string | null
           strava_id?: number | null
           updated_at?: string | null
+          user_number?: number | null
         }
         Relationships: []
       }
@@ -305,6 +311,10 @@ export type Database = {
         | "streak_8"
         | "early_bird"
         | "night_owl"
+        | "pioneer_10"
+        | "pioneer_25"
+        | "pioneer_50"
+        | "founding_member"
       app_role: "admin" | "user"
       suggestion_status: "pending" | "approved" | "rejected"
     }
@@ -447,6 +457,10 @@ export const Constants = {
         "streak_8",
         "early_bird",
         "night_owl",
+        "pioneer_10",
+        "pioneer_25",
+        "pioneer_50",
+        "founding_member",
       ],
       app_role: ["admin", "user"],
       suggestion_status: ["pending", "approved", "rejected"],
