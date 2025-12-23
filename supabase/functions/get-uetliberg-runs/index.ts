@@ -377,8 +377,7 @@ serve(async (req) => {
       }
     }
 
-    // Sort by Uetliberg score (highest first)
-    uetlibergRuns.sort((a, b) => b.uetliberg_score - a.uetliberg_score);
+    // Keep chronological order (newest first) - Strava API already returns this order
 
     console.log(`Filtered to ${uetlibergRuns.length} Uetliberg runs`);
 
