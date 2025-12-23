@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.get-uetliberg-runs]
 verify_jwt = true
+
+[functions.get-todays-runners]
+verify_jwt = true

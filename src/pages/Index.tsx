@@ -15,6 +15,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Leaderboard } from '@/components/Leaderboard';
 import { Achievements } from '@/components/Achievements';
 import { StreakCounter } from '@/components/StreakCounter';
+import { TodaysRunners } from '@/components/TodaysRunners';
 
 const MONTHS_FULL_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
@@ -384,6 +385,11 @@ export default function Index() {
                   <p className="text-sm text-muted-foreground">Uetli Segmente</p>
                 </Card>
                 <StreakCounter userId={user?.id} />
+              </div>
+
+              {/* Today's Runners */}
+              <div className="mb-6">
+                <TodaysRunners />
               </div>
 
               {/* Achievements */}
