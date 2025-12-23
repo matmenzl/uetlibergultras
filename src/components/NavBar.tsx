@@ -21,7 +21,7 @@ export default function NavBar() {
           onClick={() => navigate('/')}
         >
           <Mountain className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
-          <span className="text-xl font-bold">Gipfelsturm</span>
+          <span className="text-xl font-bold">Uetliberg Ultras</span>
         </div>
 
         <div className="flex items-center gap-4">
