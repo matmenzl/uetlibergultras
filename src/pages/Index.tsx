@@ -152,7 +152,7 @@ export default function Index() {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: { page: 1, limit: 10 },
+        body: { per_page: 50, max_pages: 10 },
       });
       
       if (error) throw error;
