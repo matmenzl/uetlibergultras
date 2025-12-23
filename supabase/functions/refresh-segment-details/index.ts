@@ -108,11 +108,11 @@ serve(async (req) => {
       });
     }
 
-    // Get all segments that need updating (placeholder names starting with "Segment ")
+    // Get all segments that need updating (placeholder names, zero distance, or missing elevation data)
     const { data: segmentsToUpdate, error: fetchError } = await supabaseAdmin
       .from('uetliberg_segments')
       .select('segment_id, name')
-      .or('name.like.Segment %,distance.eq.0');
+      .or('name.like.Segment %,distance.eq.0,elevation_high.is.null');
 
     if (fetchError) {
       console.error('Error fetching segments:', fetchError);
