@@ -1,0 +1,195 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+type AchievementType = 
+  | 'first_run'
+  | 'runs_5'
+  | 'runs_10'
+  | 'runs_25'
+  | 'runs_50'
+  | 'runs_100'
+  | 'all_segments'
+  | 'streak_2'
+  | 'streak_4'
+  | 'streak_8'
+  | 'early_bird'
+  | 'night_owl';
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Missing authorization header');
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    // Client for user authentication
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+    
+    // Service client for inserting achievements
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
+    if (userError || !user) {
+      throw new Error('Authentication failed');
+    }
+
+    const userId = user.id;
+    const newAchievements: AchievementType[] = [];
+
+    // Get existing achievements
+    const { data: existingAchievements } = await supabaseAdmin
+      .from('user_achievements')
+      .select('achievement')
+      .eq('user_id', userId);
+    
+    const existingSet = new Set(existingAchievements?.map(a => a.achievement) || []);
+
+    // Get check-in stats
+    const { data: checkIns } = await supabaseAdmin
+      .from('check_ins')
+      .select('activity_id, segment_id, checked_in_at')
+      .eq('user_id', userId);
+
+    if (!checkIns || checkIns.length === 0) {
+      return new Response(JSON.stringify({ newAchievements: [] }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Count unique activities (runs)
+    const uniqueActivities = new Set(checkIns.map(c => c.activity_id));
+    const runCount = uniqueActivities.size;
+    
+    // Count unique segments
+    const uniqueSegments = new Set(checkIns.map(c => c.segment_id));
+
+    // Check run milestones
+    if (runCount >= 1 && !existingSet.has('first_run')) {
+      newAchievements.push('first_run');
+    }
+    if (runCount >= 5 && !existingSet.has('runs_5')) {
+      newAchievements.push('runs_5');
+    }
+    if (runCount >= 10 && !existingSet.has('runs_10')) {
+      newAchievements.push('runs_10');
+    }
+    if (runCount >= 25 && !existingSet.has('runs_25')) {
+      newAchievements.push('runs_25');
+    }
+    if (runCount >= 50 && !existingSet.has('runs_50')) {
+      newAchievements.push('runs_50');
+    }
+    if (runCount >= 100 && !existingSet.has('runs_100')) {
+      newAchievements.push('runs_100');
+    }
+
+    // Check early bird / night owl
+    checkIns.forEach(checkIn => {
+      const hour = new Date(checkIn.checked_in_at).getHours();
+      if (hour < 7 && !existingSet.has('early_bird') && !newAchievements.includes('early_bird')) {
+        newAchievements.push('early_bird');
+      }
+      if (hour >= 20 && !existingSet.has('night_owl') && !newAchievements.includes('night_owl')) {
+        newAchievements.push('night_owl');
+      }
+    });
+
+    // Check streak (simplified - count consecutive weeks)
+    const getWeekNumber = (date: Date): string => {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+      return `${d.getUTCFullYear()}-W${weekNo}`;
+    };
+
+    const weeksWithActivity = new Set<string>();
+    checkIns.forEach(checkIn => {
+      weeksWithActivity.add(getWeekNumber(new Date(checkIn.checked_in_at)));
+    });
+
+    // Calculate current streak
+    const now = new Date();
+    let streak = 0;
+    let weekDate = new Date(now);
+    
+    while (true) {
+      const week = getWeekNumber(weekDate);
+      if (weeksWithActivity.has(week)) {
+        streak++;
+        weekDate.setDate(weekDate.getDate() - 7);
+      } else {
+        break;
+      }
+    }
+
+    if (streak >= 2 && !existingSet.has('streak_2')) {
+      newAchievements.push('streak_2');
+    }
+    if (streak >= 4 && !existingSet.has('streak_4')) {
+      newAchievements.push('streak_4');
+    }
+    if (streak >= 8 && !existingSet.has('streak_8')) {
+      newAchievements.push('streak_8');
+    }
+
+    // Check all segments (need to know total segment count)
+    const { count: totalSegments } = await supabaseAdmin
+      .from('uetliberg_segments')
+      .select('*', { count: 'exact', head: true });
+
+    if (totalSegments && uniqueSegments.size >= totalSegments && !existingSet.has('all_segments')) {
+      newAchievements.push('all_segments');
+    }
+
+    // Insert new achievements
+    if (newAchievements.length > 0) {
+      const achievementsToInsert = newAchievements.map(achievement => ({
+        user_id: userId,
+        achievement,
+      }));
+
+      const { error: insertError } = await supabaseAdmin
+        .from('user_achievements')
+        .insert(achievementsToInsert);
+
+      if (insertError) {
+        console.error('Error inserting achievements:', insertError);
+      }
+    }
+
+    return new Response(JSON.stringify({ 
+      newAchievements,
+      stats: {
+        runCount,
+        uniqueSegments: uniqueSegments.size,
+        streak,
+      }
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Error checking achievements:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+});
