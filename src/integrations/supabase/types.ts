@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       check_ins: {
         Row: {
+          activity_distance: number | null
+          activity_elapsed_time: number | null
           activity_id: number
           activity_name: string | null
           checked_in_at: string
@@ -27,6 +29,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          activity_distance?: number | null
+          activity_elapsed_time?: number | null
           activity_id: number
           activity_name?: string | null
           checked_in_at?: string
@@ -38,6 +42,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          activity_distance?: number | null
+          activity_elapsed_time?: number | null
           activity_id?: number
           activity_name?: string | null
           checked_in_at?: string

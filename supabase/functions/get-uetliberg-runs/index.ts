@@ -376,6 +376,8 @@ serve(async (req) => {
                   elapsed_time: effort.elapsed_time,
                   distance: effort.distance,
                   checked_in_at: run.start_date,
+                  activity_distance: run.distance,
+                  activity_elapsed_time: run.elapsed_time,
                 }, {
                   onConflict: 'user_id,segment_id,activity_id',
                   ignoreDuplicates: true,
