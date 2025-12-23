@@ -4,6 +4,7 @@ import { User } from '@supabase/supabase-js';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery } from '@tanstack/react-query';
@@ -88,6 +89,19 @@ export default function Segments() {
         return 'bg-muted text-muted-foreground';
     }
   };
+
+  const getPriorityTooltip = (priority: string | null) => {
+    switch (priority) {
+      case 'high':
+        return 'Endet innerhalb 2 km vom Uetliberg-Gipfel';
+      case 'medium':
+        return 'Endet weiter als 2 km vom Uetliberg-Gipfel';
+      case 'low':
+        return 'Ohne direkten Uetliberg-Bezug';
+      default:
+        return 'Priorität nicht klassifiziert';
+    }
+  };
   return <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
       
@@ -131,6 +145,7 @@ export default function Segments() {
             </Card>}
 
           {/* Segment List */}
+          <TooltipProvider>
           {isLoading ? <div className="space-y-4">
               {[1, 2, 3, 4, 5].map(i => <Card key={i} className="p-4">
                   <Skeleton className="h-6 w-3/4 mb-2" />
@@ -169,9 +184,16 @@ export default function Segments() {
                     </div>
 
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                      <Badge className={getPriorityColor(segment.priority)}>
-                        {segment.priority === 'high' ? 'Hoch' : segment.priority === 'medium' ? 'Mittel' : 'Niedrig'}
-                      </Badge>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge className={`${getPriorityColor(segment.priority)} cursor-help`}>
+                            {segment.priority === 'high' ? 'Hoch' : segment.priority === 'medium' ? 'Mittel' : 'Niedrig'}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{getPriorityTooltip(segment.priority)}</p>
+                        </TooltipContent>
+                      </Tooltip>
                       <Badge variant="outline">
                         {getClimbCategoryLabel(segment.climb_category)}
                       </Badge>
@@ -188,6 +210,7 @@ export default function Segments() {
                 Noch keine Segmente vorhanden
               </p>
             </Card>}
+          </TooltipProvider>
         </div>
       </main>
 
