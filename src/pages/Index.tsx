@@ -299,12 +299,9 @@ export default function Index() {
           <div className="flex items-center gap-3 mb-2">
             <Mountain className="w-10 h-10 text-primary" />
             <h1 className="text-4xl font-bold text-foreground">
-              Din Uetli, dini Uetli Runs
+              Din Uetli, dini Uetli Runs 🏔️
             </h1>
           </div>
-          <p className="text-muted-foreground mb-8">
-            Dein Üetli. Deine Runs. 🏔️
-          </p>
 
           {!user ? (
             <>
