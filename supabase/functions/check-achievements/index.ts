@@ -18,7 +18,11 @@ type AchievementType =
   | 'streak_4'
   | 'streak_8'
   | 'early_bird'
-  | 'night_owl';
+  | 'night_owl'
+  | 'pioneer_10'
+  | 'pioneer_25'
+  | 'pioneer_50'
+  | 'founding_member';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -155,6 +159,30 @@ serve(async (req) => {
 
     if (totalSegments && uniqueSegments.size >= totalSegments && !existingSet.has('all_segments')) {
       newAchievements.push('all_segments');
+    }
+
+    // Check Pioneer achievements based on user number
+    const { data: userProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('user_number, is_founding_member')
+      .eq('id', userId)
+      .single();
+
+    if (userProfile) {
+      const userNumber = userProfile.user_number;
+      
+      if (userNumber && userNumber <= 10 && !existingSet.has('pioneer_10')) {
+        newAchievements.push('pioneer_10');
+      }
+      if (userNumber && userNumber <= 25 && !existingSet.has('pioneer_25')) {
+        newAchievements.push('pioneer_25');
+      }
+      if (userNumber && userNumber <= 50 && !existingSet.has('pioneer_50')) {
+        newAchievements.push('pioneer_50');
+      }
+      if (userProfile.is_founding_member && !existingSet.has('founding_member')) {
+        newAchievements.push('founding_member');
+      }
     }
 
     // Insert new achievements

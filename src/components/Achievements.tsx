@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Award, Mountain, Flame, Sun, Moon, Star, Target, Zap, Trophy, Clock } from 'lucide-react';
+import { Award, Mountain, Flame, Sun, Moon, Star, Target, Zap, Trophy, Clock, Sparkles, Crown } from 'lucide-react';
 
 type AchievementType = 
   | 'first_run'
@@ -16,7 +16,11 @@ type AchievementType =
   | 'streak_4'
   | 'streak_8'
   | 'early_bird'
-  | 'night_owl';
+  | 'night_owl'
+  | 'pioneer_10'
+  | 'pioneer_25'
+  | 'pioneer_50'
+  | 'founding_member';
 
 interface Achievement {
   id: string;
@@ -30,6 +34,7 @@ interface AchievementConfig {
   title: string;
   description: string;
   color: string;
+  isExclusive?: boolean;
 }
 
 const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
@@ -105,9 +110,39 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     description: 'Run nach 20 Uhr',
     color: 'text-slate-400',
   },
+  // Exclusive Pioneer Achievements
+  pioneer_10: {
+    icon: <Crown className="w-5 h-5" />,
+    title: 'Top 10 Pioneer',
+    description: 'Einer der ersten 10 User',
+    color: 'text-amber-400',
+    isExclusive: true,
+  },
+  pioneer_25: {
+    icon: <Sparkles className="w-5 h-5" />,
+    title: 'Top 25 Pioneer',
+    description: 'Einer der ersten 25 User',
+    color: 'text-amber-500',
+    isExclusive: true,
+  },
+  pioneer_50: {
+    icon: <Sparkles className="w-5 h-5" />,
+    title: 'Top 50 Pioneer',
+    description: 'Einer der ersten 50 User',
+    color: 'text-amber-600',
+    isExclusive: true,
+  },
+  founding_member: {
+    icon: <Sparkles className="w-5 h-5" />,
+    title: 'Founding Member',
+    description: 'Früher Unterstützer',
+    color: 'text-yellow-500',
+    isExclusive: true,
+  },
 };
 
-const ALL_ACHIEVEMENTS: AchievementType[] = [
+// Regular achievements (always visible)
+const REGULAR_ACHIEVEMENTS: AchievementType[] = [
   'first_run',
   'runs_5',
   'runs_10',
@@ -120,6 +155,19 @@ const ALL_ACHIEVEMENTS: AchievementType[] = [
   'streak_8',
   'early_bird',
   'night_owl',
+];
+
+// Exclusive achievements (only show if earned)
+const EXCLUSIVE_ACHIEVEMENTS: AchievementType[] = [
+  'pioneer_10',
+  'pioneer_25',
+  'pioneer_50',
+  'founding_member',
+];
+
+const ALL_ACHIEVEMENTS: AchievementType[] = [
+  ...REGULAR_ACHIEVEMENTS,
+  ...EXCLUSIVE_ACHIEVEMENTS,
 ];
 
 interface AchievementsProps {
@@ -143,6 +191,11 @@ export function Achievements({ userId }: AchievementsProps) {
   });
 
   const earnedSet = new Set(earnedAchievements?.map(a => a.achievement) || []);
+  
+  // Filter exclusive achievements to only show earned ones
+  const earnedExclusiveAchievements = EXCLUSIVE_ACHIEVEMENTS.filter(a => earnedSet.has(a));
+  const totalAchievements = REGULAR_ACHIEVEMENTS.length + earnedExclusiveAchievements.length;
+  const earnedCount = [...REGULAR_ACHIEVEMENTS, ...earnedExclusiveAchievements].filter(a => earnedSet.has(a)).length;
 
   return (
     <Card className="p-6">
@@ -150,11 +203,40 @@ export function Achievements({ userId }: AchievementsProps) {
         <Award className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-lg">Achievements</h3>
         <Badge variant="secondary" className="ml-auto">
-          {earnedSet.size}/{ALL_ACHIEVEMENTS.length}
+          {earnedCount}/{totalAchievements}
         </Badge>
       </div>
+      
+      {/* Exclusive Achievements (only if earned) */}
+      {earnedExclusiveAchievements.length > 0 && (
+        <div className="mb-4">
+          <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-amber-500" />
+            Exklusive Achievements
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {earnedExclusiveAchievements.map((achievementType) => {
+              const config = ACHIEVEMENT_CONFIG[achievementType];
+              return (
+                <div
+                  key={achievementType}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-amber-500/20 via-yellow-400/20 to-amber-500/20 border border-amber-500/30"
+                  title={`${config.title}: ${config.description}`}
+                >
+                  <div className={config.color}>
+                    {config.icon}
+                  </div>
+                  <p className="text-sm font-medium">{config.title}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      
+      {/* Regular Achievements Grid */}
       <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-        {ALL_ACHIEVEMENTS.map((achievementType) => {
+        {REGULAR_ACHIEVEMENTS.map((achievementType) => {
           const config = ACHIEVEMENT_CONFIG[achievementType];
           const isEarned = earnedSet.has(achievementType);
           

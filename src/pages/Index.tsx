@@ -9,13 +9,14 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Mountain, Trophy, Flame } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Leaderboard } from '@/components/Leaderboard';
 import { Achievements } from '@/components/Achievements';
 import { StreakCounter } from '@/components/StreakCounter';
 import { TodaysRunners } from '@/components/TodaysRunners';
+import { triggerFirstCheckInConfetti, triggerConfetti } from '@/lib/confetti';
 
 const MONTHS_FULL_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
@@ -190,11 +191,24 @@ export default function Index() {
       });
       
       if (achievementResult.data?.newAchievements?.length > 0) {
-        const achievementNames = achievementResult.data.newAchievements;
-        toast({
-          title: '🏆 Neues Achievement!',
-          description: `Du hast ${achievementNames.length} neue${achievementNames.length > 1 ? ' Achievements' : 's Achievement'} freigeschaltet!`,
-        });
+        const achievementNames = achievementResult.data.newAchievements as string[];
+        
+        // Check if this is the first check-in (first_run achievement just earned)
+        if (achievementNames.includes('first_run')) {
+          // Trigger epic confetti for first check-in!
+          triggerFirstCheckInConfetti();
+          toast({
+            title: '🎉 Willkommen bei den Uetliberg Ultras!',
+            description: 'Dein erster Check-in! Du bist jetzt offiziell Teil der Community!',
+          });
+        } else {
+          // Regular confetti for other achievements
+          triggerConfetti();
+          toast({
+            title: '🏆 Neues Achievement!',
+            description: `Du hast ${achievementNames.length} neue${achievementNames.length > 1 ? ' Achievements' : 's Achievement'} freigeschaltet!`,
+          });
+        }
       } else {
         toast({
           title: 'Boom! 💥 Gecheckt!',
