@@ -46,8 +46,8 @@ const faqs = [
         a: 'Segmente sind definierte Streckenabschnitte auf Strava. Wir haben spezielle Uetliberg-Segmente ausgewählt, die alle auf oder um den Uetliberg führen. Du findest sie auf der Segmente-Seite.'
       },
       {
-        q: 'Wie wird ein Check-in registriert?',
-        a: 'Wenn du eine Aktivität auf Strava aufzeichnest und dabei ein Uetliberg-Segment läufst, wird dies automatisch erkannt und als Check-in gezählt. Es kann einige Minuten dauern, bis der Check-in erscheint.'
+        q: 'Wie funktioniert ein Check-in?',
+        a: 'Nachdem du eine Aktivität auf Strava aufgezeichnet hast, gehst du auf die Startseite und klickst auf "Check-in". Die App zeigt dir dann deine letzten Aktivitäten an, bei denen du ein Uetliberg-Segment gelaufen bist. Wähle die passende Aktivität aus, um einzuchecken.'
       },
       {
         q: 'Warum wird mein Lauf nicht angezeigt?',
