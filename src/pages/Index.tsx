@@ -312,11 +312,11 @@ export default function Index() {
                 </div>
               </Card>
 
-              {/* Stats - only count valid check-ins */}
-              {validCheckIns.length > 0 && (
+              {/* Stats - count activities as check-ins */}
+              {Object.keys(activitiesMap).length > 0 && (
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <Card className="p-4 text-center">
-                    <p className="text-3xl font-bold text-primary">{validCheckIns.length}</p>
+                    <p className="text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
                     <p className="text-sm text-muted-foreground">Check-ins gesamt</p>
                   </Card>
                   <Card className="p-4 text-center">
