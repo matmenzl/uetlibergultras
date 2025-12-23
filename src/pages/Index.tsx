@@ -312,8 +312,7 @@ export default function Index() {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+          <div className="mb-2">
             <h1 className="text-2xl sm:text-4xl font-bold text-foreground">
               Din Uetli, dini Uetli Runs 🏔️
             </h1>
