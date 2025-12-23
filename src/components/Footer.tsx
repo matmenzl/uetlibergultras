@@ -11,7 +11,7 @@ export const Footer = () => {
               <h3 className="text-2xl font-bold">Uetliberg Ultras</h3>
             </div>
             <p className="text-background/80 text-sm">
-              Dein Üetli. Deine Runs. 🏔️
+              Dein Uetli. Deine Runs. 🏔️
             </p>
           </div>
           
