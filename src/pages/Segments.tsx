@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
+import { SegmentSuggestionForm } from '@/components/SegmentSuggestionForm';
 import { useQuery } from '@tanstack/react-query';
 import { Mountain, TrendingUp, Ruler, Users, MapPin } from 'lucide-react';
 interface Segment {
@@ -136,6 +137,13 @@ export default function Segments() {
               <p className="text-sm text-muted-foreground">Enden am Uetliberg</p>
             </Card>
           </div>
+
+          {/* Segment Suggestion Form - only for logged in users */}
+          {user && (
+            <div className="mb-6">
+              <SegmentSuggestionForm />
+            </div>
+          )}
 
           {/* Placeholder segments info */}
           {placeholderSegments.length > 0 && <Card className="p-4 mb-6 border-muted bg-muted/30">
