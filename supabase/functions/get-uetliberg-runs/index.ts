@@ -82,6 +82,10 @@ serve(async (req) => {
   }
 
   try {
+    // Parse pagination parameters from request body
+    const body = await req.json().catch(() => ({}));
+    const page = body.page || 1;
+    const limit = body.limit || 5;
     // Get and validate Authorization header
     const authHeader = req.headers.get('Authorization');
     console.log('Authorization header present:', !!authHeader);
@@ -211,11 +215,11 @@ serve(async (req) => {
       );
     }
 
-    // Fetch all activities from 2025
-    console.log('Fetching activities from Strava for 2025...');
+    // Fetch activities from 2025 with pagination
+    console.log(`Fetching activities from Strava for 2025 (page ${page}, limit ${limit})...`);
     const after2025 = 1735689600; // January 1, 2025, 00:00:00 UTC
     const activitiesResponse = await fetch(
-      `https://www.strava.com/api/v3/athlete/activities?per_page=200&after=${after2025}`,
+      `https://www.strava.com/api/v3/athlete/activities?per_page=${limit}&page=${page}&after=${after2025}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -381,8 +385,10 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         activities: uetlibergRuns,
-        total_activities: allActivities.length,
-        total_runs: runs.length,
+        page,
+        limit,
+        has_more: runs.length === limit,
+        total_runs_on_page: runs.length,
         uetliberg_runs: uetlibergRuns.length,
         high_priority_segments: highPrioritySegments.length,
         medium_priority_segments: mediumPrioritySegments.length,
