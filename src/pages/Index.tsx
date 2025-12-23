@@ -11,6 +11,7 @@ import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Mountain, Trophy, Flame } from 'lucide-react';
+import uetlibergLogo from '@/assets/uetliberg-logo.png';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Leaderboard } from '@/components/Leaderboard';
 import { Achievements } from '@/components/Achievements';
@@ -322,7 +323,7 @@ export default function Index() {
             <>
               {/* Hero Section for non-logged-in users */}
               <Card className="p-8 mb-6 text-center bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/5 border-primary/20 animate-fade-in">
-                <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
+                <img src={uetlibergLogo} alt="Uetliberg Ultras" className="w-16 h-16 mx-auto mb-4" />
                 <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
                 <p className="text-muted-foreground mb-6">
                   Der Uetliberg wartet auf dich! Verbinde dich mit Strava und sammle deine Uetliberg Runs.
