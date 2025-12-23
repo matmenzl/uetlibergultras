@@ -292,7 +292,7 @@ export default function Index() {
               <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
               <p className="text-muted-foreground mb-6">
-                Der Üetli wartet auf dich! Verbinde dich mit Strava und sammle deine Gipfelsiege.
+                Der Üetli wartet auf dich! Verbinde dich mit Strava und sammle deine Uetli Runs.
               </p>
               <Button onClick={() => navigate('/auth')} size="lg" className="animate-pulse-subtle">
                 <MapPin className="w-4 h-4 mr-2" />
@@ -306,7 +306,7 @@ export default function Index() {
                 <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
                 <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
                 <p className="text-muted-foreground mb-6">
-                  Bereit für deinen nächsten Gipfelsieg?
+                  Bereit für deinen nächsten Uetli Run?
                 </p>
                 <Button 
                   onClick={() => scanMonth(currentYear, currentMonth)} 
