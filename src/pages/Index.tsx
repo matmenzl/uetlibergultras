@@ -76,6 +76,16 @@ export default function Index() {
     },
   });
 
+  // Helper to check if a segment has a valid (non-placeholder) name
+  const isValidSegment = (segmentId: number) => {
+    const segment = segments?.find(s => s.segment_id === segmentId);
+    if (!segment) return false;
+    // Placeholder names are like "Segment 12345"
+    const isPlaceholder = segment.name.startsWith('Segment ') && 
+                          /^\d+$/.test(segment.name.replace('Segment ', ''));
+    return !isPlaceholder;
+  };
+
   // Check if any segments need refreshing (have placeholder names)
   const hasPlaceholderSegments = segments?.some(s => s.name.startsWith('Segment ') && /^\d+$/.test(s.name.replace('Segment ', '')));
 
@@ -100,21 +110,21 @@ export default function Index() {
       if (error) throw error;
       
       await refetchSegments();
-      toast({
-        title: 'Segmente aktualisiert',
-        description: `${data.updated_count} Segment(e) wurden aktualisiert.`,
-      });
+      // Silent refresh - no toast needed
     } catch (error) {
       console.error('Refresh error:', error);
-      toast({
-        title: 'Fehler beim Aktualisieren',
-        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
-        variant: 'destructive',
-      });
+      // Silent fail - no toast for background refresh
     } finally {
       setIsRefreshingSegments(false);
     }
   };
+
+  // Automatically refresh segment details in background when placeholders exist
+  useEffect(() => {
+    if (hasPlaceholderSegments && user && !isRefreshingSegments) {
+      refreshSegmentDetails();
+    }
+  }, [hasPlaceholderSegments, user]);
 
   // Scan for new activities
   const scanForActivities = async () => {
@@ -181,8 +191,11 @@ export default function Index() {
     return (meters / 1000).toFixed(2) + ' km';
   };
 
+  // Filter check-ins to only show those with valid segment names
+  const validCheckIns = checkIns?.filter(c => isValidSegment(c.segment_id)) || [];
+
   // Group check-ins by date
-  const groupedCheckIns = checkIns?.reduce((groups, checkIn) => {
+  const groupedCheckIns = validCheckIns.reduce((groups, checkIn) => {
     const date = new Date(checkIn.checked_in_at).toLocaleDateString('de-DE', {
       year: 'numeric',
       month: 'long',
@@ -193,7 +206,7 @@ export default function Index() {
     }
     groups[date].push(checkIn);
     return groups;
-  }, {} as Record<string, CheckIn[]>) || {};
+  }, {} as Record<string, CheckIn[]>);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -225,37 +238,6 @@ export default function Index() {
             </Card>
           ) : (
             <>
-              {/* Refresh Segments Banner - only show if there are placeholder segments */}
-              {hasPlaceholderSegments && (
-                <Card className="p-4 mb-4 border-amber-500/50 bg-amber-500/10">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                        Einige Segmente haben noch keine Namen
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Klicke auf "Namen abrufen" um die Details von Strava zu laden
-                      </p>
-                    </div>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      onClick={refreshSegmentDetails} 
-                      disabled={isRefreshingSegments}
-                    >
-                      {isRefreshingSegments ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                          Lade...
-                        </>
-                      ) : (
-                        'Namen abrufen'
-                      )}
-                    </Button>
-                  </div>
-                </Card>
-              )}
-
               {/* Scan Button */}
               <Card className="p-6 mb-6">
                 <div className="flex items-center justify-between">
@@ -285,16 +267,16 @@ export default function Index() {
                 </div>
               </Card>
 
-              {/* Stats */}
-              {checkIns && checkIns.length > 0 && (
+              {/* Stats - only count valid check-ins */}
+              {validCheckIns.length > 0 && (
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <Card className="p-4 text-center">
-                    <p className="text-3xl font-bold text-primary">{checkIns.length}</p>
+                    <p className="text-3xl font-bold text-primary">{validCheckIns.length}</p>
                     <p className="text-sm text-muted-foreground">Check-ins gesamt</p>
                   </Card>
                   <Card className="p-4 text-center">
                     <p className="text-3xl font-bold text-primary">
-                      {new Set(checkIns.map(c => c.segment_id)).size}
+                      {new Set(validCheckIns.map(c => c.segment_id)).size}
                     </p>
                     <p className="text-sm text-muted-foreground">Verschiedene Segmente</p>
                   </Card>
@@ -313,7 +295,7 @@ export default function Index() {
                     </Card>
                   ))}
                 </div>
-              ) : checkIns && checkIns.length > 0 ? (
+              ) : validCheckIns.length > 0 ? (
                 <div className="space-y-6">
                   {Object.entries(groupedCheckIns).map(([date, dayCheckIns]) => (
                     <div key={date}>
