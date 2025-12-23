@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Shield, Menu } from 'lucide-react';
-import uetlibergLogo from '@/assets/uetliberg-logo.png';
+import { Mountain, Shield, Menu } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import {
   Sheet,
@@ -71,7 +70,7 @@ export default function NavBar() {
           className="flex items-center gap-2 cursor-pointer group"
           onClick={() => navigate('/')}
         >
-          <img src={uetlibergLogo} alt="Uetliberg Ultras" className="h-8 w-auto group-hover:scale-110 transition-transform" />
+          <Mountain className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
           <span className="text-xl font-bold">Uetliberg Ultras</span>
         </div>
 
