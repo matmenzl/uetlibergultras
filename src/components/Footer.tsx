@@ -1,6 +1,10 @@
-import { Instagram, Facebook, Mail, Mountain } from "lucide-react";
+import { Instagram, Facebook, Mail, Mountain, Settings, Map } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export const Footer = () => {
+  const { isAdmin } = useUserRole();
+
   return (
     <footer className="bg-foreground text-background py-12">
       <div className="container mx-auto px-4">
@@ -49,6 +53,24 @@ export const Footer = () => {
             <p className="text-sm text-background/60">
               Made with 💪 in Zürich
             </p>
+            {isAdmin && (
+              <div className="flex justify-center md:justify-end gap-4 mt-3">
+                <Link 
+                  to="/segments" 
+                  className="text-sm text-background/60 hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <Map className="h-4 w-4" />
+                  Segments
+                </Link>
+                <Link 
+                  to="/admin" 
+                  className="text-sm text-background/60 hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <Settings className="h-4 w-4" />
+                  Admin
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
