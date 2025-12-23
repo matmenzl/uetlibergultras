@@ -28,6 +28,13 @@ export default function NavBar() {
         <Mountain className="h-4 w-4 mr-2" />
         Segmente
       </Button>
+      <Button 
+        variant="ghost" 
+        onClick={() => { navigate('/support'); onNavigate?.(); }} 
+        className="hover:scale-105 transition-transform w-full md:w-auto justify-start md:justify-center"
+      >
+        Support
+      </Button>
       {isAdmin && (
         <Button 
           variant="ghost" 
