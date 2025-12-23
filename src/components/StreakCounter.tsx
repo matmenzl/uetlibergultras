@@ -108,9 +108,9 @@ export function StreakCounter({ userId }: StreakCounterProps) {
   return (
     <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
       <div className={`flex justify-center mb-2 ${streak > 0 ? 'animate-pulse' : ''}`}>
-        <Flame className={`w-8 h-8 ${getFlameColor(streak)}`} />
+        <Flame className={`w-6 h-6 sm:w-8 sm:h-8 ${getFlameColor(streak)}`} />
       </div>
-      <p className="text-3xl font-bold text-primary">{streak}</p>
+      <p className="text-2xl sm:text-3xl font-bold text-primary">{streak}</p>
       <p className="text-sm text-muted-foreground">Wochen Streak</p>
       <p className="text-xs text-muted-foreground mt-1">{getStreakMessage(streak)}</p>
     </Card>

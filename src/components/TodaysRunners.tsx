@@ -136,14 +136,14 @@ export const TodaysRunners = () => {
 
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-primary" />
-          <h2 className="text-xl font-bold">Am Uetliberg unterwegs</h2>
+          <h2 className="text-lg sm:text-xl font-bold">Am Uetliberg unterwegs</h2>
         </div>
         <div className="flex items-center gap-2">
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <Calendar className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
@@ -159,6 +159,7 @@ export const TodaysRunners = () => {
             size="icon"
             onClick={() => refetch()}
             disabled={isFetching}
+            className="flex-shrink-0"
           >
             <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
           </Button>
