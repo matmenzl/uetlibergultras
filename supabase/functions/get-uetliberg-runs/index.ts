@@ -321,54 +321,55 @@ serve(async (req) => {
         const uetlibergScore =
           highPriorityEfforts.length * 2 + mediumPriorityEfforts.length * 1 + (inRegion ? 0.5 : 0);
 
-        // Include if it has segments or passes through region
-        if (uetlibergScore > 0) {
+        // Include if it has Uetliberg segments (not just in region)
+        if (highPriorityEfforts.length > 0 || mediumPriorityEfforts.length > 0) {
+          const allSegmentEfforts = [...highPriorityEfforts, ...mediumPriorityEfforts];
+          
+          // Auto check-in: Create check-ins for each segment effort
+          for (const effort of allSegmentEfforts) {
+            try {
+              const { error: checkInError } = await supabaseAdmin
+                .from('check_ins')
+                .upsert({
+                  user_id: user.id,
+                  segment_id: effort.segment.id,
+                  activity_id: run.id,
+                  activity_name: run.name,
+                  elapsed_time: effort.elapsed_time,
+                  distance: effort.distance,
+                  checked_in_at: run.start_date,
+                }, {
+                  onConflict: 'user_id,segment_id,activity_id',
+                  ignoreDuplicates: true,
+                });
+              
+              if (checkInError) {
+                console.error(`Failed to create check-in for segment ${effort.segment.id}:`, checkInError);
+              } else {
+                console.log(`Auto check-in created for segment ${effort.segment.id} from activity ${run.id}`);
+              }
+            } catch (checkInErr) {
+              console.error(`Error creating check-in:`, checkInErr);
+            }
+          }
+          
           uetlibergRuns.push({
             ...run,
             uetliberg_score: uetlibergScore,
             in_region: inRegion,
-            primary_segments: highPriorityEfforts.map((effort: any) => ({
+            segments: allSegmentEfforts.map((effort: any) => ({
               segment_id: effort.segment.id,
               segment_name: effort.segment.name,
               elapsed_time: effort.elapsed_time,
               moving_time: effort.moving_time,
               distance: effort.distance,
               average_grade: effort.segment.average_grade,
-              priority: 'high',
+              priority: highPrioritySegments.some((seg) => seg.segment_id === effort.segment.id) ? 'high' : 'medium',
             })),
-            secondary_segments: mediumPriorityEfforts.map((effort: any) => ({
-              segment_id: effort.segment.id,
-              segment_name: effort.segment.name,
-              elapsed_time: effort.elapsed_time,
-              moving_time: effort.moving_time,
-              distance: effort.distance,
-              average_grade: effort.segment.average_grade,
-              priority: 'medium',
-            })),
-            uetliberg_segments: [
-              ...highPriorityEfforts.map((effort: any) => ({
-                segment_id: effort.segment.id,
-                segment_name: effort.segment.name,
-                elapsed_time: effort.elapsed_time,
-                moving_time: effort.moving_time,
-                distance: effort.distance,
-                average_grade: effort.segment.average_grade,
-                priority: 'high',
-              })),
-              ...mediumPriorityEfforts.map((effort: any) => ({
-                segment_id: effort.segment.id,
-                segment_name: effort.segment.name,
-                elapsed_time: effort.elapsed_time,
-                moving_time: effort.moving_time,
-                distance: effort.distance,
-                average_grade: effort.segment.average_grade,
-                priority: 'medium',
-              })),
-            ],
           });
 
           console.log(
-            `Activity ${run.id}: score=${uetlibergScore.toFixed(1)}, high=${highPriorityEfforts.length}, medium=${mediumPriorityEfforts.length}, in_region=${inRegion}`
+            `Activity ${run.id}: score=${uetlibergScore.toFixed(1)}, segments=${allSegmentEfforts.length}`
           );
         }
       } catch (error) {
