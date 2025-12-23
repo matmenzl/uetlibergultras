@@ -307,17 +307,42 @@ export default function Index() {
           </p>
 
           {!user ? (
-            <Card className="p-8 text-center animate-fade-in">
-              <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
-              <p className="text-muted-foreground mb-6">
-                Der Üetli wartet auf dich! Verbinde dich mit Strava und sammle deine Uetli Runs.
-              </p>
-              <Button onClick={() => navigate('/auth')} size="lg" className="animate-pulse-subtle">
-                <MapPin className="w-4 h-4 mr-2" />
-                Los geht's mit Strava! 🏃
-              </Button>
-            </Card>
+            <>
+              {/* Hero Section for non-logged-in users */}
+              <Card className="p-8 mb-6 text-center bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/5 border-primary/20 animate-fade-in">
+                <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
+                <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
+                <p className="text-muted-foreground mb-6">
+                  Der Üetli wartet auf dich! Verbinde dich mit Strava und sammle deine Uetli Runs.
+                </p>
+                <Button onClick={() => navigate('/auth')} size="lg" className="animate-pulse-subtle">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Los geht's mit Strava! 🏃
+                </Button>
+              </Card>
+
+              {/* Demo Stats */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
+                  <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
+                  <p className="text-3xl font-bold text-primary">12</p>
+                  <p className="text-sm text-muted-foreground">Uetli Runs</p>
+                </Card>
+                <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
+                  <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
+                  <p className="text-3xl font-bold text-primary">5</p>
+                  <p className="text-sm text-muted-foreground">Uetli Segmente</p>
+                </Card>
+                <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
+                  <Flame className="w-6 h-6 text-orange-500 mx-auto mb-2" />
+                  <p className="text-3xl font-bold text-orange-500">3</p>
+                  <p className="text-sm text-muted-foreground">Wochen-Streak</p>
+                </Card>
+              </div>
+
+              {/* Demo Leaderboard */}
+              <Leaderboard />
+            </>
           ) : (
             <>
               {/* Hero Check-In Button */}
