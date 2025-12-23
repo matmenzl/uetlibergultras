@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
-import { Shield, Plus, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Shield, Plus, RefreshCw, AlertTriangle, Calendar } from 'lucide-react';
 import { z } from 'zod';
 
 const segmentIdSchema = z.string()
@@ -24,6 +24,50 @@ export default function Admin() {
   const [segmentId, setSegmentId] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanningMonth, setScanningMonth] = useState<number | null>(null);
+  
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+
+  const scanMonth = async (year: number, month: number) => {
+    if (!user) return;
+    
+    setIsScanning(true);
+    setScanningMonth(month);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('Keine aktive Sitzung gefunden');
+      }
+
+      const { error } = await supabase.functions.invoke('get-uetliberg-runs', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: { year, month, per_page: 30, max_pages: 3 },
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Scan abgeschlossen',
+        description: `${MONTHS_DE[month - 1]} ${year} wurde gescannt.`,
+      });
+    } catch (error) {
+      console.error('Scan error:', error);
+      toast({
+        title: 'Fehler beim Scannen',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsScanning(false);
+      setScanningMonth(null);
+    }
+  };
 
   const handleAddSegment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -229,6 +273,40 @@ export default function Admin() {
                 )}
               </Button>
             </form>
+          </Card>
+
+          {/* Past Months Sync */}
+          <Card className="p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Vergangene Monate synchronisieren
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Lade Aktivitäten aus vergangenen Monaten nach, falls Check-ins fehlen.
+            </p>
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {MONTHS_DE.map((monthName, index) => {
+                const monthNum = index + 1;
+                const isFutureMonth = monthNum > currentMonth;
+                const isThisMonthScanning = isScanning && scanningMonth === monthNum;
+                
+                return (
+                  <Button
+                    key={monthNum}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => scanMonth(currentYear, monthNum)}
+                    disabled={isScanning || isFutureMonth}
+                  >
+                    {isThisMonthScanning ? (
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                    ) : (
+                      monthName
+                    )}
+                  </Button>
+                );
+              })}
+            </div>
           </Card>
 
           {/* Refresh All Segments */}

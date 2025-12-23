@@ -10,10 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Calendar } from 'lucide-react';
+import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 const MONTHS_FULL_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
 interface CheckIn {
@@ -292,71 +291,31 @@ export default function Index() {
             </Card>
           ) : (
             <>
-              {/* Current Month Scan */}
-              <Card className="p-6 mb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-lg">Aktuellen Monat scannen</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Scanne deine Aktivitäten von {MONTHS_FULL_DE[currentMonth - 1]} {currentYear}
-                    </p>
-                  </div>
-                  <Button 
-                    onClick={() => scanMonth(currentYear, currentMonth)} 
-                    disabled={isScanning}
-                    size="lg"
-                  >
-                    {isScanning && scanningMonth?.month === currentMonth ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                        Scanne...
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        {MONTHS_FULL_DE[currentMonth - 1]} scannen
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Past Months Scan */}
-              <Card className="p-6 mb-6">
-                <div className="mb-4">
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <Calendar className="w-5 h-5" />
-                    Vergangene Monate synchronisieren
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Wähle einen Monat, um Aktivitäten nachzuladen
-                  </p>
-                </div>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                  {MONTHS_DE.map((monthName, index) => {
-                    const monthNum = index + 1;
-                    const isFutureMonth = monthNum > currentMonth;
-                    const isCurrentMonth = monthNum === currentMonth;
-                    const isThisMonthScanning = isScanning && scanningMonth?.month === monthNum;
-                    
-                    return (
-                      <Button
-                        key={monthNum}
-                        variant={isCurrentMonth ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => scanMonth(currentYear, monthNum)}
-                        disabled={isScanning || isFutureMonth}
-                        className="relative"
-                      >
-                        {isThisMonthScanning ? (
-                          <RefreshCw className="w-3 h-3 animate-spin" />
-                        ) : (
-                          monthName
-                        )}
-                      </Button>
-                    );
-                  })}
-                </div>
+              {/* Hero Check-In Button */}
+              <Card className="p-8 mb-6 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                <CheckCircle2 className="w-16 h-16 text-primary mx-auto mb-4" />
+                <h2 className="text-2xl font-bold mb-2">Uetliberg-Run einchecken</h2>
+                <p className="text-muted-foreground mb-6">
+                  Synchronisiere deinen letzten Lauf mit Uetliberg-Segmenten
+                </p>
+                <Button 
+                  onClick={() => scanMonth(currentYear, currentMonth)} 
+                  disabled={isScanning}
+                  size="lg"
+                  className="text-lg px-8 py-6"
+                >
+                  {isScanning ? (
+                    <>
+                      <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                      Checke ein...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-5 h-5 mr-2" />
+                      Jetzt einchecken
+                    </>
+                  )}
+                </Button>
               </Card>
 
               {/* Stats - count activities as check-ins */}
