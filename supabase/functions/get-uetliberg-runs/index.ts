@@ -82,10 +82,11 @@ serve(async (req) => {
   }
 
   try {
-    // Parse pagination parameters from request body
+    // Parse scan parameters from request body
     const body = await req.json().catch(() => ({}));
-    const page = body.page || 1;
-    const limit = body.limit || 5;
+    const maxPages = Math.max(1, Math.min(Number(body.max_pages ?? 10), 30));
+    const perPage = Math.max(1, Math.min(Number(body.per_page ?? body.limit ?? 50), 50));
+
     // Get and validate Authorization header
     const authHeader = req.headers.get('Authorization');
     console.log('Authorization header present:', !!authHeader);
@@ -215,48 +216,75 @@ serve(async (req) => {
       );
     }
 
-    // Fetch activities from 2025 with pagination
-    console.log(`Fetching activities from Strava for 2025 (page ${page}, limit ${limit})...`);
+    // Fetch activities from current year with deep pagination (newest first)
     const after2025 = 1735689600; // January 1, 2025, 00:00:00 UTC
-    const activitiesResponse = await fetch(
-      `https://www.strava.com/api/v3/athlete/activities?per_page=${limit}&page=${page}&after=${after2025}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
 
-    console.log(`Activities API response status: ${activitiesResponse.status}`);
+    let scannedPages = 0;
+    const allActivities: any[] = [];
 
-    if (!activitiesResponse.ok) {
-      const errorText = await activitiesResponse.text();
-      console.error(`Failed to fetch activities from Strava: ${activitiesResponse.status} - ${errorText}`);
-      
-      // Handle rate limiting specifically
-      if (activitiesResponse.status === 429) {
+    for (let currentPage = 1; currentPage <= maxPages; currentPage++) {
+      console.log(
+        `Fetching activities from Strava for 2025 (page ${currentPage}/${maxPages}, per_page=${perPage})...`
+      );
+
+      const activitiesResponse = await fetch(
+        `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${currentPage}&after=${after2025}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      console.log(`Activities API response status: ${activitiesResponse.status}`);
+
+      if (!activitiesResponse.ok) {
+        const errorText = await activitiesResponse.text();
+        console.error(
+          `Failed to fetch activities from Strava: ${activitiesResponse.status} - ${errorText}`
+        );
+
+        // Handle rate limiting specifically
+        if (activitiesResponse.status === 429) {
+          return new Response(
+            JSON.stringify({
+              error: 'Strava API Rate Limit erreicht',
+              message:
+                'Bitte warte ein paar Minuten und versuche es dann erneut. Strava limitiert die Anzahl der API-Anfragen.',
+              status: 429,
+            }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
         return new Response(
           JSON.stringify({
-            error: 'Strava API Rate Limit erreicht',
-            message: 'Bitte warte ein paar Minuten und versuche es dann erneut. Strava limitiert die Anzahl der API-Anfragen.',
-            status: 429,
+            error: 'Failed to fetch activities from Strava',
+            details: errorText,
+            status: activitiesResponse.status,
           }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: activitiesResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
-      return new Response(
-        JSON.stringify({
-          error: 'Failed to fetch activities from Strava',
-          details: errorText,
-          status: activitiesResponse.status,
-        }),
-        { status: activitiesResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
 
-    const allActivities = await activitiesResponse.json();
-    console.log(`Fetched ${allActivities.length} activities from Strava`);
+      const pageActivities = await activitiesResponse.json();
+      scannedPages++;
+      console.log(`Fetched ${pageActivities.length} activities from Strava`);
+
+      if (!Array.isArray(pageActivities) || pageActivities.length === 0) {
+        break;
+      }
+
+      allActivities.push(...pageActivities);
+
+      // If Strava returned fewer than requested, we've reached the end
+      if (pageActivities.length < perPage) {
+        break;
+      }
+
+      // Small pause between page fetches (avoid burst)
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
 
     // Filter for runs only
     const runs = allActivities.filter((activity: any) => activity.type === 'Run');
@@ -385,10 +413,10 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         activities: uetlibergRuns,
-        page,
-        limit,
-        has_more: runs.length === limit,
-        total_runs_on_page: runs.length,
+        scanned_pages: scannedPages,
+        per_page: perPage,
+        max_pages: maxPages,
+        total_runs_scanned: runs.length,
         uetliberg_runs: uetlibergRuns.length,
         high_priority_segments: highPrioritySegments.length,
         medium_priority_segments: mediumPrioritySegments.length,
