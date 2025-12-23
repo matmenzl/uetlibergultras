@@ -24,6 +24,8 @@ interface CheckIn {
   distance: number | null;
   checked_in_at: string;
   created_at: string;
+  activity_distance: number | null;
+  activity_elapsed_time: number | null;
 }
 
 interface SegmentInfo {
@@ -37,8 +39,8 @@ interface ActivityGroup {
   activity_name: string;
   checked_in_at: string;
   segments: CheckIn[];
-  totalDistance: number;
-  totalTime: number;
+  activityDistance: number | null;
+  activityElapsedTime: number | null;
 }
 
 export default function Index() {
@@ -220,13 +222,11 @@ export default function Index() {
         activity_name: checkIn.activity_name || `Aktivität ${checkIn.activity_id}`,
         checked_in_at: checkIn.checked_in_at,
         segments: [],
-        totalDistance: 0,
-        totalTime: 0,
+        activityDistance: checkIn.activity_distance,
+        activityElapsedTime: checkIn.activity_elapsed_time,
       };
     }
     groups[checkIn.activity_id].segments.push(checkIn);
-    groups[checkIn.activity_id].totalDistance += checkIn.distance || 0;
-    groups[checkIn.activity_id].totalTime += checkIn.elapsed_time || 0;
     // Use earliest segment time as activity time
     if (checkIn.checked_in_at < groups[checkIn.activity_id].checked_in_at) {
       groups[checkIn.activity_id].checked_in_at = checkIn.checked_in_at;
@@ -366,8 +366,8 @@ export default function Index() {
                                       {activity.activity_name}
                                     </p>
                                     <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
-                                      <span>{formatDistance(activity.totalDistance)}</span>
-                                      <span>{formatTime(activity.totalTime)}</span>
+                                      <span>{formatDistance(activity.activityDistance)}</span>
+                                      <span>{formatTime(activity.activityElapsedTime)}</span>
                                     </div>
                                   </div>
                                   <Badge variant="secondary" className="flex-shrink-0">
