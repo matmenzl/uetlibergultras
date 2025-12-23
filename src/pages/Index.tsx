@@ -10,7 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, CheckCircle2, Clock, RefreshCw } from 'lucide-react';
+import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface CheckIn {
   id: string;
@@ -27,6 +28,15 @@ interface SegmentInfo {
   segment_id: number;
   name: string;
   priority: string;
+}
+
+interface ActivityGroup {
+  activity_id: number;
+  activity_name: string;
+  checked_in_at: string;
+  segments: CheckIn[];
+  totalDistance: number;
+  totalTime: number;
 }
 
 export default function Index() {
@@ -194,19 +204,54 @@ export default function Index() {
   // Filter check-ins to only show those with valid segment names
   const validCheckIns = checkIns?.filter(c => isValidSegment(c.segment_id)) || [];
 
-  // Group check-ins by date
-  const groupedCheckIns = validCheckIns.reduce((groups, checkIn) => {
-    const date = new Date(checkIn.checked_in_at).toLocaleDateString('de-DE', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    if (!groups[date]) {
-      groups[date] = [];
+  // Group check-ins by activity first
+  const activitiesMap = validCheckIns.reduce((groups, checkIn) => {
+    if (!groups[checkIn.activity_id]) {
+      groups[checkIn.activity_id] = {
+        activity_id: checkIn.activity_id,
+        activity_name: checkIn.activity_name || `Aktivität ${checkIn.activity_id}`,
+        checked_in_at: checkIn.checked_in_at,
+        segments: [],
+        totalDistance: 0,
+        totalTime: 0,
+      };
     }
-    groups[date].push(checkIn);
+    groups[checkIn.activity_id].segments.push(checkIn);
+    groups[checkIn.activity_id].totalDistance += checkIn.distance || 0;
+    groups[checkIn.activity_id].totalTime += checkIn.elapsed_time || 0;
+    // Use earliest segment time as activity time
+    if (checkIn.checked_in_at < groups[checkIn.activity_id].checked_in_at) {
+      groups[checkIn.activity_id].checked_in_at = checkIn.checked_in_at;
+    }
     return groups;
-  }, {} as Record<string, CheckIn[]>);
+  }, {} as Record<number, ActivityGroup>);
+
+  // Group activities by date, sorted newest first
+  const activitiesByDate = Object.values(activitiesMap)
+    .sort((a, b) => new Date(b.checked_in_at).getTime() - new Date(a.checked_in_at).getTime())
+    .reduce((groups, activity) => {
+      const date = new Date(activity.checked_in_at).toLocaleDateString('de-DE', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(activity);
+      return groups;
+    }, {} as Record<string, ActivityGroup[]>);
+
+  // Get sorted date entries (newest first)
+  const sortedDateEntries = Object.entries(activitiesByDate).sort((a, b) => {
+    const dateA = new Date(Object.values(activitiesMap).find(act => 
+      new Date(act.checked_in_at).toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' }) === a[0]
+    )?.checked_in_at || 0);
+    const dateB = new Date(Object.values(activitiesMap).find(act => 
+      new Date(act.checked_in_at).toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' }) === b[0]
+    )?.checked_in_at || 0);
+    return dateB.getTime() - dateA.getTime();
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -297,39 +342,54 @@ export default function Index() {
                 </div>
               ) : validCheckIns.length > 0 ? (
                 <div className="space-y-6">
-                  {Object.entries(groupedCheckIns).map(([date, dayCheckIns]) => (
+                  {sortedDateEntries.map(([date, activities]) => (
                     <div key={date}>
                       <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
                         <Clock className="w-4 h-4" />
                         {date}
                       </h3>
-                      <div className="space-y-2">
-                        {dayCheckIns.map((checkIn) => (
-                          <Card key={checkIn.id} className="p-4 hover:shadow-md transition-shadow">
-                            <div className="flex items-start gap-3">
-                              <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">
-                                  {getSegmentName(checkIn.segment_id)}
-                                </p>
-                                {checkIn.activity_name && (
-                                  <p className="text-sm text-muted-foreground truncate">
-                                    {checkIn.activity_name}
-                                  </p>
-                                )}
-                                <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
-                                  <span>{formatDistance(checkIn.distance)}</span>
-                                  <span>{formatTime(checkIn.elapsed_time)}</span>
+                      <div className="space-y-3">
+                        {activities.map((activity) => (
+                          <Collapsible key={activity.activity_id}>
+                            <Card className="overflow-hidden">
+                              <CollapsibleTrigger className="w-full">
+                                <div className="p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors">
+                                  <Activity className="w-5 h-5 text-primary flex-shrink-0" />
+                                  <div className="flex-1 min-w-0 text-left">
+                                    <p className="font-medium truncate">
+                                      {activity.activity_name}
+                                    </p>
+                                    <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+                                      <span>{formatDistance(activity.totalDistance)}</span>
+                                      <span>{formatTime(activity.totalTime)}</span>
+                                    </div>
+                                  </div>
+                                  <Badge variant="secondary" className="flex-shrink-0">
+                                    {activity.segments.length} {activity.segments.length === 1 ? 'Segment' : 'Segmente'}
+                                  </Badge>
+                                  <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
                                 </div>
-                              </div>
-                              <Badge variant="outline" className="flex-shrink-0">
-                                {new Date(checkIn.checked_in_at).toLocaleTimeString('de-DE', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                              </Badge>
-                            </div>
-                          </Card>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent>
+                                <div className="border-t bg-muted/30 px-4 py-2 space-y-2">
+                                  {activity.segments.map((checkIn) => (
+                                    <div key={checkIn.id} className="flex items-center gap-3 py-2">
+                                      <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium truncate">
+                                          {getSegmentName(checkIn.segment_id)}
+                                        </p>
+                                      </div>
+                                      <div className="flex gap-3 text-xs text-muted-foreground">
+                                        <span>{formatDistance(checkIn.distance)}</span>
+                                        <span>{formatTime(checkIn.elapsed_time)}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </CollapsibleContent>
+                            </Card>
+                          </Collapsible>
                         ))}
                       </div>
                     </div>
