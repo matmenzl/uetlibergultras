@@ -12,6 +12,9 @@ import { Footer } from '@/components/Footer';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Mountain, Trophy, Flame } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Leaderboard } from '@/components/Leaderboard';
+import { Achievements } from '@/components/Achievements';
+import { StreakCounter } from '@/components/StreakCounter';
 
 const MONTHS_FULL_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
@@ -177,10 +180,26 @@ export default function Index() {
       if (error) throw error;
       
       await refetchCheckIns();
-      toast({
-        title: 'Boom! 💥 Gecheckt!',
-        description: `${MONTHS_FULL_DE[month - 1]} ${year} erfolgreich synchronisiert.`,
+      
+      // Check for new achievements after scan
+      const achievementResult = await supabase.functions.invoke('check-achievements', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
+      
+      if (achievementResult.data?.newAchievements?.length > 0) {
+        const achievementNames = achievementResult.data.newAchievements;
+        toast({
+          title: '🏆 Neues Achievement!',
+          description: `Du hast ${achievementNames.length} neue${achievementNames.length > 1 ? ' Achievements' : 's Achievement'} freigeschaltet!`,
+        });
+      } else {
+        toast({
+          title: 'Boom! 💥 Gecheckt!',
+          description: `${MONTHS_FULL_DE[month - 1]} ${year} erfolgreich synchronisiert.`,
+        });
+      }
     } catch (error) {
       console.error('Scan error:', error);
       toast({
@@ -329,22 +348,31 @@ export default function Index() {
               </Card>
 
               {/* Stats - count activities as check-ins */}
-              {Object.keys(activitiesMap).length > 0 && (
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
-                    <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
-                    <p className="text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
-                    <p className="text-sm text-muted-foreground">Uetli Runs</p>
-                  </Card>
-                  <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
-                    <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
-                    <p className="text-3xl font-bold text-primary">
-                      {new Set(validCheckIns.map(c => c.segment_id)).size}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Uetli Segmente</p>
-                  </Card>
-                </div>
-              )}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
+                  <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
+                  <p className="text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
+                  <p className="text-sm text-muted-foreground">Uetli Runs</p>
+                </Card>
+                <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
+                  <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
+                  <p className="text-3xl font-bold text-primary">
+                    {new Set(validCheckIns.map(c => c.segment_id)).size}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Uetli Segmente</p>
+                </Card>
+                <StreakCounter userId={user?.id} />
+              </div>
+
+              {/* Achievements */}
+              <div className="mb-6">
+                <Achievements userId={user?.id} />
+              </div>
+
+              {/* Leaderboard */}
+              <div className="mb-6">
+                <Leaderboard />
+              </div>
 
               {/* Check-in History */}
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
