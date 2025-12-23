@@ -15,33 +15,40 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-interface RunnerSegment {
-  segment_id: number;
-  segment_name: string;
-  elapsed_time: number;
-  rank: number;
-}
-
 interface Runner {
-  athlete_name: string;
-  athlete_photo: string | null;
-  segments: RunnerSegment[];
-  best_time: number;
+  user_id: string;
+  display_name: string;
+  profile_picture: string | null;
   total_segments: number;
-}
-
-interface TodaysRunnersResponse {
-  runners: Runner[];
-  date_range: string;
-  segments_fetched: number;
-  total_entries: number;
-  errors?: string[];
+  best_time: number;
 }
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
+};
+
+const getDateRange = (range: string): { start: Date; end: Date } => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  switch (range) {
+    case 'today':
+      return { start: today, end: now };
+    case 'this_week': {
+      const dayOfWeek = today.getDay();
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+      return { start: monday, end: now };
+    }
+    case 'this_month':
+      return { start: new Date(now.getFullYear(), now.getMonth(), 1), end: now };
+    case 'this_year':
+      return { start: new Date(now.getFullYear(), 0, 1), end: now };
+    default:
+      return { start: today, end: now };
+  }
 };
 
 const getDateRangeLabel = (range: string): string => {
@@ -62,30 +69,70 @@ const getDateRangeLabel = (range: string): string => {
 export const TodaysRunners = () => {
   const [dateRange, setDateRange] = useState<string>('today');
 
-  const { data, isLoading, error, refetch, isFetching } = useQuery<TodaysRunnersResponse>({
+  const { data: runners = [], isLoading, error, refetch, isFetching } = useQuery<Runner[]>({
     queryKey: ['todays-runners', dateRange],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { start, end } = getDateRange(dateRange);
       
-      if (!session?.access_token) {
-        throw new Error('Nicht eingeloggt');
+      // Get check-ins within the date range
+      const { data: checkIns, error: checkInsError } = await supabase
+        .from('check_ins')
+        .select('user_id, segment_id, elapsed_time, checked_in_at')
+        .gte('checked_in_at', start.toISOString())
+        .lte('checked_in_at', end.toISOString());
+
+      if (checkInsError) throw checkInsError;
+      if (!checkIns || checkIns.length === 0) return [];
+
+      // Get unique user IDs
+      const userIds = [...new Set(checkIns.map(c => c.user_id))];
+
+      // Get profiles for these users
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, display_name, profile_picture')
+        .in('id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Aggregate stats per user
+      const userStats = new Map<string, { segments: Set<number>; bestTime: number }>();
+      
+      for (const checkIn of checkIns) {
+        const existing = userStats.get(checkIn.user_id) || { segments: new Set(), bestTime: Infinity };
+        existing.segments.add(checkIn.segment_id);
+        if (checkIn.elapsed_time && checkIn.elapsed_time < existing.bestTime) {
+          existing.bestTime = checkIn.elapsed_time;
+        }
+        userStats.set(checkIn.user_id, existing);
       }
 
-      const { data, error } = await supabase.functions.invoke('get-todays-runners', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: { date_range: dateRange },
+      // Build runner list
+      const runnerList: Runner[] = userIds.map(userId => {
+        const profile = profiles?.find(p => p.id === userId);
+        const stats = userStats.get(userId)!;
+        return {
+          user_id: userId,
+          display_name: profile?.display_name || 'Unbekannt',
+          profile_picture: profile?.profile_picture || null,
+          total_segments: stats.segments.size,
+          best_time: stats.bestTime === Infinity ? 0 : stats.bestTime,
+        };
       });
 
-      if (error) throw error;
-      return data as TodaysRunnersResponse;
+      // Sort by total segments (descending), then by best time
+      runnerList.sort((a, b) => {
+        if (b.total_segments !== a.total_segments) {
+          return b.total_segments - a.total_segments;
+        }
+        return a.best_time - b.best_time;
+      });
+
+      return runnerList;
     },
-    staleTime: 15 * 60 * 1000, // Cache for 15 minutes
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
-
-  const runners = data?.runners || [];
 
   return (
     <Card className="p-6">
@@ -147,29 +194,31 @@ export const TodaysRunners = () => {
         <div className="space-y-3">
           {runners.slice(0, 10).map((runner, index) => (
             <div
-              key={`${runner.athlete_name}-${index}`}
+              key={runner.user_id}
               className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
             >
               <Avatar className="h-10 w-10 border-2 border-primary/20">
-                {runner.athlete_photo ? (
-                  <AvatarImage src={runner.athlete_photo} alt={runner.athlete_name} />
+                {runner.profile_picture ? (
+                  <AvatarImage src={runner.profile_picture} alt={runner.display_name} />
                 ) : null}
                 <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                  {runner.athlete_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  {runner.display_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                 </AvatarFallback>
               </Avatar>
               
               <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{runner.athlete_name}</p>
+                <p className="font-medium truncate">{runner.display_name}</p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Mountain className="w-3 h-3" />
                     {runner.total_segments} {runner.total_segments === 1 ? 'Segment' : 'Segmente'}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {formatTime(runner.best_time)}
-                  </span>
+                  {runner.best_time > 0 && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {formatTime(runner.best_time)}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -184,12 +233,6 @@ export const TodaysRunners = () => {
           {runners.length > 10 && (
             <p className="text-sm text-center text-muted-foreground pt-2">
               +{runners.length - 10} weitere Läufer
-            </p>
-          )}
-
-          {data?.segments_fetched && (
-            <p className="text-xs text-center text-muted-foreground pt-2 border-t">
-              {data.segments_fetched} Segmente abgefragt • {data.total_entries} Einträge gefunden
             </p>
           )}
         </div>
