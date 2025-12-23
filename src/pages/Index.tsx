@@ -30,6 +30,8 @@ interface StravaActivity {
 export default function Index() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [page, setPage] = useState(1);
+  const [allActivities, setAllActivities] = useState<StravaActivity[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -44,9 +46,9 @@ export default function Index() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch Uetliberg runs
-  const { data: activitiesData, isLoading, error, refetch } = useQuery({
-    queryKey: ['uetliberg-runs', user?.id],
+  // Fetch Uetliberg runs with pagination
+  const { data: activitiesData, isLoading, isFetching, error, refetch } = useQuery({
+    queryKey: ['uetliberg-runs', user?.id, page],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -54,17 +56,17 @@ export default function Index() {
         throw new Error('Keine aktive Sitzung gefunden');
       }
 
-      console.log('Calling get-uetliberg-runs with user:', user?.id);
+      console.log(`Calling get-uetliberg-runs with user: ${user?.id}, page: ${page}`);
       
       const { data, error } = await supabase.functions.invoke('get-uetliberg-runs', {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
+        body: { page, limit: 5 },
       });
       
       if (error) {
         console.error('Edge function error:', error);
-        // Check if it's a rate limit error
         if (error.message?.includes('429') || error.context?.status === 429) {
           throw new Error('RATE_LIMIT');
         }
@@ -75,13 +77,29 @@ export default function Index() {
     },
     enabled: !!user,
     retry: (failureCount, error) => {
-      // Don't retry on rate limit errors
       if (error instanceof Error && error.message === 'RATE_LIMIT') {
         return false;
       }
       return failureCount < 2;
     },
   });
+
+  // Accumulate activities when new data arrives
+  useEffect(() => {
+    if (activitiesData?.activities) {
+      if (page === 1) {
+        setAllActivities(activitiesData.activities);
+      } else {
+        setAllActivities(prev => [...prev, ...activitiesData.activities]);
+      }
+    }
+  }, [activitiesData, page]);
+
+  // Reset activities when user changes
+  useEffect(() => {
+    setPage(1);
+    setAllActivities([]);
+  }, [user?.id]);
 
 
   const formatDistance = (meters: number) => {
@@ -121,14 +139,12 @@ export default function Index() {
             </h1>
           </div>
           
-          {activitiesData && (
+          {allActivities.length > 0 && (
             <div className="mb-6 p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
-                <strong>Statistik:</strong> {activitiesData.uetliberg_runs} Uetliberg-Läufe 
-                von insgesamt {activitiesData.total_runs} Läufen 
-                ({activitiesData.total_activities} Aktivitäten gesamt)
+                <strong>Geladen:</strong> {allActivities.length} Uetliberg-Läufe
               </p>
-              {activitiesData.high_priority_segments !== undefined && (
+              {activitiesData?.high_priority_segments !== undefined && (
                 <p className="text-xs text-muted-foreground mt-1">
                   🎯 {activitiesData.high_priority_segments} Segmente am Uetliberg • 
                   📍 {activitiesData.medium_priority_segments} Segmente in der Region
@@ -173,9 +189,9 @@ export default function Index() {
                 Erneut versuchen
               </Button>
             </Card>
-          ) : activitiesData?.activities?.length > 0 ? (
+          ) : allActivities.length > 0 || activitiesData?.activities?.length > 0 ? (
             <div className="space-y-4">
-              {activitiesData.activities.map((activity: StravaActivity) => (
+              {allActivities.map((activity: StravaActivity) => (
                 <Card key={activity.id} className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="text-xl font-bold text-foreground flex-1">
@@ -245,6 +261,17 @@ export default function Index() {
                   )}
                 </Card>
               ))}
+              
+              {activitiesData?.has_more && (
+                <Button 
+                  onClick={() => setPage(p => p + 1)}
+                  variant="outline"
+                  className="w-full"
+                  disabled={isFetching}
+                >
+                  {isFetching ? 'Lade weitere Läufe...' : 'Weitere Läufe laden'}
+                </Button>
+              )}
             </div>
           ) : (
             <Card className="p-8 text-center">
