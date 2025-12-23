@@ -44,7 +44,7 @@ export const Footer = () => {
           
           <div className="text-center md:text-right">
             <p className="text-sm text-background/60">
-              © 2024 morningrun.ch
+              © 2024 kollektivauthentisch.ch
             </p>
             <p className="text-sm text-background/60">
               Made with 💪 in Zürich
