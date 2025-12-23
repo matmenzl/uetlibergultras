@@ -53,7 +53,7 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
   },
   runs_25: {
     icon: <Zap className="w-5 h-5" />,
-    title: 'Üetli-Veteran',
+    title: 'Uetli-Veteran',
     description: '25 Uetli Runs',
     color: 'text-blue-500',
   },
@@ -65,7 +65,7 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
   },
   runs_100: {
     icon: <Award className="w-5 h-5" />,
-    title: 'Üetli-Legende',
+    title: 'Uetli-Legende',
     description: '100 Uetli Runs',
     color: 'text-primary',
   },

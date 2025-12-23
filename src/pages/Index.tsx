@@ -310,7 +310,7 @@ export default function Index() {
                 <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
                 <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
                 <p className="text-muted-foreground mb-6">
-                  Der Üetli wartet auf dich! Verbinde dich mit Strava und sammle deine Uetli Runs.
+                  Der Uetli wartet auf dich! Verbinde dich mit Strava und sammle deine Uetli Runs.
                 </p>
                 <Button onClick={() => navigate('/auth')} size="lg" className="animate-pulse-subtle">
                   <MapPin className="w-4 h-4 mr-2" />
@@ -469,7 +469,7 @@ export default function Index() {
               ) : (
                 <Card className="p-8 text-center animate-fade-in">
                   <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-bold mb-2">Der Üetli wartet auf dich! 🏔️</h3>
+                  <h3 className="text-lg font-bold mb-2">Der Uetli wartet auf dich! 🏔️</h3>
                   <p className="text-muted-foreground mb-4">
                     Mach deinen ersten Run und check ihn ein.
                   </p>
