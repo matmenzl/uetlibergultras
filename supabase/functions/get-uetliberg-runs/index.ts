@@ -84,8 +84,20 @@ serve(async (req) => {
   try {
     // Parse scan parameters from request body
     const body = await req.json().catch(() => ({}));
-    const maxPages = Math.max(1, Math.min(Number(body.max_pages ?? 10), 30));
-    const perPage = Math.max(1, Math.min(Number(body.per_page ?? body.limit ?? 50), 50));
+    const maxPages = Math.max(1, Math.min(Number(body.max_pages ?? 3), 10));
+    const perPage = Math.max(1, Math.min(Number(body.per_page ?? 30), 50));
+    
+    // Month-based filtering (default: current month)
+    const now = new Date();
+    const year = Number(body.year ?? now.getFullYear());
+    const month = Number(body.month ?? (now.getMonth() + 1)); // 1-12
+    
+    // Calculate start and end timestamps for the specified month
+    const startOfMonth = Math.floor(new Date(Date.UTC(year, month - 1, 1, 0, 0, 0)).getTime() / 1000);
+    const endOfMonth = Math.floor(new Date(Date.UTC(year, month, 0, 23, 59, 59)).getTime() / 1000);
+    
+    console.log(`Scanning activities for ${year}-${month.toString().padStart(2, '0')}`);
+    console.log(`Time range: ${new Date(startOfMonth * 1000).toISOString()} to ${new Date(endOfMonth * 1000).toISOString()}`);
 
     // Get and validate Authorization header
     const authHeader = req.headers.get('Authorization');
@@ -216,19 +228,17 @@ serve(async (req) => {
       );
     }
 
-    // Fetch activities from current year with deep pagination (newest first)
-    const after2025 = 1735689600; // January 1, 2025, 00:00:00 UTC
-
+    // Fetch activities for the specified month only
     let scannedPages = 0;
     const allActivities: any[] = [];
 
     for (let currentPage = 1; currentPage <= maxPages; currentPage++) {
       console.log(
-        `Fetching activities from Strava for 2025 (page ${currentPage}/${maxPages}, per_page=${perPage})...`
+        `Fetching activities from Strava for ${year}-${month.toString().padStart(2, '0')} (page ${currentPage}/${maxPages}, per_page=${perPage})...`
       );
 
       const activitiesResponse = await fetch(
-        `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${currentPage}&after=${after2025}`,
+        `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${currentPage}&after=${startOfMonth}&before=${endOfMonth}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -413,6 +423,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         activities: uetlibergRuns,
+        scanned_year: year,
+        scanned_month: month,
         scanned_pages: scannedPages,
         per_page: perPage,
         max_pages: maxPages,
