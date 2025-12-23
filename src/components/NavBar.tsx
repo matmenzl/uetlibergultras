@@ -1,14 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Shield, Menu } from 'lucide-react';
+import { Mountain, Shield, Menu } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import logo from '@/assets/logo-uetliberg-ultras.png';
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -26,6 +25,7 @@ export default function NavBar() {
         onClick={() => { navigate('/segments'); onNavigate?.(); }} 
         className="hover:scale-105 transition-transform w-full md:w-auto justify-start md:justify-center"
       >
+        <Mountain className="h-4 w-4 mr-2" />
         Segmente
       </Button>
       <Button 
@@ -71,11 +71,8 @@ export default function NavBar() {
           className="flex items-center gap-2 cursor-pointer group"
           onClick={() => navigate('/')}
         >
-          <img 
-            src={logo} 
-            alt="Uetliberg Ultras" 
-            className="h-10 w-auto group-hover:scale-105 transition-transform"
-          />
+          <Mountain className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+          <span className="text-xl font-bold">Uetliberg Ultras</span>
         </div>
 
         {/* Desktop Navigation */}
