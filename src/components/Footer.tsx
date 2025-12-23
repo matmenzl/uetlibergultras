@@ -1,4 +1,4 @@
-import { Instagram, Facebook, Mail } from "lucide-react";
+import { Instagram, Facebook, Mail, Mountain } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -6,9 +6,12 @@ export const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-3 gap-8 items-center">
           <div>
-            <h3 className="text-2xl font-bold mb-2">morningrun</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <Mountain className="h-6 w-6" />
+              <h3 className="text-2xl font-bold">Gipfelsturm</h3>
+            </div>
             <p className="text-background/80 text-sm">
-              Zürich's aktivste Morgen-Laufgruppe
+              Dein Üetli. Deine Runs. 🏔️
             </p>
           </div>
           
@@ -17,21 +20,21 @@ export const Footer = () => {
             <div className="flex justify-center gap-4">
               <a 
                 href="#" 
-                className="hover:text-primary transition-colors"
+                className="hover:text-primary transition-colors hover:scale-110 transform"
                 aria-label="Instagram"
               >
                 <Instagram className="h-6 w-6" />
               </a>
               <a 
                 href="#" 
-                className="hover:text-primary transition-colors"
+                className="hover:text-primary transition-colors hover:scale-110 transform"
                 aria-label="Facebook"
               >
                 <Facebook className="h-6 w-6" />
               </a>
               <a 
                 href="mailto:info@morningrun.ch" 
-                className="hover:text-primary transition-colors"
+                className="hover:text-primary transition-colors hover:scale-110 transform"
                 aria-label="Email"
               >
                 <Mail className="h-6 w-6" />
@@ -44,7 +47,7 @@ export const Footer = () => {
               © 2024 morningrun.ch
             </p>
             <p className="text-sm text-background/60">
-              Alle Rechte vorbehalten
+              Made with 💪 in Zürich
             </p>
           </div>
         </div>
