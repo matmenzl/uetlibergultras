@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import {
@@ -138,6 +139,20 @@ const faqs = [
 ];
 
 export default function Support() {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://tally.so/widgets/embed.js';
+    script.onload = () => {
+      if (typeof (window as any).Tally !== 'undefined') {
+        (window as any).Tally.loadEmbeds();
+      }
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
@@ -184,11 +199,20 @@ export default function Support() {
         </div>
 
         {/* Contact Section */}
-        <Card className="mt-8 p-6 text-center">
-          <h2 className="font-bold text-lg mb-2">Noch Fragen?</h2>
-          <p className="text-muted-foreground text-sm">
+        <Card className="mt-8 p-6">
+          <h2 className="font-bold text-lg mb-4 text-center">Noch Fragen?</h2>
+          <p className="text-muted-foreground text-sm text-center mb-6">
             Falls deine Frage nicht beantwortet wurde, schreib uns gerne eine Nachricht.
           </p>
+          <iframe
+            data-tally-src="https://tally.so/embed/rjBg7v?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
+            loading="lazy"
+            width="100%"
+            height="342"
+            frameBorder="0"
+            title="Uetliberg Ultras Kontaktformular"
+            className="w-full"
+          />
         </Card>
       </main>
 
