@@ -24,8 +24,8 @@ const faqs = [
     icon: <Mountain className="w-5 h-5" />,
     questions: [
       {
-        q: 'Was ist Uetliberg Run Club?',
-        a: 'Der Uetliberg Run Club ist eine Community für alle, die gerne auf den Uetliberg laufen. Wir tracken deine Läufe über Strava-Segmente und belohnen dich mit Achievements für deine Fortschritte.'
+        q: 'Was ist Uetliberg Ultras?',
+        a: 'Uetliberg Ultras ist eine Community für alle, die gerne auf den Uetliberg laufen. Wir tracken deine Läufe über Strava-Segmente und belohnen dich mit Achievements für deine Fortschritte.'
       },
       {
         q: 'Wie verbinde ich mein Strava-Konto?',
@@ -126,8 +126,8 @@ const faqs = [
     icon: <Users className="w-5 h-5" />,
     questions: [
       {
-        q: 'Wer steckt hinter dem Uetliberg Run Club?',
-        a: 'Der Uetliberg Run Club ist ein Community-Projekt von und für Läufer, die den Uetliberg lieben. Wir sind keine offizielle Organisation, sondern eine Gruppe von Enthusiasten.'
+        q: 'Wer steckt hinter Uetliberg Ultras?',
+        a: 'Uetliberg Ultras ist ein Community-Projekt von und für Läufer, die den Uetliberg lieben. Wir sind keine offizielle Organisation, sondern eine Gruppe von Enthusiasten.'
       },
       {
         q: 'Wie kann ich zur Community beitragen?',
@@ -150,7 +150,7 @@ export default function Support() {
             <h1 className="text-2xl sm:text-4xl font-bold">Support & FAQ</h1>
           </div>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Hier findest du Antworten auf häufig gestellte Fragen zum Uetliberg Run Club.
+            Hier findest du Antworten auf häufig gestellte Fragen zu Uetliberg Ultras.
           </p>
         </div>
 
