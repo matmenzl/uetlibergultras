@@ -11,16 +11,13 @@ import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Mountain, Trophy, Flame } from 'lucide-react';
-import uetlibergLogo from '@/assets/uetliberg-logo.png';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Leaderboard } from '@/components/Leaderboard';
 import { Achievements } from '@/components/Achievements';
 import { StreakCounter } from '@/components/StreakCounter';
 import { TodaysRunners } from '@/components/TodaysRunners';
 import { triggerFirstCheckInConfetti, triggerConfetti } from '@/lib/confetti';
-
 const MONTHS_FULL_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-
 interface CheckIn {
   id: string;
   segment_id: number;
@@ -33,13 +30,11 @@ interface CheckIn {
   activity_distance: number | null;
   activity_elapsed_time: number | null;
 }
-
 interface SegmentInfo {
   segment_id: number;
   name: string;
   priority: string;
 }
-
 interface ActivityGroup {
   activity_id: number;
   activity_name: string;
@@ -58,56 +53,72 @@ const getGreeting = (): string => {
   if (hour >= 18 && hour < 22) return "Abend-Session! 🌅";
   return "Nachtläufer unterwegs! 🌙";
 };
-
 export default function Index() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const [scanningMonth, setScanningMonth] = useState<{ year: number; month: number } | null>(null);
+  const [scanningMonth, setScanningMonth] = useState<{
+    year: number;
+    month: number;
+  } | null>(null);
   const [isRefreshingSegments, setIsRefreshingSegments] = useState(false);
-  
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1; // 1-12
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       setUser(session?.user ?? null);
     });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
   // Fetch check-in history
-  const { data: checkIns, isLoading: checkInsLoading, refetch: refetchCheckIns } = useQuery({
+  const {
+    data: checkIns,
+    isLoading: checkInsLoading,
+    refetch: refetchCheckIns
+  } = useQuery({
     queryKey: ['check-ins', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('check_ins')
-        .select('*')
-        .order('checked_in_at', { ascending: false });
-      
+      const {
+        data,
+        error
+      } = await supabase.from('check_ins').select('*').order('checked_in_at', {
+        ascending: false
+      });
       if (error) throw error;
       return data as CheckIn[];
     },
-    enabled: !!user,
+    enabled: !!user
   });
 
   // Fetch segment info for names
-  const { data: segments, refetch: refetchSegments } = useQuery({
+  const {
+    data: segments,
+    refetch: refetchSegments
+  } = useQuery({
     queryKey: ['segments'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('uetliberg_segments')
-        .select('segment_id, name, priority');
-      
+      const {
+        data,
+        error
+      } = await supabase.from('uetliberg_segments').select('segment_id, name, priority');
       if (error) throw error;
       return data as SegmentInfo[];
-    },
+    }
   });
 
   // Helper to check if a segment has a valid (non-placeholder) name
@@ -115,8 +126,7 @@ export default function Index() {
     const segment = segments?.find(s => s.segment_id === segmentId);
     if (!segment) return false;
     // Placeholder names are like "Segment 12345"
-    const isPlaceholder = segment.name.startsWith('Segment ') && 
-                          /^\d+$/.test(segment.name.replace('Segment ', ''));
+    const isPlaceholder = segment.name.startsWith('Segment ') && /^\d+$/.test(segment.name.replace('Segment ', ''));
     return !isPlaceholder;
   };
 
@@ -126,23 +136,25 @@ export default function Index() {
   // Refresh segment details from Strava
   const refreshSegmentDetails = async () => {
     if (!user) return;
-    
     setIsRefreshingSegments(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session?.access_token) {
         throw new Error('Keine aktive Sitzung gefunden');
       }
-
-      const { data, error } = await supabase.functions.invoke('refresh-segment-details', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('refresh-segment-details', {
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+          Authorization: `Bearer ${session.access_token}`
+        }
       });
-      
       if (error) throw error;
-      
       await refetchSegments();
       // Silent refresh - no toast needed
     } catch (error) {
@@ -163,57 +175,65 @@ export default function Index() {
   // Scan for activities of a specific month
   const scanMonth = async (year: number, month: number) => {
     if (!user) return;
-    
     setIsScanning(true);
-    setScanningMonth({ year, month });
+    setScanningMonth({
+      year,
+      month
+    });
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session?.access_token) {
         throw new Error('Keine aktive Sitzung gefunden');
       }
-
-      const { error } = await supabase.functions.invoke('get-uetliberg-runs', {
+      const {
+        error
+      } = await supabase.functions.invoke('get-uetliberg-runs', {
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`
         },
-        body: { year, month, per_page: 30, max_pages: 3 },
+        body: {
+          year,
+          month,
+          per_page: 30,
+          max_pages: 3
+        }
       });
-      
       if (error) throw error;
-      
       await refetchCheckIns();
-      
+
       // Check for new achievements after scan
       const achievementResult = await supabase.functions.invoke('check-achievements', {
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+          Authorization: `Bearer ${session.access_token}`
+        }
       });
-      
       if (achievementResult.data?.newAchievements?.length > 0) {
         const achievementNames = achievementResult.data.newAchievements as string[];
-        
+
         // Check if this is the first check-in (first_run achievement just earned)
         if (achievementNames.includes('first_run')) {
           // Trigger epic confetti for first check-in!
           triggerFirstCheckInConfetti();
           toast({
             title: '🎉 Willkommen bei den Uetliberg Ultras!',
-            description: 'Dein erster Check-in! Du bist jetzt offiziell Teil der Community!',
+            description: 'Dein erster Check-in! Du bist jetzt offiziell Teil der Community!'
           });
         } else {
           // Regular confetti for other achievements
           triggerConfetti();
           toast({
             title: '🏆 Neues Achievement!',
-            description: `Du hast ${achievementNames.length} neue${achievementNames.length > 1 ? ' Achievements' : 's Achievement'} freigeschaltet!`,
+            description: `Du hast ${achievementNames.length} neue${achievementNames.length > 1 ? ' Achievements' : 's Achievement'} freigeschaltet!`
           });
         }
       } else {
         toast({
           title: 'Boom! 💥 Gecheckt!',
-          description: `${MONTHS_FULL_DE[month - 1]} ${year} erfolgreich synchronisiert.`,
+          description: `${MONTHS_FULL_DE[month - 1]} ${year} erfolgreich synchronisiert.`
         });
       }
     } catch (error) {
@@ -221,36 +241,32 @@ export default function Index() {
       toast({
         title: 'Oops! 😅',
         description: error instanceof Error ? error.message : 'Da lief etwas schief...',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setIsScanning(false);
       setScanningMonth(null);
     }
   };
-
   const getSegmentName = (segmentId: number) => {
     const segment = segments?.find(s => s.segment_id === segmentId);
     return segment?.name || `Segment ${segmentId}`;
   };
-
   const formatTime = (seconds: number | null) => {
     if (!seconds) return '-';
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('de-DE', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit',
+      minute: '2-digit'
     });
   };
-
   const formatDistance = (meters: number | null) => {
     if (!meters) return '-';
     return (meters / 1000).toFixed(2) + ' km';
@@ -268,7 +284,7 @@ export default function Index() {
         checked_in_at: checkIn.checked_in_at,
         segments: [],
         activityDistance: checkIn.activity_distance,
-        activityElapsedTime: checkIn.activity_elapsed_time,
+        activityElapsedTime: checkIn.activity_elapsed_time
       };
     }
     groups[checkIn.activity_id].segments.push(checkIn);
@@ -280,49 +296,47 @@ export default function Index() {
   }, {} as Record<number, ActivityGroup>);
 
   // Group activities by date, sorted newest first
-  const activitiesByDate = Object.values(activitiesMap)
-    .sort((a, b) => new Date(b.checked_in_at).getTime() - new Date(a.checked_in_at).getTime())
-    .reduce((groups, activity) => {
-      const date = new Date(activity.checked_in_at).toLocaleDateString('de-DE', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-      if (!groups[date]) {
-        groups[date] = [];
-      }
-      groups[date].push(activity);
-      return groups;
-    }, {} as Record<string, ActivityGroup[]>);
+  const activitiesByDate = Object.values(activitiesMap).sort((a, b) => new Date(b.checked_in_at).getTime() - new Date(a.checked_in_at).getTime()).reduce((groups, activity) => {
+    const date = new Date(activity.checked_in_at).toLocaleDateString('de-DE', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(activity);
+    return groups;
+  }, {} as Record<string, ActivityGroup[]>);
 
   // Get sorted date entries (newest first)
   const sortedDateEntries = Object.entries(activitiesByDate).sort((a, b) => {
-    const dateA = new Date(Object.values(activitiesMap).find(act => 
-      new Date(act.checked_in_at).toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' }) === a[0]
-    )?.checked_in_at || 0);
-    const dateB = new Date(Object.values(activitiesMap).find(act => 
-      new Date(act.checked_in_at).toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' }) === b[0]
-    )?.checked_in_at || 0);
+    const dateA = new Date(Object.values(activitiesMap).find(act => new Date(act.checked_in_at).toLocaleDateString('de-DE', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }) === a[0])?.checked_in_at || 0);
+    const dateB = new Date(Object.values(activitiesMap).find(act => new Date(act.checked_in_at).toLocaleDateString('de-DE', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }) === b[0])?.checked_in_at || 0);
     return dateB.getTime() - dateA.getTime();
   });
-
-  return (
-    <div className="min-h-screen flex flex-col bg-background">
+  return <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <div className="mb-2">
-            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">
-              Din Uetli, dini Uetli Runs 🏔️
-            </h1>
+          <div className="flex items-center gap-3 mb-2">
+            <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Din Uetli, dini Uetli Runs </h1>
           </div>
 
-          {!user ? (
-            <>
+          {!user ? <>
               {/* Hero Section for non-logged-in users */}
               <Card className="p-8 mb-6 text-center bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/5 border-primary/20 animate-fade-in">
-                <img src={uetlibergLogo} alt="Uetliberg Ultras" className="w-48 h-48 mx-auto mb-4" />
+                <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
                 <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
                 <p className="text-muted-foreground mb-6">
                   Der Uetliberg wartet auf dich! Verbinde dich mit Strava und sammle deine Uetliberg Runs.
@@ -354,9 +368,7 @@ export default function Index() {
 
               {/* Demo Leaderboard */}
               <Leaderboard />
-            </>
-          ) : (
-            <>
+            </> : <>
               {/* Hero Check-In Button */}
               <Card className="p-8 mb-6 text-center bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/5 border-primary/20 animate-fade-in">
                 <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
@@ -364,23 +376,14 @@ export default function Index() {
                 <p className="text-muted-foreground mb-6">
                   Bereit für deinen nächsten Uetli Run?
                 </p>
-                <Button 
-                  onClick={() => scanMonth(currentYear, currentMonth)} 
-                  disabled={isScanning}
-                  size="lg"
-                  className="text-lg px-8 py-6 animate-pulse-subtle hover:scale-105 transition-transform"
-                >
-                  {isScanning ? (
-                    <>
+                <Button onClick={() => scanMonth(currentYear, currentMonth)} disabled={isScanning} size="lg" className="text-lg px-8 py-6 animate-pulse-subtle hover:scale-105 transition-transform">
+                  {isScanning ? <>
                       <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
                       Checke ein...
-                    </>
-                  ) : (
-                    <>
+                    </> : <>
                       <Flame className="w-5 h-5 mr-2" />
                       Run einchecken 💪
-                    </>
-                  )}
+                    </>}
                 </Button>
               </Card>
 
@@ -422,26 +425,19 @@ export default function Index() {
                 Deine Runs
               </h2>
               
-              {checkInsLoading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <Card key={i} className="p-4">
+              {checkInsLoading ? <div className="space-y-4">
+                  {[1, 2, 3].map(i => <Card key={i} className="p-4">
                       <Skeleton className="h-5 w-3/4 mb-2" />
                       <Skeleton className="h-4 w-1/2" />
-                    </Card>
-                  ))}
-                </div>
-              ) : validCheckIns.length > 0 ? (
-                <div className="space-y-6">
-                  {sortedDateEntries.map(([date, activities]) => (
-                    <div key={date} className="animate-fade-in">
+                    </Card>)}
+                </div> : validCheckIns.length > 0 ? <div className="space-y-6">
+                  {sortedDateEntries.map(([date, activities]) => <div key={date} className="animate-fade-in">
                       <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
                         <Clock className="w-4 h-4" />
                         {date}
                       </h3>
                       <div className="space-y-3">
-                        {activities.map((activity) => (
-                          <Collapsible key={activity.activity_id}>
+                        {activities.map(activity => <Collapsible key={activity.activity_id}>
                             <Card className="overflow-hidden hover:shadow-md transition-shadow">
                               <CollapsibleTrigger className="w-full">
                                 <div className="p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors">
@@ -463,8 +459,7 @@ export default function Index() {
                               </CollapsibleTrigger>
                               <CollapsibleContent>
                                 <div className="border-t bg-muted/30 px-4 py-2 space-y-2">
-                                  {activity.segments.map((checkIn) => (
-                                    <div key={checkIn.id} className="flex items-center gap-3 py-2">
+                                  {activity.segments.map(checkIn => <div key={checkIn.id} className="flex items-center gap-3 py-2">
                                       <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
                                       <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">
@@ -475,19 +470,14 @@ export default function Index() {
                                         <span>{formatDistance(checkIn.distance)}</span>
                                         <span>{formatTime(checkIn.elapsed_time)}</span>
                                       </div>
-                                    </div>
-                                  ))}
+                                    </div>)}
                                 </div>
                               </CollapsibleContent>
                             </Card>
-                          </Collapsible>
-                        ))}
+                          </Collapsible>)}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <Card className="p-8 text-center animate-fade-in">
+                    </div>)}
+                </div> : <Card className="p-8 text-center animate-fade-in">
                   <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-bold mb-2">Der Uetli wartet auf dich! 🏔️</h3>
                   <p className="text-muted-foreground mb-4">
@@ -496,14 +486,11 @@ export default function Index() {
                   <p className="text-sm text-muted-foreground">
                     Klick auf "Run einchecken" um loszulegen!
                   </p>
-                </Card>
-              )}
-            </>
-          )}
+                </Card>}
+            </>}
         </div>
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>;
 }
