@@ -2,17 +2,12 @@ import NavBar from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const Privacy = () => {
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <NavBar />
       
       <main className="container mx-auto px-4 py-12 max-w-4xl">
-        <Link 
-          to="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
-        >
+        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8">
           <ArrowLeft className="h-4 w-4" />
           Zurück zur Startseite
         </Link>
@@ -39,11 +34,7 @@ const Privacy = () => {
 
           <section>
             <h2 className="text-2xl font-semibold mb-4">2. Geltungsbereich</h2>
-            <p>
-              Diese Datenschutzerklärung gilt für die Nutzung der Website uetliberg-ultras.lovable.app 
-              und die damit verbundene App «Uetliberg Ultras». Sie erläutert, wie wir Personendaten 
-              im Sinne des Schweizer Datenschutzgesetzes (DSG) bearbeiten.
-            </p>
+            <p>Diese Datenschutzerklärung gilt für die Nutzung der Website www.uetlibergultras.ch und die damit verbundene App «Uetliberg Ultras». Sie erläutert, wie wir Personendaten im Sinne des Schweizer Datenschutzgesetzes (DSG) bearbeiten.</p>
           </section>
 
           <section>
@@ -155,10 +146,7 @@ const Privacy = () => {
             <p>
               Bei Fragen zum Datenschutz können Sie uns über die Support-Seite kontaktieren.
             </p>
-            <Link 
-              to="/support" 
-              className="text-primary hover:underline"
-            >
+            <Link to="/support" className="text-primary hover:underline">
               Zur Support-Seite →
             </Link>
           </section>
@@ -166,8 +154,6 @@ const Privacy = () => {
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Privacy;
