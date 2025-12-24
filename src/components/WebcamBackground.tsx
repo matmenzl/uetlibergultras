@@ -106,9 +106,9 @@ export function WebcamBackground() {
         }}
       />
       
-      {/* Webcam Controls Overlay */}
-      <div className="absolute bottom-2 right-2 z-30 flex items-center gap-2">
-        <span className="text-xs text-white/80 bg-black/50 px-2 py-1 rounded backdrop-blur-sm">
+      {/* Webcam Controls Overlay - responsive positioning */}
+      <div className="absolute bottom-2 left-2 sm:left-auto sm:right-2 z-30 flex items-center gap-1.5 sm:gap-2">
+        <span className="text-[10px] sm:text-xs text-white/80 bg-black/50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded backdrop-blur-sm">
           📷 {formatTimestamp(screenshotMeta)}
         </span>
         <Button
@@ -116,12 +116,12 @@ export function WebcamBackground() {
           variant="secondary"
           onClick={captureScreenshot}
           disabled={isCapturing}
-          className="bg-black/50 hover:bg-black/70 text-white border-none backdrop-blur-sm"
+          className="h-7 w-7 sm:h-8 sm:w-8 p-0 bg-black/50 hover:bg-black/70 text-white border-none backdrop-blur-sm"
         >
           {isCapturing ? (
-            <RefreshCw className="w-4 h-4 animate-spin" />
+            <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
           ) : (
-            <Camera className="w-4 h-4" />
+            <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           )}
         </Button>
       </div>
