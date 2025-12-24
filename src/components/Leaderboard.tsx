@@ -87,11 +87,11 @@ export function Leaderboard() {
   if (isLoading) {
     return (
       <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Trophy className="w-5 h-5 text-primary" />
-          <h3 className="font-bold text-lg">Leaderboard</h3>
-        </div>
-        <div className="space-y-3">
+      <div className="flex items-center gap-2 mb-4">
+        <Trophy className="w-5 h-5 text-primary" />
+        <h3 className="font-bold text-lg">365-Tage Challenge {new Date().getFullYear()}</h3>
+      </div>
+      <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center gap-3">
               <Skeleton className="w-8 h-8 rounded-full" />
@@ -106,15 +106,15 @@ export function Leaderboard() {
   if (!leaderboard || leaderboard.length === 0) {
     return (
       <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Trophy className="w-5 h-5 text-primary" />
-          <h3 className="font-bold text-lg">Leaderboard</h3>
-        </div>
-        <div className="text-center py-6">
-          <Trophy className="w-12 h-12 text-primary/30 mx-auto mb-3" />
-          <p className="text-muted-foreground text-sm mb-4">
-            Verbinde dich mit Strava, um zu sehen wer auf dem Leaderboard wo rangiert ist. 🏆
-          </p>
+      <div className="flex items-center gap-2 mb-4">
+        <Trophy className="w-5 h-5 text-primary" />
+        <h3 className="font-bold text-lg">365-Tage Challenge {new Date().getFullYear()}</h3>
+      </div>
+      <div className="text-center py-6">
+        <Trophy className="w-12 h-12 text-primary/30 mx-auto mb-3" />
+        <p className="text-muted-foreground text-sm mb-4">
+          Verbinde dich mit Strava und schau wer die 365-Tage Challenge {new Date().getFullYear()} anführt
+        </p>
           {!user && (
             <Button 
               variant="outline" 
@@ -135,14 +135,14 @@ export function Leaderboard() {
     <Card className="p-6">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="w-5 h-5 text-primary" />
-        <h3 className="font-bold text-lg">Leaderboard</h3>
+        <h3 className="font-bold text-lg">365-Tage Challenge {new Date().getFullYear()}</h3>
       </div>
       
       {/* CTA for non-logged-in users */}
       {!user && (
         <div className="bg-muted/50 rounded-lg p-4 mb-4 text-center">
           <p className="text-sm text-muted-foreground mb-3">
-            Verbinde dich mit Strava und schau wer das 365-Tage Leaderboard 2026 anführt
+            Verbinde dich mit Strava und schau wer die 365-Tage Challenge {new Date().getFullYear()} anführt
           </p>
           <Button 
             size="sm" 
