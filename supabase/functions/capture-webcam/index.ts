@@ -24,13 +24,16 @@ Deno.serve(async (req) => {
       throw new Error('Supabase configuration missing');
     }
 
-    console.log('Starting webcam screenshot capture...');
+    console.log('Starting webcam screenshot capture (SE direction, cropped)...');
 
-    // Roundshot webcam URL
-    const targetUrl = 'https://uetliberg.roundshot.com/#/';
+    // Roundshot webcam URL - SE direction (Southeast view)
+    const targetUrl = 'https://uetliberg.roundshot.com/#/se';
     
     // Call Screenshot API with delay for page load
-    const screenshotUrl = `https://shot.screenshotapi.net/screenshot?token=${screenshotApiKey}&url=${encodeURIComponent(targetUrl)}&delay=10000&output=image&file_type=jpeg&width=1920&height=1080&full_page=false&fresh=true`;
+    // We capture a larger area and will crop in post if needed
+    // Using css_clip to crop: top=80px (header), bottom=100px (controls)
+    // Format: css_clip=top,right,bottom,left
+    const screenshotUrl = `https://shot.screenshotapi.net/screenshot?token=${screenshotApiKey}&url=${encodeURIComponent(targetUrl)}&delay=12000&output=image&file_type=jpeg&width=1920&height=1080&full_page=false&fresh=true&css_clip=80,0,100,0`;
 
     console.log('Fetching screenshot from API...');
     const screenshotResponse = await fetch(screenshotUrl);
