@@ -29,19 +29,35 @@ Deno.serve(async (req) => {
     // Roundshot webcam URL - SE direction (Southeast view)
     const targetUrl = 'https://uetliberg.roundshot.com/#/se';
     
-    // Using CSS injection to hide UI overlays and remove_selector to remove UI elements
-    // The webcam canvas is inside .pnlm-render-container or similar
+    // Using CSS injection to hide UI overlays
     const hideUiCss = encodeURIComponent(`
+      /* Generic app chrome */
+      header, footer,
       .header, .footer, .controls, .navigation, .menu, .logo, .brand,
       [class*="header"], [class*="footer"], [class*="control"], [class*="nav"],
-      [class*="menu"], [class*="logo"], [class*="brand"], [class*="btn"],
-      [class*="button"], [class*="overlay"], [class*="ui"], [class*="toolbar"],
-      .leaflet-control-container, .pnlm-controls-container, .pnlm-compass,
-      .pnlm-load-box, .pnlm-about-msg, .pnlm-hot-spot-debug-indicator,
-      [class*="timestamp"], [class*="time"], [class*="date"],
+      [class*="menu"], [class*="logo"], [class*="brand"], [class*="toolbar"],
+      [class*="overlay"], [class*="ui"],
+
+      /* Pannellum UI (common for 360 viewers) */
+      .pnlm-controls-container, .pnlm-control, .pnlm-compass, .pnlm-hot-spot,
+      .pnlm-load-box, .pnlm-about-msg, .pnlm-ui, .pnlm-button,
+
+      /* Roundshot-ish prefixes (best-effort) */
       .rs-ui, .rs-control, .rs-header, .rs-footer, .rs-logo, .rs-menu,
-      .rs-timeline, .rs-compass, .rs-fullscreen, .rs-share, .rs-info
-      { display: none !important; visibility: hidden !important; opacity: 0 !important; }
+      .rs-timeline, .rs-compass, .rs-fullscreen, .rs-share, .rs-info,
+
+      /* Specifically: anything clickable in the top-right corner */
+      button[style*="top"],
+      button[style*="right"],
+      a[style*="top"],
+      a[style*="right"],
+      [style*="position: fixed"][style*="top"][style*="right"],
+      [style*="position: absolute"][style*="top"][style*="right"]
+      {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+      }
     `);
     
     // Call Screenshot API with delay for page load and CSS to hide UI elements
