@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Mountain, Trophy, Flame } from 'lucide-react';
+import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Mountain, Trophy, Flame, HelpCircle } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Leaderboard } from '@/components/Leaderboard';
 import { Achievements } from '@/components/Achievements';
@@ -482,6 +482,26 @@ export default function Index() {
                       </div>
                     </div>
                   ))}
+                  
+                  {/* CTA for missing runs */}
+                  <Card className="p-4 mt-6 bg-muted/30 border-dashed">
+                    <div className="flex items-start gap-3">
+                      <HelpCircle className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-medium text-foreground">Run fehlt?</span>{' '}
+                          Falls ein Uetli-Run nicht auftaucht, können wir ihn manuell für dich holen.
+                        </p>
+                        <Button 
+                          variant="link" 
+                          className="h-auto p-0 text-primary mt-1"
+                          onClick={() => navigate('/support')}
+                        >
+                          Support kontaktieren →
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
                 </div>
               ) : (
                 <Card className="p-8 text-center animate-fade-in">
