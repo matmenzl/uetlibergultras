@@ -18,7 +18,10 @@ import { StreakCounter } from '@/components/StreakCounter';
 import { TodaysRunners } from '@/components/TodaysRunners';
 import { WebcamBackground } from '@/components/WebcamBackground';
 import { triggerFirstCheckInConfetti, triggerConfetti } from '@/lib/confetti';
+import { useWeather } from '@/hooks/useWeather';
+
 const MONTHS_FULL_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
 interface CheckIn {
   id: string;
   segment_id: number;
@@ -31,11 +34,13 @@ interface CheckIn {
   activity_distance: number | null;
   activity_elapsed_time: number | null;
 }
+
 interface SegmentInfo {
   segment_id: number;
   name: string;
   priority: string;
 }
+
 interface ActivityGroup {
   activity_id: number;
   activity_name: string;
@@ -54,6 +59,7 @@ const getGreeting = (): string => {
   if (hour >= 18 && hour < 22) return "Abend-Session! 🌅";
   return "Nachtläufer unterwegs! 🌙";
 };
+
 export default function Index() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -65,21 +71,17 @@ export default function Index() {
   const [isRefreshingSegments, setIsRefreshingSegments] = useState(false);
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1; // 1-12
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const { data: weatherData } = useWeather();
+
   useEffect(() => {
     supabase.auth.getSession().then(({
-      data: {
-        session
-      }
+      data: { session }
     }) => {
       setUser(session?.user ?? null);
     });
     const {
-      data: {
-        subscription
-      }
+      data: { subscription }
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -94,10 +96,7 @@ export default function Index() {
   } = useQuery({
     queryKey: ['check-ins', user?.id],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('check_ins').select('*').order('checked_in_at', {
+      const { data, error } = await supabase.from('check_ins').select('*').order('checked_in_at', {
         ascending: false
       });
       if (error) throw error;
@@ -113,10 +112,7 @@ export default function Index() {
   } = useQuery({
     queryKey: ['segments'],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('uetliberg_segments').select('segment_id, name, priority');
+      const { data, error } = await supabase.from('uetliberg_segments').select('segment_id, name, priority');
       if (error) throw error;
       return data as SegmentInfo[];
     }
@@ -139,18 +135,11 @@ export default function Index() {
     if (!user) return;
     setIsRefreshingSegments(true);
     try {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         throw new Error('Keine aktive Sitzung gefunden');
       }
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('refresh-segment-details', {
+      const { data, error } = await supabase.functions.invoke('refresh-segment-details', {
         headers: {
           Authorization: `Bearer ${session.access_token}`
         }
@@ -177,22 +166,13 @@ export default function Index() {
   const scanMonth = async (year: number, month: number) => {
     if (!user) return;
     setIsScanning(true);
-    setScanningMonth({
-      year,
-      month
-    });
+    setScanningMonth({ year, month });
     try {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         throw new Error('Keine aktive Sitzung gefunden');
       }
-      const {
-        error
-      } = await supabase.functions.invoke('get-uetliberg-runs', {
+      const { error } = await supabase.functions.invoke('get-uetliberg-runs', {
         headers: {
           Authorization: `Bearer ${session.access_token}`
         },
@@ -249,16 +229,19 @@ export default function Index() {
       setScanningMonth(null);
     }
   };
+
   const getSegmentName = (segmentId: number) => {
     const segment = segments?.find(s => s.segment_id === segmentId);
     return segment?.name || `Segment ${segmentId}`;
   };
+
   const formatTime = (seconds: number | null) => {
     if (!seconds) return '-';
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('de-DE', {
       year: 'numeric',
@@ -268,6 +251,7 @@ export default function Index() {
       minute: '2-digit'
     });
   };
+
   const formatDistance = (meters: number | null) => {
     if (!meters) return '-';
     return (meters / 1000).toFixed(2) + ' km';
@@ -324,14 +308,21 @@ export default function Index() {
     }) === b[0])?.checked_in_at || 0);
     return dateB.getTime() - dateA.getTime();
   });
-  return <div className="min-h-screen flex flex-col bg-background">
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
             <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
-            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Din Uetli, dini Uetli Runs </h1>
+            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Din Uetli, dini Uetli Runs</h1>
+            {weatherData?.weather && (
+              <span className="text-2xl sm:text-4xl" title="Aktuelles Wetter am Uetliberg">
+                {weatherData.weather}
+              </span>
+            )}
           </div>
 
           {/* Hero Section - unterschiedlich für eingeloggt/nicht eingeloggt */}
@@ -502,5 +493,6 @@ export default function Index() {
       </main>
 
       <Footer />
-    </div>;
+    </div>
+  );
 }
