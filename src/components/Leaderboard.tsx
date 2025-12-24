@@ -5,9 +5,16 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Medal, Award, Mountain, User, LogIn, Sparkles } from 'lucide-react';
+import { Trophy, Medal, Award, Mountain, User, LogIn, Sparkles, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FoundingMemberBadge } from './FoundingMemberBadge';
+import { differenceInDays } from 'date-fns';
+
+const getDaysRemaining = () => {
+  const now = new Date();
+  const endOfYear = new Date(now.getFullYear(), 11, 31);
+  return differenceInDays(endOfYear, now);
+};
 
 interface LeaderboardEntry {
   user_id: string;
@@ -133,9 +140,15 @@ export function Leaderboard() {
 
   return (
     <Card className="p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Trophy className="w-5 h-5 text-primary" />
-        <h3 className="font-bold text-lg">365-Tage Challenge {new Date().getFullYear()}</h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Trophy className="w-5 h-5 text-primary" />
+          <h3 className="font-bold text-lg">365-Tage Challenge {new Date().getFullYear()}</h3>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+          <Calendar className="w-3 h-3" />
+          <span>Noch {getDaysRemaining()} Tage</span>
+        </div>
       </div>
       
       {/* CTA for non-logged-in users */}
