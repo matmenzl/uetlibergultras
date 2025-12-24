@@ -113,7 +113,7 @@ export function Leaderboard() {
         <div className="text-center py-6">
           <Trophy className="w-12 h-12 text-primary/30 mx-auto mb-3" />
           <p className="text-muted-foreground text-sm mb-4">
-            Das Podest wartet auf dich! Werde der erste Uetliberg-Champion. 🏆
+            Verbinde dich mit Strava, um zu sehen wer auf dem Leaderboard wo rangiert ist. 🏆
           </p>
           {!user && (
             <Button 
