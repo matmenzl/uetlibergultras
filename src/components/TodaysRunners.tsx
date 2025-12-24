@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Users, Clock, Mountain, RefreshCw, Calendar } from 'lucide-react';
+import { Users, Clock, Mountain, RefreshCw, Calendar, MapPin } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -67,7 +69,21 @@ const getDateRangeLabel = (range: string): string => {
 };
 
 export const TodaysRunners = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
   const [dateRange, setDateRange] = useState<string>('today');
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const { data: runners = [], isLoading, error, refetch, isFetching } = useQuery<Runner[]>({
     queryKey: ['todays-runners', dateRange],
@@ -235,6 +251,23 @@ export const TodaysRunners = () => {
             <p className="text-sm text-center text-muted-foreground pt-2">
               +{runners.length - 10} weitere Läufer
             </p>
+          )}
+
+          {/* CTA for non-logged-in users */}
+          {!user && (
+            <div className="mt-4 pt-4 border-t border-border">
+              <p className="text-sm text-muted-foreground text-center mb-3">
+                Verbinde dich mit Strava und schau wer heute schon am Uetliberg unterwegs war.
+              </p>
+              <Button 
+                onClick={() => navigate('/auth')} 
+                className="w-full"
+                variant="outline"
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                Mit Strava verbinden
+              </Button>
+            </div>
           )}
         </div>
       )}
