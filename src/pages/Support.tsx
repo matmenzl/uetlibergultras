@@ -66,13 +66,27 @@ const faqs = [
       },
       {
         q: 'Welche Achievements gibt es?',
-        a: `Es gibt 12 Achievements:
-• Erstbesteigung – Dein erster Uetli Run
-• Bergfreund/Bergläufer/Veteran/Gipfelstürmer/Legende – 5/10/25/50/100 Runs
-• Segmentjäger – Alle verfügbaren Segmente mindestens einmal gelaufen
-• Dranbleiber/Durchhalter/Unaufhaltsam – 2/4/8 Wochen Streak
-• Frühaufsteher – Ein Run vor 7 Uhr morgens
-• Nachteule – Ein Run nach 20 Uhr abends`
+        a: `Es gibt 12 reguläre Achievements:
+• Erstbesteigung ⭐ – Dein erster Uetli Run
+• Bergfreund 🏔️ – 5 Uetli Runs
+• Bergläufer 🔥 – 10 Uetli Runs
+• Uetli-Veteran ⚡ – 25 Uetli Runs
+• Gipfelstürmer 🏆 – 50 Uetli Runs
+• Uetli-Legende 🎖️ – 100 Uetli Runs
+• Segmentjäger 🎯 – Alle Segmente mindestens einmal gelaufen
+• Dranbleiber ⏰ – 2 Wochen Streak
+• Durchhalter 🔥 – 4 Wochen Streak
+• Unaufhaltsam 🔥 – 8 Wochen Streak
+• Frühaufsteher ☀️ – Ein Run vor 7 Uhr morgens
+• Nachteule 🌙 – Ein Run nach 20 Uhr abends`
+      },
+      {
+        q: 'Was sind exklusive Achievements?',
+        a: `Exklusive Achievements sind limitiert und können nicht mehr verdient werden! Sie werden nur angezeigt, wenn du sie besitzt:
+• Top 10 Pioneer 👑 – Einer der ersten 10 User
+• Top 25 Pioneer ✨ – Einer der ersten 25 User
+• Top 50 Pioneer ✨ – Einer der ersten 50 User
+• Founding Member ✨ – Unter den ersten 50 registrierten Usern`
       },
       {
         q: 'Was ist ein Streak?',
