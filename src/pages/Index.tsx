@@ -334,17 +334,18 @@ export default function Index() {
             <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Din Uetli, dini Uetli Runs </h1>
           </div>
 
-          {!user ? <>
-              {/* Hero Section for non-logged-in users */}
-              <Card className="p-8 pb-14 sm:pb-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
-                {/* Webcam Screenshot als Hintergrund */}
-                <WebcamBackground />
-                {/* Overlay für bessere Lesbarkeit */}
-                <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/50 to-background/70 z-10" />
-                {/* Content */}
-                <div className="relative z-20">
-                  <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
+          {/* Hero Section - unterschiedlich für eingeloggt/nicht eingeloggt */}
+          <Card className="p-8 pb-14 sm:pb-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
+            {/* Webcam Screenshot als Hintergrund */}
+            <WebcamBackground />
+            {/* Overlay für bessere Lesbarkeit */}
+            <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/50 to-background/70 z-10" />
+            {/* Content */}
+            <div className="relative z-20">
+              <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
+              <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
+              {!user ? (
+                <>
                   <p className="text-muted-foreground mb-6">
                     Der Uetliberg wartet auf dich! Verbinde dich mit Strava und sammle deine Uetliberg Runs.
                   </p>
@@ -352,56 +353,45 @@ export default function Index() {
                     <MapPin className="w-4 h-4 mr-2" />
                     Los geht's mit Strava! 🏃
                   </Button>
-                </div>
-              </Card>
-
-              {/* Demo Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
-                  <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-2xl sm:text-3xl font-bold text-primary">12</p>
-                  <p className="text-sm text-muted-foreground">Uetli Runs</p>
-                </Card>
-                <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
-                  <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-2xl sm:text-3xl font-bold text-primary">5</p>
-                  <p className="text-sm text-muted-foreground">Uetli Segmente</p>
-                </Card>
-                <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
-                  <Flame className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-                  <p className="text-2xl sm:text-3xl font-bold text-orange-500">3</p>
-                  <p className="text-sm text-muted-foreground">Wochen-Streak</p>
-                </Card>
-              </div>
-
-              {/* Demo Leaderboard */}
-              <Leaderboard />
-            </> : <>
-              {/* Hero Check-In Button */}
-              <Card className="p-8 pb-14 sm:pb-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
-                {/* Webcam Screenshot als Hintergrund */}
-                <WebcamBackground />
-                {/* Overlay für bessere Lesbarkeit */}
-                <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/50 to-background/70 z-10" />
-                {/* Content */}
-                <div className="relative z-20">
-                  <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
+                </>
+              ) : (
+                <>
                   <p className="text-muted-foreground mb-6">
                     Bereit für deinen nächsten Uetli Run?
                   </p>
                   <Button onClick={() => scanMonth(currentYear, currentMonth)} disabled={isScanning} size="lg" className="text-lg px-8 py-6 animate-pulse-subtle hover:scale-105 transition-transform">
-                    {isScanning ? <>
+                    {isScanning ? (
+                      <>
                         <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
                         Checke ein...
-                      </> : <>
+                      </>
+                    ) : (
+                      <>
                         <Flame className="w-5 h-5 mr-2" />
                         Run einchecken 💪
-                      </>}
+                      </>
+                    )}
                   </Button>
-                </div>
-              </Card>
+                </>
+              )}
+            </div>
+          </Card>
 
+          {/* ===== ÖFFENTLICHE KOMPONENTEN (für alle sichtbar) ===== */}
+          
+          {/* Today's Runners */}
+          <div className="mb-6">
+            <TodaysRunners />
+          </div>
+
+          {/* Leaderboard */}
+          <div className="mb-6">
+            <Leaderboard />
+          </div>
+
+          {/* ===== PRIVATE KOMPONENTEN (nur für eingeloggte User) ===== */}
+          {user && (
+            <>
               {/* Stats - count activities as check-ins */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
@@ -419,19 +409,9 @@ export default function Index() {
                 <StreakCounter userId={user?.id} />
               </div>
 
-              {/* Today's Runners */}
-              <div className="mb-6">
-                <TodaysRunners />
-              </div>
-
               {/* Achievements */}
               <div className="mb-6">
                 <Achievements userId={user?.id} />
-              </div>
-
-              {/* Leaderboard */}
-              <div className="mb-6">
-                <Leaderboard />
               </div>
 
               {/* Check-in History */}
@@ -440,19 +420,26 @@ export default function Index() {
                 Deine Runs
               </h2>
               
-              {checkInsLoading ? <div className="space-y-4">
-                  {[1, 2, 3].map(i => <Card key={i} className="p-4">
+              {checkInsLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map(i => (
+                    <Card key={i} className="p-4">
                       <Skeleton className="h-5 w-3/4 mb-2" />
                       <Skeleton className="h-4 w-1/2" />
-                    </Card>)}
-                </div> : validCheckIns.length > 0 ? <div className="space-y-6">
-                  {sortedDateEntries.map(([date, activities]) => <div key={date} className="animate-fade-in">
+                    </Card>
+                  ))}
+                </div>
+              ) : validCheckIns.length > 0 ? (
+                <div className="space-y-6">
+                  {sortedDateEntries.map(([date, activities]) => (
+                    <div key={date} className="animate-fade-in">
                       <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
                         <Clock className="w-4 h-4" />
                         {date}
                       </h3>
                       <div className="space-y-3">
-                        {activities.map(activity => <Collapsible key={activity.activity_id}>
+                        {activities.map(activity => (
+                          <Collapsible key={activity.activity_id}>
                             <Card className="overflow-hidden hover:shadow-md transition-shadow">
                               <CollapsibleTrigger className="w-full">
                                 <div className="p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors">
@@ -474,7 +461,8 @@ export default function Index() {
                               </CollapsibleTrigger>
                               <CollapsibleContent>
                                 <div className="border-t bg-muted/30 px-4 py-2 space-y-2">
-                                  {activity.segments.map(checkIn => <div key={checkIn.id} className="flex items-center gap-3 py-2">
+                                  {activity.segments.map(checkIn => (
+                                    <div key={checkIn.id} className="flex items-center gap-3 py-2">
                                       <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
                                       <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">
@@ -485,14 +473,19 @@ export default function Index() {
                                         <span>{formatDistance(checkIn.distance)}</span>
                                         <span>{formatTime(checkIn.elapsed_time)}</span>
                                       </div>
-                                    </div>)}
+                                    </div>
+                                  ))}
                                 </div>
                               </CollapsibleContent>
                             </Card>
-                          </Collapsible>)}
+                          </Collapsible>
+                        ))}
                       </div>
-                    </div>)}
-                </div> : <Card className="p-8 text-center animate-fade-in">
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <Card className="p-8 text-center animate-fade-in">
                   <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-bold mb-2">Der Uetli wartet auf dich! 🏔️</h3>
                   <p className="text-muted-foreground mb-4">
@@ -501,8 +494,10 @@ export default function Index() {
                   <p className="text-sm text-muted-foreground">
                     Klick auf "Run einchecken" um loszulegen!
                   </p>
-                </Card>}
-            </>}
+                </Card>
+              )}
+            </>
+          )}
         </div>
       </main>
 
