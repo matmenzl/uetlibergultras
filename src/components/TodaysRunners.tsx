@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Users, Clock, Mountain, RefreshCw, Calendar, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { User } from "@supabase/supabase-js";
+import stravaConnectButton from "@/assets/btn_strava_connect_with_orange.svg";
 
 interface Runner {
   user_id: string;
@@ -241,9 +242,12 @@ export const TodaysRunners = () => {
           {!user ? (
             <>
               <p className="font-medium mb-2">Verbinde dich mit Strava und schau wer heute schon am Uetliberg unterwegs war.</p>
-              <Button onClick={() => navigate("/auth")} className="mt-2">
-                Mit Strava verbinden
-              </Button>
+              <button 
+                onClick={() => navigate("/auth")} 
+                className="mt-2 hover:opacity-90 transition-opacity"
+              >
+                <img src={stravaConnectButton} alt="Connect with Strava" className="h-10 mx-auto" />
+              </button>
             </>
           ) : (
             <>
