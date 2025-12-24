@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Award } from 'lucide-react';
+import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -51,14 +52,16 @@ export default function Auth() {
         </div>
 
         <div className="space-y-4">
-          <Button 
+          <button 
             onClick={handleStravaLogin}
-            className="w-full h-12 text-lg bg-[#FC4C02] hover:bg-[#E34402] text-white"
-            size="lg"
+            className="w-full flex justify-center hover:opacity-90 transition-opacity"
           >
-            <Award className="mr-2 h-5 w-5" />
-            Mit Strava anmelden
-          </Button>
+            <img 
+              src={stravaConnectButton} 
+              alt="Connect with Strava" 
+              className="h-12"
+            />
+          </button>
 
           <div className="text-center text-sm text-muted-foreground">
             <p>
