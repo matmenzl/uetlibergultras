@@ -336,7 +336,7 @@ export default function Index() {
 
           {!user ? <>
               {/* Hero Section for non-logged-in users */}
-              <Card className="p-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
+              <Card className="p-8 pb-14 sm:pb-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
                 {/* Webcam Screenshot als Hintergrund */}
                 <WebcamBackground />
                 {/* Overlay für bessere Lesbarkeit */}
@@ -378,7 +378,7 @@ export default function Index() {
               <Leaderboard />
             </> : <>
               {/* Hero Check-In Button */}
-              <Card className="p-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
+              <Card className="p-8 pb-14 sm:pb-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
                 {/* Webcam Screenshot als Hintergrund */}
                 <WebcamBackground />
                 {/* Overlay für bessere Lesbarkeit */}
