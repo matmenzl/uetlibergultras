@@ -335,16 +335,28 @@ export default function Index() {
 
           {!user ? <>
               {/* Hero Section for non-logged-in users */}
-              <Card className="p-8 mb-6 text-center bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/5 border-primary/20 animate-fade-in">
-                <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
-                <p className="text-muted-foreground mb-6">
-                  Der Uetliberg wartet auf dich! Verbinde dich mit Strava und sammle deine Uetliberg Runs.
-                </p>
-                <Button onClick={() => navigate('/auth')} size="lg" className="animate-pulse-subtle">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Los geht's mit Strava! 🏃
-                </Button>
+              <Card className="p-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
+                {/* Webcam Iframe als Hintergrund */}
+                <iframe 
+                  src="https://uetliberg.roundshot.com/#/" 
+                  className="absolute inset-0 w-full h-full z-0 border-0 scale-150"
+                  title="Uetliberg Webcam"
+                  loading="lazy"
+                />
+                {/* Overlay für bessere Lesbarkeit */}
+                <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/50 to-background/70 z-10" />
+                {/* Content */}
+                <div className="relative z-20">
+                  <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Der Uetliberg wartet auf dich! Verbinde dich mit Strava und sammle deine Uetliberg Runs.
+                  </p>
+                  <Button onClick={() => navigate('/auth')} size="lg" className="animate-pulse-subtle">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    Los geht's mit Strava! 🏃
+                  </Button>
+                </div>
               </Card>
 
               {/* Demo Stats */}
@@ -370,21 +382,33 @@ export default function Index() {
               <Leaderboard />
             </> : <>
               {/* Hero Check-In Button */}
-              <Card className="p-8 mb-6 text-center bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/5 border-primary/20 animate-fade-in">
-                <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
-                <p className="text-muted-foreground mb-6">
-                  Bereit für deinen nächsten Uetli Run?
-                </p>
-                <Button onClick={() => scanMonth(currentYear, currentMonth)} disabled={isScanning} size="lg" className="text-lg px-8 py-6 animate-pulse-subtle hover:scale-105 transition-transform">
-                  {isScanning ? <>
-                      <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
-                      Checke ein...
-                    </> : <>
-                      <Flame className="w-5 h-5 mr-2" />
-                      Run einchecken 💪
-                    </>}
-                </Button>
+              <Card className="p-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
+                {/* Webcam Iframe als Hintergrund */}
+                <iframe 
+                  src="https://uetliberg.roundshot.com/#/" 
+                  className="absolute inset-0 w-full h-full z-0 border-0 scale-150"
+                  title="Uetliberg Webcam"
+                  loading="lazy"
+                />
+                {/* Overlay für bessere Lesbarkeit */}
+                <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/50 to-background/70 z-10" />
+                {/* Content */}
+                <div className="relative z-20">
+                  <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Bereit für deinen nächsten Uetli Run?
+                  </p>
+                  <Button onClick={() => scanMonth(currentYear, currentMonth)} disabled={isScanning} size="lg" className="text-lg px-8 py-6 animate-pulse-subtle hover:scale-105 transition-transform">
+                    {isScanning ? <>
+                        <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                        Checke ein...
+                      </> : <>
+                        <Flame className="w-5 h-5 mr-2" />
+                        Run einchecken 💪
+                      </>}
+                  </Button>
+                </div>
               </Card>
 
               {/* Stats - count activities as check-ins */}
