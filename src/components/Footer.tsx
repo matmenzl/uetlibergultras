@@ -21,6 +21,26 @@ export const Footer = () => {
           
           
           <div className="text-center md:text-right">
+            <div className="flex justify-center md:justify-end gap-4 mb-2">
+              <Link 
+                to="/privacy" 
+                className="text-sm text-background/60 hover:text-primary transition-colors"
+              >
+                Datenschutz
+              </Link>
+              <Link 
+                to="/terms" 
+                className="text-sm text-background/60 hover:text-primary transition-colors"
+              >
+                AGB
+              </Link>
+              <Link 
+                to="/support" 
+                className="text-sm text-background/60 hover:text-primary transition-colors"
+              >
+                Support
+              </Link>
+            </div>
             <p className="text-sm text-background/60">
               © 2024 kollektivauthentisch.ch
             </p>

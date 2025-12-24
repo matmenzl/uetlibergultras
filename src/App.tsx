@@ -9,7 +9,8 @@ import AuthStravaCallback from "./pages/AuthStravaCallback";
 import Segments from "./pages/Segments";
 import Admin from "./pages/Admin";
 import Support from "./pages/Support";
-
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -22,6 +23,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/segments" element={<Segments />} />
           <Route path="/support" element={<Support />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/strava-callback" element={<AuthStravaCallback />} />
