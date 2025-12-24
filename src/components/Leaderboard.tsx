@@ -140,18 +140,17 @@ export function Leaderboard() {
       
       {/* CTA for non-logged-in users */}
       {!user && (
-        <div className="bg-muted/50 rounded-lg p-3 mb-4 flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">
-            Melde dich an, um auf dem Leaderboard zu erscheinen!
+        <div className="bg-muted/50 rounded-lg p-4 mb-4 text-center">
+          <p className="text-sm text-muted-foreground mb-3">
+            Verbinde dich mit Strava und schau wer das 365-Tage Leaderboard 2026 anführt
           </p>
           <Button 
-            variant="ghost" 
             size="sm" 
             onClick={() => navigate('/auth')}
-            className="gap-1 text-xs"
+            className="gap-2"
           >
-            <LogIn className="w-3 h-3" />
-            Login
+            <LogIn className="w-4 h-4" />
+            Mit Strava verbinden
           </Button>
         </div>
       )}
