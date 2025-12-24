@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Users, Clock, Mountain, RefreshCw, Calendar } from "lucide-react";
+import { Users, Clock, Mountain, RefreshCw, Calendar, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Runner {
@@ -15,6 +15,8 @@ interface Runner {
   profile_picture: string | null;
   total_segments: number;
   best_time: number;
+  total_elevation: number;
+  total_distance: number;
 }
 
 const formatTime = (seconds: number) => {
@@ -84,22 +86,57 @@ export const TodaysRunners = () => {
       if (checkInsError) throw checkInsError;
       if (!checkIns || checkIns.length === 0) return [];
 
-      // Get unique user IDs
+      // Get unique user IDs and segment IDs
       const userIds = [...new Set(checkIns.map((c) => c.user_id))];
+      const segmentIds = [...new Set(checkIns.map((c) => c.segment_id))];
 
-      // Get profiles for these users
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, display_name, first_name, last_name, profile_picture")
-        .in("id", userIds);
+      // Get profiles and segments in parallel
+      const [profilesResult, segmentsResult] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, display_name, first_name, last_name, profile_picture")
+          .in("id", userIds),
+        supabase
+          .from("uetliberg_segments")
+          .select("segment_id, elevation_high, elevation_low, distance")
+          .in("segment_id", segmentIds)
+      ]);
 
-      if (profilesError) throw profilesError;
+      if (profilesResult.error) throw profilesResult.error;
+      if (segmentsResult.error) throw segmentsResult.error;
+
+      const profiles = profilesResult.data;
+      const segments = segmentsResult.data;
+
+      // Create segment lookup map
+      const segmentMap = new Map(segments?.map(s => [s.segment_id, s]) || []);
 
       // Aggregate stats per user
-      const userStats = new Map<string, { segments: Set<number>; bestTime: number }>();
+      const userStats = new Map<string, { 
+        segments: Set<number>; 
+        bestTime: number; 
+        totalElevation: number;
+        totalDistance: number;
+      }>();
 
       for (const checkIn of checkIns) {
-        const existing = userStats.get(checkIn.user_id) || { segments: new Set(), bestTime: Infinity };
+        const existing = userStats.get(checkIn.user_id) || { 
+          segments: new Set(), 
+          bestTime: Infinity,
+          totalElevation: 0,
+          totalDistance: 0
+        };
+        
+        // Only add elevation/distance if this is a new segment for the user
+        if (!existing.segments.has(checkIn.segment_id)) {
+          const segment = segmentMap.get(checkIn.segment_id);
+          if (segment) {
+            const elevation = (segment.elevation_high || 0) - (segment.elevation_low || 0);
+            existing.totalElevation += Math.max(0, elevation);
+            existing.totalDistance += segment.distance || 0;
+          }
+        }
+        
         existing.segments.add(checkIn.segment_id);
         if (checkIn.elapsed_time && checkIn.elapsed_time < existing.bestTime) {
           existing.bestTime = checkIn.elapsed_time;
@@ -126,6 +163,8 @@ export const TodaysRunners = () => {
           profile_picture: profile?.profile_picture || null,
           total_segments: stats.segments.size,
           best_time: stats.bestTime === Infinity ? 0 : stats.bestTime,
+          total_elevation: Math.round(stats.totalElevation),
+          total_distance: Math.round(stats.totalDistance),
         };
       });
 
@@ -214,11 +253,17 @@ export const TodaysRunners = () => {
 
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{runner.display_name}</p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                   <span className="flex items-center gap-1">
                     <Mountain className="w-3 h-3" />
                     {runner.total_segments} {runner.total_segments === 1 ? "Segment" : "Segmente"}
                   </span>
+                  {runner.total_elevation > 0 && (
+                    <span className="flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      {runner.total_elevation}m
+                    </span>
+                  )}
                   {runner.best_time > 0 && (
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
