@@ -5,7 +5,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Medal, Award, Mountain, User, LogIn, Sparkles, Calendar } from 'lucide-react';
+import { Trophy, Medal, Award, Mountain, User, Sparkles, Calendar } from 'lucide-react';
+import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { useNavigate } from 'react-router-dom';
 import { FoundingMemberBadge } from './FoundingMemberBadge';
 import { differenceInDays } from 'date-fns';
@@ -123,15 +124,16 @@ export function Leaderboard() {
           Verbinde dich mit Strava und schau wer die 365-Tage Challenge {new Date().getFullYear()} anführt
         </p>
           {!user && (
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <button 
               onClick={() => navigate('/auth')}
-              className="gap-2"
+              className="hover:opacity-90 transition-opacity"
             >
-              <LogIn className="w-4 h-4" />
-              Mit Strava verbinden
-            </Button>
+              <img 
+                src={stravaConnectButton} 
+                alt="Mit Strava verbinden" 
+                className="h-10"
+              />
+            </button>
           )}
         </div>
       </Card>
@@ -157,14 +159,16 @@ export function Leaderboard() {
           <p className="text-sm text-muted-foreground mb-3">
             Verbinde dich mit Strava und schau wer die 365-Tage Challenge {new Date().getFullYear()} anführt
           </p>
-          <Button 
-            size="sm" 
+          <button 
             onClick={() => navigate('/auth')}
-            className="gap-2"
+            className="hover:opacity-90 transition-opacity"
           >
-            <LogIn className="w-4 h-4" />
-            Mit Strava verbinden
-          </Button>
+            <img 
+              src={stravaConnectButton} 
+              alt="Mit Strava verbinden" 
+              className="h-10"
+            />
+          </button>
         </div>
       )}
       
