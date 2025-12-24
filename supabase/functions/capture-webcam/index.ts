@@ -29,39 +29,87 @@ Deno.serve(async (req) => {
     // Roundshot webcam URL - no direction specified (default view)
     const targetUrl = 'https://uetliberg.roundshot.com/';
     
-    // Using CSS injection to hide UI overlays
+    // Aggressive CSS injection to hide ALL UI overlays
     const hideUiCss = encodeURIComponent(`
-      /* Generic app chrome */
-      header, footer,
-      .header, .footer, .controls, .navigation, .menu, .logo, .brand,
-      [class*="header"], [class*="footer"], [class*="control"], [class*="nav"],
-      [class*="menu"], [class*="logo"], [class*="brand"], [class*="toolbar"],
-      [class*="overlay"], [class*="ui"],
-
-      /* Pannellum UI (common for 360 viewers) */
-      .pnlm-controls-container, .pnlm-control, .pnlm-compass, .pnlm-hot-spot,
-      .pnlm-load-box, .pnlm-about-msg, .pnlm-ui, .pnlm-button,
-
-      /* Roundshot-ish prefixes (best-effort) */
-      .rs-ui, .rs-control, .rs-header, .rs-footer, .rs-logo, .rs-menu,
-      .rs-timeline, .rs-compass, .rs-fullscreen, .rs-share, .rs-info,
-
-      /* Specifically: anything clickable in the top-right corner */
-      button[style*="top"],
-      button[style*="right"],
-      a[style*="top"],
-      a[style*="right"],
-      [style*="position: fixed"][style*="top"][style*="right"],
-      [style*="position: absolute"][style*="top"][style*="right"]
+      /* Hide everything except the panorama canvas */
+      * {
+        pointer-events: none !important;
+      }
+      
+      /* Target specific Roundshot UI elements */
+      img:not([class*="pnlm"]):not([id*="pnlm"]),
+      svg,
+      button,
+      a,
+      nav,
+      header,
+      footer,
+      aside,
+      [class*="logo"],
+      [class*="brand"],
+      [class*="control"],
+      [class*="zoom"],
+      [class*="nav"],
+      [class*="menu"],
+      [class*="toolbar"],
+      [class*="overlay"],
+      [class*="ui-"],
+      [class*="-ui"],
+      [class*="btn"],
+      [class*="button"],
+      [class*="icon"],
+      [class*="widget"],
+      [class*="panel"],
+      [class*="sidebar"],
+      [class*="header"],
+      [class*="footer"],
+      [class*="compass"],
+      [class*="timeline"],
+      [class*="share"],
+      [class*="fullscreen"],
+      [class*="info"],
+      [class*="help"],
+      [class*="settings"],
+      [id*="logo"],
+      [id*="control"],
+      [id*="nav"],
+      [id*="menu"],
+      [id*="ui"],
+      [id*="toolbar"],
+      div[style*="z-index"],
+      div[style*="position: absolute"],
+      div[style*="position: fixed"]
       {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+      
+      /* Keep only the panorama container visible */
+      .pnlm-render-container,
+      .pnlm-container,
+      canvas,
+      [class*="panorama"],
+      [class*="pano"],
+      [id*="panorama"],
+      [id*="pano"]
+      {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        height: 100% !important;
       }
     `);
     
-    // Call Screenshot API with delay for page load and CSS to hide UI elements
-    const screenshotUrl = `https://shot.screenshotapi.net/screenshot?token=${screenshotApiKey}&url=${encodeURIComponent(targetUrl)}&delay=15000&output=image&file_type=jpeg&width=1920&height=1080&full_page=false&fresh=true&css=${hideUiCss}`;
+    // Use remove_selector to physically remove UI elements from DOM before screenshot
+    const removeSelectors = encodeURIComponent('button, nav, header, footer, aside, [class*="logo"], [class*="control"], [class*="zoom"], [class*="nav"], [class*="menu"], svg, a[href]');
+    
+    // Call Screenshot API with CSS injection AND remove_selector
+    const screenshotUrl = `https://shot.screenshotapi.net/screenshot?token=${screenshotApiKey}&url=${encodeURIComponent(targetUrl)}&delay=15000&output=image&file_type=jpeg&width=1920&height=1080&full_page=false&fresh=true&css=${hideUiCss}&remove_selector=${removeSelectors}`;
 
     console.log('Fetching screenshot from API...');
     const screenshotResponse = await fetch(screenshotUrl);
