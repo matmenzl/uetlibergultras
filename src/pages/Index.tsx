@@ -319,8 +319,16 @@ export default function Index() {
             <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
             <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Din Uetli, dini Uetli Runs</h1>
             {weatherData?.weather && (
-              <span className="text-2xl sm:text-4xl" title="Aktuelles Wetter am Uetliberg">
+              <span 
+                className="text-2xl sm:text-4xl flex items-center gap-1" 
+                title="Aktuelles Wetter am Uetliberg"
+              >
                 {weatherData.weather}
+                {weatherData.temperature !== null && (
+                  <span className="text-lg sm:text-2xl text-muted-foreground font-normal">
+                    {weatherData.temperature}°
+                  </span>
+                )}
               </span>
             )}
           </div>
