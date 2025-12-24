@@ -106,8 +106,8 @@ export function WebcamBackground() {
         }}
       />
       
-      {/* Webcam Controls Overlay - responsive positioning */}
-      <div className="absolute bottom-2 left-2 sm:left-auto sm:right-2 z-30 flex items-center gap-1.5 sm:gap-2">
+      {/* Webcam Controls Overlay - centered on mobile, right on desktop */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-2 sm:translate-x-0 z-30 flex items-center gap-1.5 sm:gap-2">
         <span className="text-[10px] sm:text-xs text-white/80 bg-black/50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded backdrop-blur-sm">
           📷 {formatTimestamp(screenshotMeta)}
         </span>
