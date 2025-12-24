@@ -202,10 +202,22 @@ export const TodaysRunners = () => {
           </Button>
         </div>
       ) : runners.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          <Mountain className="w-12 h-12 mx-auto mb-2 opacity-50" />
-          <p className="font-medium">{getDateRangeLabel(dateRange)} noch keine Läufer</p>
-          <p className="text-sm">Sei der Erste am Uetliberg! 🏔️</p>
+        <div className="text-center py-8">
+          <Mountain className="w-12 h-12 mx-auto mb-2 text-muted-foreground opacity-50" />
+          <p className="font-medium text-muted-foreground">{getDateRangeLabel(dateRange)} noch keine Läufer</p>
+          {!user ? (
+            <>
+              <p className="text-sm text-muted-foreground mt-2 mb-4">
+                Verbinde dich mit Strava und schau wer heute schon am Uetliberg unterwegs war.
+              </p>
+              <Button onClick={() => navigate('/auth')} variant="outline">
+                <MapPin className="w-4 h-4 mr-2" />
+                Mit Strava verbinden
+              </Button>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">Sei der Erste am Uetliberg! 🏔️</p>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
