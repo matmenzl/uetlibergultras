@@ -16,6 +16,7 @@ import { Leaderboard } from '@/components/Leaderboard';
 import { Achievements } from '@/components/Achievements';
 import { StreakCounter } from '@/components/StreakCounter';
 import { TodaysRunners } from '@/components/TodaysRunners';
+import { WebcamBackground } from '@/components/WebcamBackground';
 import { triggerFirstCheckInConfetti, triggerConfetti } from '@/lib/confetti';
 const MONTHS_FULL_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 interface CheckIn {
@@ -336,13 +337,8 @@ export default function Index() {
           {!user ? <>
               {/* Hero Section for non-logged-in users */}
               <Card className="p-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
-                {/* Webcam Iframe als Hintergrund */}
-                <iframe 
-                  src="https://uetliberg.roundshot.com/#/" 
-                  className="absolute inset-0 w-full h-full z-0 border-0 scale-150"
-                  title="Uetliberg Webcam"
-                  loading="lazy"
-                />
+                {/* Webcam Screenshot als Hintergrund */}
+                <WebcamBackground />
                 {/* Overlay für bessere Lesbarkeit */}
                 <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/50 to-background/70 z-10" />
                 {/* Content */}
@@ -383,13 +379,8 @@ export default function Index() {
             </> : <>
               {/* Hero Check-In Button */}
               <Card className="p-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
-                {/* Webcam Iframe als Hintergrund */}
-                <iframe 
-                  src="https://uetliberg.roundshot.com/#/" 
-                  className="absolute inset-0 w-full h-full z-0 border-0 scale-150"
-                  title="Uetliberg Webcam"
-                  loading="lazy"
-                />
+                {/* Webcam Screenshot als Hintergrund */}
+                <WebcamBackground />
                 {/* Overlay für bessere Lesbarkeit */}
                 <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/50 to-background/70 z-10" />
                 {/* Content */}
