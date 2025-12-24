@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import heroImage from '@/assets/hero-runners.jpg';
 import { Button } from '@/components/ui/button';
 import { Camera, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -96,14 +95,9 @@ export function WebcamBackground() {
   return (
     <>
       <img
-        src={webcamData?.url || heroImage}
+        src={webcamData?.url || ''}
         alt="Uetliberg Webcam"
-        className="absolute inset-0 w-full h-full object-cover z-0"
-        onError={(e) => {
-          // Fallback to hero image if screenshot fails to load
-          const target = e.target as HTMLImageElement;
-          target.src = heroImage;
-        }}
+        className="absolute inset-0 w-full h-full object-cover z-0 bg-muted"
       />
       
       {/* Webcam Controls Overlay - centered on mobile, right on desktop */}
