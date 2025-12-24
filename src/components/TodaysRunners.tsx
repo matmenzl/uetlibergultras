@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Users, Clock, Mountain, RefreshCw, Calendar, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { User } from "@supabase/supabase-js";
 
 interface Runner {
   user_id: string;
@@ -64,6 +66,12 @@ const getDateRangeLabel = (range: string): string => {
 
 export const TodaysRunners = () => {
   const [dateRange, setDateRange] = useState<string>("today");
+  const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+  }, []);
 
   const {
     data: runners = [],
@@ -230,8 +238,19 @@ export const TodaysRunners = () => {
       ) : runners.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <Mountain className="w-12 h-12 mx-auto mb-2 opacity-50" />
-          <p className="font-medium">{getDateRangeLabel(dateRange)} noch keine Läufer</p>
-          <p className="text-sm">Sei der Erste am Uetliberg! 🏔️</p>
+          {!user ? (
+            <>
+              <p className="font-medium mb-2">Verbinde dich mit Strava und schau wer heute schon am Uetliberg unterwegs war.</p>
+              <Button onClick={() => navigate("/auth")} className="mt-2">
+                Mit Strava verbinden
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="font-medium">{getDateRangeLabel(dateRange)} noch keine Läufer</p>
+              <p className="text-sm">Sei der Erste am Uetliberg! 🏔️</p>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
