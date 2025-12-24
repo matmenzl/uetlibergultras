@@ -30,10 +30,9 @@ Deno.serve(async (req) => {
     const targetUrl = 'https://uetliberg.roundshot.com/#/se';
     
     // Call Screenshot API with delay for page load
-    // We capture a larger area and will crop in post if needed
-    // Using css_clip to crop: top=80px (header), bottom=100px (controls)
+    // Using css_clip to crop UI overlays: top=120px (header/logo), bottom=150px (controls/nav)
     // Format: css_clip=top,right,bottom,left
-    const screenshotUrl = `https://shot.screenshotapi.net/screenshot?token=${screenshotApiKey}&url=${encodeURIComponent(targetUrl)}&delay=12000&output=image&file_type=jpeg&width=1920&height=1080&full_page=false&fresh=true&css_clip=80,0,100,0`;
+    const screenshotUrl = `https://shot.screenshotapi.net/screenshot?token=${screenshotApiKey}&url=${encodeURIComponent(targetUrl)}&delay=12000&output=image&file_type=jpeg&width=1920&height=1080&full_page=false&fresh=true&css_clip=120,0,150,0`;
 
     console.log('Fetching screenshot from API...');
     const screenshotResponse = await fetch(screenshotUrl);
