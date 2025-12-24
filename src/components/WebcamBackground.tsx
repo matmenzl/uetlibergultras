@@ -1,12 +1,20 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import heroImage from '@/assets/hero-runners.jpg';
+import { Button } from '@/components/ui/button';
+import { Camera, RefreshCw } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 export function WebcamBackground() {
+  const [isCapturing, setIsCapturing] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   // Fetch the latest webcam screenshot URL with cache busting
-  const { data: webcamUrl } = useQuery({
+  const { data: webcamData, refetch } = useQuery({
     queryKey: ['webcam-screenshot'],
     queryFn: async () => {
       const { data } = supabase.storage
@@ -14,22 +22,109 @@ export function WebcamBackground() {
         .getPublicUrl('latest.jpg');
       
       // Add timestamp for cache busting
-      return `${data.publicUrl}?t=${Date.now()}`;
+      const timestamp = Date.now();
+      return {
+        url: `${data.publicUrl}?t=${timestamp}`,
+        capturedAt: new Date() // We'll update this when we get actual metadata
+      };
     },
     refetchInterval: 60000, // Refetch every 60 seconds
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
+  // Fetch screenshot metadata (last modified time)
+  const { data: screenshotMeta } = useQuery({
+    queryKey: ['webcam-screenshot-meta'],
+    queryFn: async () => {
+      const { data, error } = await supabase.storage
+        .from('webcam-screenshots')
+        .list('', {
+          search: 'latest.jpg'
+        });
+      
+      if (error || !data || data.length === 0) {
+        return null;
+      }
+      
+      const file = data.find(f => f.name === 'latest.jpg');
+      return file ? new Date(file.updated_at) : null;
+    },
+    refetchInterval: 60000,
+    staleTime: 30000,
+  });
+
+  const captureScreenshot = async () => {
+    setIsCapturing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('capture-webcam');
+      
+      if (error) throw error;
+      
+      // Refetch both the image and metadata
+      await Promise.all([
+        refetch(),
+        queryClient.invalidateQueries({ queryKey: ['webcam-screenshot-meta'] })
+      ]);
+      
+      toast({
+        title: '📸 Screenshot aufgenommen!',
+        description: 'Das Webcam-Bild wurde aktualisiert.',
+      });
+    } catch (error) {
+      console.error('Screenshot capture error:', error);
+      toast({
+        title: 'Fehler beim Screenshot',
+        description: error instanceof Error ? error.message : 'Konnte Screenshot nicht aufnehmen',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
+  const formatTimestamp = (date: Date | null | undefined) => {
+    if (!date) return 'Unbekannt';
+    return date.toLocaleString('de-CH', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   return (
-    <img
-      src={webcamUrl || heroImage}
-      alt="Uetliberg Webcam"
-      className="absolute inset-0 w-full h-full object-cover z-0"
-      onError={(e) => {
-        // Fallback to hero image if screenshot fails to load
-        const target = e.target as HTMLImageElement;
-        target.src = heroImage;
-      }}
-    />
+    <>
+      <img
+        src={webcamData?.url || heroImage}
+        alt="Uetliberg Webcam"
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        onError={(e) => {
+          // Fallback to hero image if screenshot fails to load
+          const target = e.target as HTMLImageElement;
+          target.src = heroImage;
+        }}
+      />
+      
+      {/* Webcam Controls Overlay */}
+      <div className="absolute bottom-2 right-2 z-30 flex items-center gap-2">
+        <span className="text-xs text-white/80 bg-black/50 px-2 py-1 rounded backdrop-blur-sm">
+          📷 {formatTimestamp(screenshotMeta)}
+        </span>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={captureScreenshot}
+          disabled={isCapturing}
+          className="bg-black/50 hover:bg-black/70 text-white border-none backdrop-blur-sm"
+        >
+          {isCapturing ? (
+            <RefreshCw className="w-4 h-4 animate-spin" />
+          ) : (
+            <Camera className="w-4 h-4" />
+          )}
+        </Button>
+      </div>
+    </>
   );
 }
