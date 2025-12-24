@@ -27,7 +27,7 @@ export const Footer = () => {
               <img 
                 src={poweredByStrava} 
                 alt="Powered by Strava" 
-                className="h-6"
+                className="h-4"
               />
             </a>
           </div>
