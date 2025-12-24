@@ -24,10 +24,10 @@ Deno.serve(async (req) => {
       throw new Error('Supabase configuration missing');
     }
 
-    console.log('Starting webcam screenshot capture (S direction)...');
+    console.log('Starting webcam screenshot capture...');
 
-    // Roundshot webcam URL - S direction (South view)
-    const targetUrl = 'https://uetliberg.roundshot.com/#/s';
+    // Roundshot webcam URL - no direction specified (default view)
+    const targetUrl = 'https://uetliberg.roundshot.com/';
     
     // Using CSS injection to hide UI overlays
     const hideUiCss = encodeURIComponent(`
