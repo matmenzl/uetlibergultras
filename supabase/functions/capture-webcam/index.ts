@@ -24,15 +24,28 @@ Deno.serve(async (req) => {
       throw new Error('Supabase configuration missing');
     }
 
-    console.log('Starting webcam screenshot capture (SE direction, cropped)...');
+    console.log('Starting webcam screenshot capture (SE direction)...');
 
     // Roundshot webcam URL - SE direction (Southeast view)
     const targetUrl = 'https://uetliberg.roundshot.com/#/se';
     
-    // Call Screenshot API with delay for page load
-    // Using css_clip to crop UI overlays heavily: top=300px, right=300px, bottom=350px, left=300px
-    // Format: css_clip=top,right,bottom,left
-    const screenshotUrl = `https://shot.screenshotapi.net/screenshot?token=${screenshotApiKey}&url=${encodeURIComponent(targetUrl)}&delay=12000&output=image&file_type=jpeg&width=1920&height=1080&full_page=false&fresh=true&css_clip=300,300,350,300`;
+    // Using CSS injection to hide UI overlays and remove_selector to remove UI elements
+    // The webcam canvas is inside .pnlm-render-container or similar
+    const hideUiCss = encodeURIComponent(`
+      .header, .footer, .controls, .navigation, .menu, .logo, .brand,
+      [class*="header"], [class*="footer"], [class*="control"], [class*="nav"],
+      [class*="menu"], [class*="logo"], [class*="brand"], [class*="btn"],
+      [class*="button"], [class*="overlay"], [class*="ui"], [class*="toolbar"],
+      .leaflet-control-container, .pnlm-controls-container, .pnlm-compass,
+      .pnlm-load-box, .pnlm-about-msg, .pnlm-hot-spot-debug-indicator,
+      [class*="timestamp"], [class*="time"], [class*="date"],
+      .rs-ui, .rs-control, .rs-header, .rs-footer, .rs-logo, .rs-menu,
+      .rs-timeline, .rs-compass, .rs-fullscreen, .rs-share, .rs-info
+      { display: none !important; visibility: hidden !important; opacity: 0 !important; }
+    `);
+    
+    // Call Screenshot API with delay for page load and CSS to hide UI elements
+    const screenshotUrl = `https://shot.screenshotapi.net/screenshot?token=${screenshotApiKey}&url=${encodeURIComponent(targetUrl)}&delay=15000&output=image&file_type=jpeg&width=1920&height=1080&full_page=false&fresh=true&css=${hideUiCss}`;
 
     console.log('Fetching screenshot from API...');
     const screenshotResponse = await fetch(screenshotUrl);
