@@ -192,7 +192,7 @@ export const TodaysRunners = () => {
   });
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 h-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-primary" />

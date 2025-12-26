@@ -198,7 +198,7 @@ export function Achievements({ userId }: AchievementsProps) {
   const earnedCount = [...REGULAR_ACHIEVEMENTS, ...earnedExclusiveAchievements].filter(a => earnedSet.has(a)).length;
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 h-full">
       <div className="flex items-center gap-2 mb-4">
         <Award className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-lg">Achievements</h3>
@@ -235,7 +235,7 @@ export function Achievements({ userId }: AchievementsProps) {
       )}
       
       {/* Regular Achievements Grid */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {REGULAR_ACHIEVEMENTS.map((achievementType) => {
           const config = ACHIEVEMENT_CONFIG[achievementType];
           const isEarned = earnedSet.has(achievementType);
