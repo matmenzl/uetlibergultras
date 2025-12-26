@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Lightbulb, Send, Loader2 } from 'lucide-react';
+import { Lightbulb, Send, Loader2, CheckCircle } from 'lucide-react';
 import { z } from 'zod';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 
@@ -27,6 +27,7 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const { toast } = useToast();
 
   const submitSuggestion = async (userId: string, segmentUrl: string) => {
@@ -55,6 +56,13 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
       });
 
       setUrl('');
+      setShowSuccess(true);
+      
+      // Reset success state after 3 seconds
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000);
+      
       onSuccess?.();
     } catch (err) {
       console.error('Error submitting suggestion:', err);
@@ -127,7 +135,19 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {showLoginPrompt ? (
+        {showSuccess ? (
+          <div className="flex flex-col items-center justify-center py-4 animate-fade-in">
+            <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-3 animate-scale-in">
+              <CheckCircle className="w-10 h-10 text-green-500" />
+            </div>
+            <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+              Erfolgreich eingereicht!
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Ein Admin wird deinen Vorschlag prüfen.
+            </p>
+          </div>
+        ) : showLoginPrompt ? (
           <div className="space-y-3 text-center">
             <p className="text-sm text-muted-foreground">
               Verbinde dich mit Strava um Segmente vorzuschlagen
