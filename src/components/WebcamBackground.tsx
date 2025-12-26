@@ -66,17 +66,10 @@ export function WebcamBackground() {
     staleTime: 15000,
   });
 
-  // Calculate cooldown status
+  // RATE LIMIT TEMPORARILY DISABLED FOR DEBUGGING
   const cooldownInfo = useMemo(() => {
-    if (!screenshotMeta) return { isOnCooldown: false, remainingMinutes: 0 };
-    
-    const now = new Date();
-    const diffMinutes = (now.getTime() - screenshotMeta.getTime()) / (1000 * 60);
-    const isOnCooldown = diffMinutes < RATE_LIMIT_MINUTES;
-    const remainingMinutes = Math.ceil(RATE_LIMIT_MINUTES - diffMinutes);
-    
-    return { isOnCooldown, remainingMinutes: Math.max(0, remainingMinutes) };
-  }, [screenshotMeta]);
+    return { isOnCooldown: false, remainingMinutes: 0 };
+  }, []);
 
   const captureScreenshot = async () => {
     // Double-check cooldown on client side
