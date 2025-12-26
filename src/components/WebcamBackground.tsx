@@ -161,29 +161,29 @@ export function WebcamBackground() {
         />
       )}
       
-      {/* Weather overlay with live indicator - positioned to avoid overlap on mobile */}
+      {/* Weather overlay with live indicator */}
       {imageLoaded && (
-        <div className="absolute bottom-14 sm:bottom-auto sm:top-4 left-2 sm:left-4 z-20 flex items-center gap-1.5 sm:gap-2">
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
           {/* Live indicator or timestamp */}
           {isLive ? (
-            <div className="bg-red-600/90 backdrop-blur-sm rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1 flex items-center gap-1 sm:gap-1.5">
-              <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white rounded-full animate-pulse" />
-              <span className="text-white text-[10px] sm:text-xs font-semibold uppercase tracking-wide">Live</span>
+            <div className="bg-red-600/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              <span className="text-white text-xs font-semibold uppercase tracking-wide">Live</span>
             </div>
           ) : screenshotMeta && (
-            <div className="bg-black/40 backdrop-blur-sm rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1 flex items-center gap-1 sm:gap-1.5">
-              <Clock className="w-2.5 sm:w-3 h-2.5 sm:h-3 text-white/80" />
-              <span className="text-white text-[10px] sm:text-xs font-medium">{formatTime(screenshotMeta)}</span>
+            <div className="bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5">
+              <Clock className="w-3 h-3 text-white/80" />
+              <span className="text-white text-xs font-medium">{formatTime(screenshotMeta)}</span>
             </div>
           )}
           
           {/* Weather info */}
           {weatherData && (
-            <div className="bg-black/40 backdrop-blur-sm rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 text-white">
-              <div className="flex items-center gap-1 sm:gap-2">
-                <span className="text-base sm:text-xl">{weatherData.weather}</span>
+            <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-1.5 text-white">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{weatherData.weather}</span>
                 {weatherData.temperature !== null && (
-                  <span className="text-xs sm:text-base font-medium">{weatherData.temperature}°C</span>
+                  <span className="text-base font-medium">{weatherData.temperature}°C</span>
                 )}
               </div>
             </div>
@@ -191,7 +191,7 @@ export function WebcamBackground() {
         </div>
       )}
       
-      {/* Screenshot button - bottom right, smaller on mobile */}
+      {/* Screenshot button with timestamp and cooldown */}
       <div className="absolute bottom-2 right-2 z-30">
         <TooltipProvider>
           <Tooltip>
@@ -201,18 +201,17 @@ export function WebcamBackground() {
                 variant="secondary"
                 onClick={captureScreenshot}
                 disabled={isCapturing || cooldownInfo.isOnCooldown}
-                className="bg-black/50 hover:bg-black/70 text-white disabled:opacity-70 text-xs sm:text-sm px-2 sm:px-3 h-7 sm:h-9"
+                className="bg-black/50 hover:bg-black/70 text-white disabled:opacity-70"
               >
                 {isCapturing ? (
-                  <RefreshCw className="w-3 sm:w-4 h-3 sm:h-4 animate-spin mr-1 sm:mr-2" />
+                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
                 ) : cooldownInfo.isOnCooldown ? (
-                  <Clock className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
+                  <Clock className="w-4 h-4 mr-2" />
                 ) : (
-                  <Camera className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
+                  <Camera className="w-4 h-4 mr-2" />
                 )}
-                <span className="hidden sm:inline">{screenshotMeta ? formatTime(screenshotMeta) : 'Screenshot'}</span>
-                <span className="sm:hidden">{screenshotMeta ? formatTime(screenshotMeta) : '📸'}</span>
-                {cooldownInfo.isOnCooldown && <span className="hidden sm:inline"> ({cooldownInfo.remainingMinutes} Min)</span>}
+                {screenshotMeta ? formatTime(screenshotMeta) : 'Screenshot'}
+                {cooldownInfo.isOnCooldown && ` (${cooldownInfo.remainingMinutes} Min)`}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
