@@ -161,10 +161,9 @@ export function WebcamBackground() {
         />
       )}
       
-      {/* Weather overlay with live indicator */}
+      {/* Live indicator - top left */}
       {imageLoaded && (
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-          {/* Live indicator or timestamp */}
+        <div className="absolute top-4 left-4 z-20">
           {isLive ? (
             <div className="bg-red-600/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5">
               <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
@@ -176,18 +175,20 @@ export function WebcamBackground() {
               <span className="text-white text-xs font-medium">{formatTime(screenshotMeta)}</span>
             </div>
           )}
-          
-          {/* Weather info */}
-          {weatherData && (
-            <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-1.5 text-white">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">{weatherData.weather}</span>
-                {weatherData.temperature !== null && (
-                  <span className="text-base font-medium">{weatherData.temperature}°C</span>
-                )}
-              </div>
+        </div>
+      )}
+      
+      {/* Weather info - top right */}
+      {imageLoaded && weatherData && (
+        <div className="absolute top-4 right-4 z-20">
+          <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-1.5 text-white">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">{weatherData.weather}</span>
+              {weatherData.temperature !== null && (
+                <span className="text-base font-medium">{weatherData.temperature}°C</span>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
       
