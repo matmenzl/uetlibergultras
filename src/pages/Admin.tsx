@@ -11,7 +11,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
-import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink } from 'lucide-react';
+import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff } from 'lucide-react';
 import { z } from 'zod';
 
 const segmentIdSchema = z.string()
@@ -30,6 +30,26 @@ export default function Admin() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanningMonth, setScanningMonth] = useState<number | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [isTogglingCron, setIsTogglingCron] = useState(false);
+
+  // Fetch webcam cron status
+  const { data: cronStatus, refetch: refetchCronStatus } = useQuery({
+    queryKey: ['webcam-cron-status'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return { status: 'unknown' };
+      
+      const { data, error } = await supabase.functions.invoke('manage-webcam-cron', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { action: 'status' },
+      });
+      
+      if (error) throw error;
+      return data as { status: 'active' | 'inactive' | 'unknown' };
+    },
+    enabled: isAdmin,
+    refetchInterval: 30000,
+  });
   
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
@@ -310,6 +330,37 @@ export default function Admin() {
     }
   };
 
+  const handleToggleCron = async (enable: boolean) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return;
+    
+    setIsTogglingCron(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-webcam-cron', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { action: enable ? 'enable' : 'disable' },
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: enable ? 'Webcam-Cron aktiviert' : 'Webcam-Cron deaktiviert',
+        description: data.message,
+      });
+      
+      refetchCronStatus();
+    } catch (error) {
+      console.error('Cron toggle error:', error);
+      toast({
+        title: 'Fehler',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsTogglingCron(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
@@ -544,6 +595,55 @@ export default function Admin() {
                   </Button>
                 );
               })}
+            </div>
+          </Card>
+
+          {/* Webcam Cron Control */}
+          <Card className="p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <Camera className="w-5 h-5" />
+              Webcam-Screenshots
+              {cronStatus?.status === 'active' && (
+                <Badge variant="secondary" className="bg-green-500/20 text-green-700 dark:text-green-400">
+                  Aktiv
+                </Badge>
+              )}
+              {cronStatus?.status === 'inactive' && (
+                <Badge variant="secondary" className="bg-red-500/20 text-red-700 dark:text-red-400">
+                  Inaktiv
+                </Badge>
+              )}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Automatische Screenshots alle 30 Minuten (6:00–20:00 Uhr).
+              <br />
+              <span className="text-xs">ScreenshotOne Free-Tier: 100 Screenshots/Monat</span>
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant={cronStatus?.status === 'active' ? 'outline' : 'default'}
+                onClick={() => handleToggleCron(true)}
+                disabled={isTogglingCron || cronStatus?.status === 'active'}
+              >
+                {isTogglingCron ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Power className="w-4 h-4 mr-2" />
+                )}
+                Aktivieren
+              </Button>
+              <Button
+                variant={cronStatus?.status === 'inactive' ? 'outline' : 'destructive'}
+                onClick={() => handleToggleCron(false)}
+                disabled={isTogglingCron || cronStatus?.status === 'inactive'}
+              >
+                {isTogglingCron ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <PowerOff className="w-4 h-4 mr-2" />
+                )}
+                Deaktivieren
+              </Button>
             </div>
           </Card>
 
