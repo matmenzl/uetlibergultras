@@ -32,7 +32,7 @@ export const Footer = () => {
               href="https://www.strava.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity duration-300"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#FC4C02] hover:bg-[#FC4C02]/90 transition-all duration-300"
             >
               <img 
                 src={poweredByStrava} 
