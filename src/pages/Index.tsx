@@ -317,7 +317,20 @@ export default function Index() {
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
             <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
-            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Running up that hill</h1>
+            <h1 
+              className="text-2xl sm:text-4xl font-bold text-foreground cursor-pointer group relative"
+              onClick={() => {
+                // Easter Egg: Kate Bush - Running Up That Hill
+                window.open('https://www.youtube.com/watch?v=wp43OdtAAkM', '_blank');
+              }}
+              title="🎵"
+            >
+              <span className="relative z-10 group-hover:text-primary transition-colors duration-300">
+                Running up that hill
+              </span>
+              {/* 80s Synthwave glow effect on hover */}
+              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 blur-xl bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 transition-opacity duration-500 -z-10" />
+            </h1>
             {weatherData?.weather && (
               <span 
                 className="text-2xl sm:text-4xl flex items-center gap-1" 
