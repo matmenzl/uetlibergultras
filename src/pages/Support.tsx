@@ -48,7 +48,7 @@ const faqs = [
       },
       {
         q: 'Wie funktioniert ein Check-in?',
-        a: 'Nachdem du eine Aktivität auf Strava aufgezeichnet hast, gehst du auf die Startseite und klickst auf "Check-in". Die App erkennt automatisch, welche Uetliberg-Segmente du gelaufen bist und checkt dich ein.'
+        a: 'Sobald du dein Strava-Konto verbunden hast, werden deine Läufe automatisch erfasst. Immer wenn du eine Aktivität auf Strava speicherst, erkennt unsere App automatisch, ob du Uetliberg-Segmente gelaufen bist, und checkt dich ein – ohne dass du etwas tun musst. Die Verbindung bleibt aktiv, bis du sie in deinen Strava-Einstellungen unter "Apps" widerrufst.'
       },
       {
         q: 'Warum wird mein Lauf nicht angezeigt?',
