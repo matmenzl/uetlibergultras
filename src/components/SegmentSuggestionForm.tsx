@@ -29,44 +29,9 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setShowLoginPrompt(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleStravaConnect = () => {
-    // Save current URL to return after auth
-    sessionStorage.setItem('auth_return_url', window.location.pathname);
-    
-    const clientId = '186560';
-    const redirectUri = `${window.location.origin}/auth/strava-callback`;
-    const scope = 'read,activity:read,activity:read_all';
-    const stravaAuthUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&approval_prompt=force&scope=${scope}`;
-    window.location.href = stravaAuthUrl;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    // Check if user is logged in
-    if (!user) {
-      setShowLoginPrompt(true);
-      return;
-    }
-
+  const submitSuggestion = async (userId: string, segmentUrl: string) => {
     // Validate URL
-    const validation = stravaSegmentUrlSchema.safeParse(url);
+    const validation = stravaSegmentUrlSchema.safeParse(segmentUrl);
     if (!validation.success) {
       setError(validation.error.errors[0].message);
       return;
@@ -75,11 +40,10 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
     setIsSubmitting(true);
 
     try {
-
       const { error: insertError } = await supabase
         .from('segment_suggestions')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           strava_segment_url: validation.data
         });
 
@@ -98,6 +62,60 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        setShowLoginPrompt(false);
+        // Check if there's a pending segment suggestion
+        const pendingUrl = sessionStorage.getItem('pending_segment_url');
+        if (pendingUrl) {
+          sessionStorage.removeItem('pending_segment_url');
+          setUrl(pendingUrl);
+          // Auto-submit after a short delay to let the UI update
+          setTimeout(() => {
+            submitSuggestion(session.user.id, pendingUrl);
+          }, 500);
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleStravaConnect = () => {
+    // Save the pending segment URL to submit after auth
+    if (url.trim()) {
+      sessionStorage.setItem('pending_segment_url', url.trim());
+    }
+    // Save current URL to return after auth
+    sessionStorage.setItem('auth_return_url', window.location.pathname);
+    
+    const clientId = '186560';
+    const redirectUri = `${window.location.origin}/auth/strava-callback`;
+    const scope = 'read,activity:read,activity:read_all';
+    const stravaAuthUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&approval_prompt=force&scope=${scope}`;
+    window.location.href = stravaAuthUrl;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    // Check if user is logged in
+    if (!user) {
+      // Save URL before showing login prompt
+      setShowLoginPrompt(true);
+      return;
+    }
+
+    await submitSuggestion(user.id, url);
   };
 
   return (
