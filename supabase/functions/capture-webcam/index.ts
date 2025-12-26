@@ -68,41 +68,9 @@ Deno.serve(async (req) => {
     // Roundshot webcam URL - default panorama view
     const targetUrl = 'https://uetliberg.roundshot.com/';
     
-    // Comprehensive CSS selectors to hide ALL UI elements
-    const hideSelectors = [
-      // Common UI elements
-      'button', 'nav', 'header', 'footer', 'aside', 'svg', 'a', 'img:not(canvas)',
-      // Class-based selectors for Roundshot UI
-      '[class*="logo"]', '[class*="control"]', '[class*="zoom"]', '[class*="nav"]',
-      '[class*="menu"]', '[class*="toolbar"]', '[class*="overlay"]', '[class*="ui"]',
-      '[class*="icon"]', '[class*="widget"]', '[class*="panel"]', '[class*="sidebar"]',
-      '[class*="compass"]', '[class*="timeline"]', '[class*="share"]', '[class*="fullscreen"]',
-      '[class*="info"]', '[class*="help"]', '[class*="settings"]', '[class*="button"]',
-      '[class*="btn"]', '[class*="brand"]', '[class*="header"]', '[class*="footer"]',
-      '[class*="popup"]', '[class*="modal"]', '[class*="dialog"]', '[class*="tooltip"]',
-      '[class*="hotspot"]', '[class*="marker"]', '[class*="poi"]', '[class*="label"]',
-      '[class*="text"]', '[class*="title"]', '[class*="caption"]', '[class*="legend"]',
-      // ID-based selectors
-      '[id*="logo"]', '[id*="control"]', '[id*="nav"]', '[id*="menu"]', '[id*="ui"]',
-      '[id*="toolbar"]', '[id*="overlay"]', '[id*="header"]', '[id*="footer"]',
-      // Position-based (often overlays)
-      '[style*="position: absolute"]', '[style*="position: fixed"]',
-      '[style*="z-index"]',
-    ].join(',');
-    
-    // Custom CSS to inject - hide everything except the panorama canvas
-    const customStyles = `
-      * { pointer-events: none !important; }
-      body > *:not(.pnlm-container):not([class*="panorama"]):not([class*="pano"]):not(canvas) {
-        opacity: 0 !important;
-        visibility: hidden !important;
-      }
-      .pnlm-container, [class*="panorama"], [class*="pano"], canvas {
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-    `;
-    
+    // NOTE: Previously we hid *too much* (e.g. `img` / overlays), which could result in a white/blank capture.
+    // Keep capture stable first; we can re-introduce targeted UI-hiding later once we know Roundshot's DOM.
+
     // Build ScreenshotOne API URL
     const params = new URLSearchParams({
       access_key: screenshotOneKey,
@@ -110,12 +78,11 @@ Deno.serve(async (req) => {
       viewport_width: '1920',
       viewport_height: '1080',
       format: 'jpeg',
-      delay: '15',
+      // Give the panorama time to render
+      delay: '25',
       block_ads: 'true',
       block_cookie_banners: 'true',
       block_trackers: 'true',
-      hide_selectors: hideSelectors,
-      styles: customStyles,
       full_page: 'false',
       cache: 'false',
     });
