@@ -351,7 +351,7 @@ export default function Index() {
           </Dialog>
 
           {/* Hero Section - unterschiedlich für eingeloggt/nicht eingeloggt */}
-          <Card className="p-10 sm:p-12 mb-8 text-center border-border/30 animate-fade-in relative overflow-hidden min-h-[400px]">
+          <Card className="p-12 sm:p-16 mb-8 text-center border-border/30 animate-fade-in relative overflow-hidden min-h-[480px]">
             {/* Webcam Screenshot als Hintergrund */}
             <WebcamBackground />
             {/* Content */}
