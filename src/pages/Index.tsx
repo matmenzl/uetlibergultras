@@ -331,19 +331,6 @@ export default function Index() {
               {/* 80s Synthwave glow effect on hover */}
               <span className="absolute inset-0 opacity-0 group-hover:opacity-100 blur-xl bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 transition-opacity duration-500 -z-10" />
             </h1>
-            {weatherData?.weather && (
-              <span 
-                className="text-2xl sm:text-4xl flex items-center gap-1" 
-                title="Aktuelles Wetter am Uetliberg"
-              >
-                {weatherData.weather}
-                {weatherData.temperature !== null && (
-                  <span className="text-lg sm:text-2xl text-muted-foreground font-normal">
-                    {weatherData.temperature}°
-                  </span>
-                )}
-              </span>
-            )}
           </div>
 
           {/* Hero Section - unterschiedlich für eingeloggt/nicht eingeloggt */}
