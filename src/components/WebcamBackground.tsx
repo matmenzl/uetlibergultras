@@ -66,15 +66,33 @@ export function WebcamBackground() {
     staleTime: 15000,
   });
 
-  // RATE LIMIT TEMPORARILY DISABLED FOR DEBUGGING
+  // Calculate cooldown based on last screenshot time
   const cooldownInfo = useMemo(() => {
-    return { isOnCooldown: false, remainingMinutes: 0 };
-  }, []);
+    if (!screenshotMeta) return { isOnCooldown: false, remainingMinutes: 0 };
+    
+    const now = new Date();
+    const minutesSinceLastUpdate = (now.getTime() - screenshotMeta.getTime()) / (1000 * 60);
+    const isOnCooldown = minutesSinceLastUpdate < RATE_LIMIT_MINUTES;
+    const remainingMinutes = Math.ceil(RATE_LIMIT_MINUTES - minutesSinceLastUpdate);
+    
+    return { isOnCooldown, remainingMinutes };
+  }, [screenshotMeta]);
 
   const captureScreenshot = async () => {
     setIsCapturing(true);
     try {
       const { data, error } = await supabase.functions.invoke('capture-webcam');
+      
+      // Check if the response indicates rate limiting
+      if (data?.rateLimited) {
+        toast({
+          title: '⏰ Bitte warten',
+          description: `Nächster Screenshot in ${data.remainingMinutes} Minute${data.remainingMinutes === 1 ? '' : 'n'} möglich.`,
+        });
+        // Refresh metadata to update cooldown display
+        queryClient.invalidateQueries({ queryKey: ['webcam-screenshot-meta'] });
+        return;
+      }
       
       if (error) throw error;
       
