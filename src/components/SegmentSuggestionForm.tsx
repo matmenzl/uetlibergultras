@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { Lightbulb, Send, Loader2, CheckCircle } from 'lucide-react';
 import { z } from 'zod';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
@@ -29,6 +30,7 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const submitSuggestion = async (userId: string, segmentUrl: string) => {
     // Validate URL
@@ -62,6 +64,9 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
       setTimeout(() => {
         setShowSuccess(false);
       }, 3000);
+      
+      // Refresh the suggestions list
+      queryClient.invalidateQueries({ queryKey: ['my-suggestions'] });
       
       onSuccess?.();
     } catch (err) {
