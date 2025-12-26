@@ -45,8 +45,11 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
   }, []);
 
   const handleStravaConnect = () => {
+    // Save current URL to return after auth
+    sessionStorage.setItem('auth_return_url', window.location.pathname);
+    
     const clientId = '186560';
-    const redirectUri = `${window.location.origin}/auth/strava/callback`;
+    const redirectUri = `${window.location.origin}/auth/strava-callback`;
     const scope = 'read,activity:read,activity:read_all';
     const stravaAuthUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&approval_prompt=force&scope=${scope}`;
     window.location.href = stravaAuthUrl;
