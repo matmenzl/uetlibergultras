@@ -118,12 +118,9 @@ export function WebcamBackground() {
     }
   };
 
-  const formatTimestamp = (date: Date | null | undefined) => {
-    if (!date) return 'Unbekannt';
+  const formatTime = (date: Date | null | undefined) => {
+    if (!date) return '';
     return date.toLocaleString('de-CH', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     });
@@ -154,7 +151,7 @@ export function WebcamBackground() {
         />
       )}
       
-      {/* Screenshot button with cooldown indicator */}
+      {/* Screenshot button with timestamp and cooldown */}
       <div className="absolute bottom-2 right-2 z-30">
         <TooltipProvider>
           <Tooltip>
@@ -173,16 +170,16 @@ export function WebcamBackground() {
                 ) : (
                   <Camera className="w-4 h-4 mr-2" />
                 )}
-                {cooldownInfo.isOnCooldown 
-                  ? `${cooldownInfo.remainingMinutes} Min`
-                  : 'Screenshot'}
+                {screenshotMeta ? formatTime(screenshotMeta) : 'Screenshot'}
+                {cooldownInfo.isOnCooldown && ` (${cooldownInfo.remainingMinutes} Min)`}
               </Button>
             </TooltipTrigger>
-            {cooldownInfo.isOnCooldown && (
-              <TooltipContent>
-                <p>Nächster Screenshot in {cooldownInfo.remainingMinutes} Minute{cooldownInfo.remainingMinutes === 1 ? '' : 'n'} möglich</p>
-              </TooltipContent>
-            )}
+            <TooltipContent>
+              {cooldownInfo.isOnCooldown 
+                ? <p>Nächster Screenshot in {cooldownInfo.remainingMinutes} Minute{cooldownInfo.remainingMinutes === 1 ? '' : 'n'} möglich</p>
+                : <p>Neuen Screenshot aufnehmen</p>
+              }
+            </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
