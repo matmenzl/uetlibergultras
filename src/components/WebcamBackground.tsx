@@ -10,6 +10,8 @@ const RATE_LIMIT_MINUTES = 15;
 
 export function WebcamBackground() {
   const [isCapturing, setIsCapturing] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -17,19 +19,30 @@ export function WebcamBackground() {
   const { data: webcamData, refetch } = useQuery({
     queryKey: ['webcam-screenshot'],
     queryFn: async () => {
+      // First check if the file exists
+      const { data: files, error: listError } = await supabase.storage
+        .from('webcam-screenshots')
+        .list('', { search: 'latest.jpg' });
+      
+      if (listError || !files || files.length === 0) {
+        console.log('Webcam screenshot not found in storage');
+        return null;
+      }
+      
       const { data } = supabase.storage
         .from('webcam-screenshots')
         .getPublicUrl('latest.jpg');
       
       // Add timestamp for cache busting
       const timestamp = Date.now();
+      console.log('Webcam URL:', `${data.publicUrl}?t=${timestamp}`);
       return {
         url: `${data.publicUrl}?t=${timestamp}`,
-        capturedAt: new Date() // We'll update this when we get actual metadata
+        capturedAt: new Date()
       };
     },
-    refetchInterval: 60000, // Refetch every 60 seconds
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    refetchInterval: 60000,
+    staleTime: 30000,
   });
 
   // Fetch screenshot metadata (last modified time)
@@ -128,11 +141,28 @@ export function WebcamBackground() {
 
   return (
     <>
-      <img
-        src={webcamData?.url || ''}
-        alt="Uetliberg Webcam"
-        className="absolute inset-0 w-full h-full object-cover z-0 bg-muted"
-      />
+      {/* Fallback gradient background when no image */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-muted to-primary/10 z-0" />
+      
+      {webcamData?.url && !imageError && (
+        <img
+          src={webcamData.url}
+          alt="Uetliberg Webcam"
+          className={`absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-500 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => {
+            console.log('Webcam image loaded successfully');
+            setImageLoaded(true);
+            setImageError(false);
+          }}
+          onError={(e) => {
+            console.error('Webcam image failed to load:', e);
+            setImageError(true);
+            setImageLoaded(false);
+          }}
+        />
+      )}
       
       {/* Webcam Controls Overlay - centered on mobile, right on desktop */}
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-2 sm:translate-x-0 z-30 flex items-center gap-1.5 sm:gap-2">
