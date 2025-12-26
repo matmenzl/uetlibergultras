@@ -138,12 +138,10 @@ export default function Segments() {
             </Card>
           </div>
 
-          {/* Segment Suggestion Form - only for logged in users */}
-          {user && (
-            <div className="mb-6">
-              <SegmentSuggestionForm />
-            </div>
-          )}
+          {/* Segment Suggestion Form - shown to all users */}
+          <div className="mb-6">
+            <SegmentSuggestionForm />
+          </div>
 
           {/* Placeholder segments info */}
           {placeholderSegments.length > 0 && <Card className="p-4 mb-6 border-muted bg-muted/30">
