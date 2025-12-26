@@ -125,12 +125,15 @@ serve(async (req) => {
       }
 
       if (action === "disable") {
-        // Find and unschedule the cron job by name
-        try {
-          await connection.queryObject`SELECT cron.unschedule('webcam-screenshot-job')`;
-        } catch (e) {
-          // Job might not exist, that's ok
-          console.log("No existing job to unschedule:", e);
+        // Find and unschedule all webcam cron jobs
+        const existing = await connection.queryObject`
+          SELECT jobid FROM cron.job WHERE command ILIKE '%capture-webcam%'
+        `;
+        
+        for (const row of existing.rows) {
+          const jobId = Number((row as any).jobid);
+          console.log("Unscheduling job:", jobId);
+          await connection.queryObject`SELECT cron.unschedule(${jobId})`;
         }
 
         return new Response(
