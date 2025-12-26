@@ -76,14 +76,14 @@ export const Footer = () => {
             </h4>
             <div className="space-y-1.5">
               <p className="text-sm text-muted-foreground">
-                © 2024{" "}
+                © 2025{" "}
                 <a 
-                  href="https://kollektivauthentisch.ch" 
+                  href="https://uetlibergultras.ch" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="hover:text-foreground transition-colors duration-200 inline-flex items-center gap-1"
                 >
-                  kollektivauthentisch.ch
+                  uetlibergultras.ch
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </p>
