@@ -9,7 +9,7 @@ import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { SegmentSuggestionForm } from '@/components/SegmentSuggestionForm';
 import { useQuery } from '@tanstack/react-query';
-import { Mountain, TrendingUp, Ruler, Users, MapPin } from 'lucide-react';
+import { Mountain, TrendingUp, Ruler, Users, MapPin, Clock, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 interface Segment {
   segment_id: number;
   name: string;
@@ -58,6 +58,61 @@ export default function Segments() {
       return data as Segment[];
     }
   });
+
+  // Fetch user's own suggestions
+  const { data: mySuggestions } = useQuery({
+    queryKey: ['my-suggestions', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('segment_suggestions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case 'approved':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'rejected':
+        return <XCircle className="w-4 h-4 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'Wird geprüft';
+      case 'approved':
+        return 'Genehmigt';
+      case 'rejected':
+        return 'Abgelehnt';
+      default:
+        return status;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400';
+      case 'approved':
+        return 'bg-green-500/20 text-green-700 dark:text-green-400';
+      case 'rejected':
+        return 'bg-red-500/20 text-red-700 dark:text-red-400';
+      default:
+        return 'bg-muted text-muted-foreground';
+    }
+  };
 
   // Helper to check if segment has valid name
   const isValidSegment = (segment: Segment) => {
@@ -142,6 +197,43 @@ export default function Segments() {
           <div className="mb-6">
             <SegmentSuggestionForm />
           </div>
+
+          {/* User's own suggestions */}
+          {user && mySuggestions && mySuggestions.length > 0 && (
+            <Card className="p-4 mb-6">
+              <h3 className="text-sm font-semibold mb-3">Deine Vorschläge</h3>
+              <div className="space-y-2">
+                {mySuggestions.map((suggestion) => (
+                  <div 
+                    key={suggestion.id}
+                    className={`flex items-center justify-between gap-3 p-2 rounded-lg ${
+                      suggestion.status === 'pending' 
+                        ? 'bg-muted/50' 
+                        : suggestion.status === 'approved'
+                        ? 'bg-green-500/10'
+                        : 'bg-red-500/10'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      {getStatusIcon(suggestion.status)}
+                      <a 
+                        href={suggestion.strava_segment_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline truncate flex items-center gap-1"
+                      >
+                        <span className="truncate">{suggestion.strava_segment_url.replace('https://www.strava.com/segments/', 'Segment ')}</span>
+                        <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                      </a>
+                    </div>
+                    <Badge className={`${getStatusColor(suggestion.status)} flex-shrink-0`}>
+                      {getStatusLabel(suggestion.status)}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
           {/* Placeholder segments info */}
           {placeholderSegments.length > 0 && <Card className="p-4 mb-6 border-muted bg-muted/30">
