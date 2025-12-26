@@ -36,7 +36,7 @@ export default function NavBar() {
         variant="ghost" 
         size="sm"
         onClick={() => { navigate('/segments'); onNavigate?.(); }} 
-        className="text-muted-foreground hover:text-foreground transition-colors w-full md:w-auto justify-start md:justify-center"
+        className="text-white/90 hover:text-white hover:bg-white/10 transition-colors w-full md:w-auto justify-start md:justify-center"
       >
         Segmente
       </Button>
@@ -44,7 +44,7 @@ export default function NavBar() {
         variant="ghost" 
         size="sm"
         onClick={() => { navigate('/support'); onNavigate?.(); }} 
-        className="text-muted-foreground hover:text-foreground transition-colors w-full md:w-auto justify-start md:justify-center"
+        className="text-white/90 hover:text-white hover:bg-white/10 transition-colors w-full md:w-auto justify-start md:justify-center"
       >
         Support
       </Button>
@@ -53,7 +53,7 @@ export default function NavBar() {
           variant="ghost" 
           size="sm"
           onClick={() => { navigate('/admin'); onNavigate?.(); }}
-          className="text-muted-foreground hover:text-foreground transition-colors w-full md:w-auto justify-start md:justify-center"
+          className="text-white/90 hover:text-white hover:bg-white/10 transition-colors w-full md:w-auto justify-start md:justify-center"
         >
           <Shield className="h-3.5 w-3.5 mr-1.5" />
           Admin
@@ -64,7 +64,7 @@ export default function NavBar() {
           variant="ghost" 
           size="sm"
           onClick={() => { handleSignOut(); onNavigate?.(); }}
-          className="text-muted-foreground hover:text-foreground w-full md:w-auto"
+          className="text-white/90 hover:text-white hover:bg-white/10 w-full md:w-auto"
         >
           Abmelden
         </Button>
