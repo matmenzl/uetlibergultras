@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Camera, RefreshCw, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useWeather } from '@/hooks/useWeather';
 
 const RATE_LIMIT_MINUTES = 15;
 
@@ -14,6 +15,7 @@ export function WebcamBackground() {
   const [imageError, setImageError] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: weatherData } = useWeather();
 
   // Fetch the latest webcam screenshot URL with cache busting
   const { data: webcamData, refetch } = useQuery({
@@ -149,6 +151,20 @@ export function WebcamBackground() {
             setImageLoaded(false);
           }}
         />
+      )}
+      
+      {/* Weather overlay */}
+      {imageLoaded && weatherData && (
+        <div className="absolute top-4 left-4 z-20">
+          <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2 text-white">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{weatherData.weather}</span>
+              {weatherData.temperature !== null && (
+                <span className="text-lg font-medium">{weatherData.temperature}°C</span>
+              )}
+            </div>
+          </div>
+        </div>
       )}
       
       {/* Screenshot button with timestamp and cooldown */}
