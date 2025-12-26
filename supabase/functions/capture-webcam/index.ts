@@ -5,6 +5,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Rate limit: 15 minutes between screenshots
+const RATE_LIMIT_MINUTES = 15;
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -16,15 +19,51 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!screenshotApiKey) {
-      throw new Error('SCREENSHOT_API_KEY not configured');
-    }
-
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error('Supabase configuration missing');
     }
 
-    console.log('Starting webcam screenshot capture...');
+    // Initialize Supabase client early for rate limit check
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Check when the last screenshot was taken
+    const { data: files, error: listError } = await supabase.storage
+      .from('webcam-screenshots')
+      .list('', { search: 'latest.jpg' });
+
+    if (!listError && files && files.length > 0) {
+      const latestFile = files.find(f => f.name === 'latest.jpg');
+      if (latestFile) {
+        const lastUpdated = new Date(latestFile.updated_at);
+        const now = new Date();
+        const diffMinutes = (now.getTime() - lastUpdated.getTime()) / (1000 * 60);
+        
+        if (diffMinutes < RATE_LIMIT_MINUTES) {
+          const remainingMinutes = Math.ceil(RATE_LIMIT_MINUTES - diffMinutes);
+          console.log(`Rate limit: Last screenshot was ${diffMinutes.toFixed(1)} minutes ago. Need to wait ${remainingMinutes} more minutes.`);
+          
+          return new Response(
+            JSON.stringify({
+              success: false,
+              rateLimited: true,
+              message: `Bitte warte noch ${remainingMinutes} Minute${remainingMinutes > 1 ? 'n' : ''} bis zum nächsten Screenshot.`,
+              lastUpdated: lastUpdated.toISOString(),
+              nextAllowedAt: new Date(lastUpdated.getTime() + RATE_LIMIT_MINUTES * 60 * 1000).toISOString(),
+            }),
+            {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 429,
+            }
+          );
+        }
+      }
+    }
+
+    if (!screenshotApiKey) {
+      throw new Error('SCREENSHOT_API_KEY not configured');
+    }
+
+    console.log('Starting webcam screenshot capture (rate limit passed)...');
 
     // Roundshot webcam URL - no direction specified (default view)
     const targetUrl = 'https://uetliberg.roundshot.com/';
@@ -130,9 +169,6 @@ Deno.serve(async (req) => {
     // Convert blob to ArrayBuffer for upload
     const arrayBuffer = await imageBlob.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
-
-    // Initialize Supabase client with service role
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Upload to storage bucket (upsert = replace existing)
     const fileName = 'latest.jpg';

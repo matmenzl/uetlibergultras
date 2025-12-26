@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Camera, RefreshCw } from 'lucide-react';
+import { Camera, RefreshCw, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const RATE_LIMIT_MINUTES = 15;
 
 export function WebcamBackground() {
   const [isCapturing, setIsCapturing] = useState(false);
@@ -48,14 +49,47 @@ export function WebcamBackground() {
       const file = data.find(f => f.name === 'latest.jpg');
       return file ? new Date(file.updated_at) : null;
     },
-    refetchInterval: 60000,
-    staleTime: 30000,
+    refetchInterval: 30000, // Check more frequently to update cooldown status
+    staleTime: 15000,
   });
 
+  // Calculate cooldown status
+  const cooldownInfo = useMemo(() => {
+    if (!screenshotMeta) return { isOnCooldown: false, remainingMinutes: 0 };
+    
+    const now = new Date();
+    const diffMinutes = (now.getTime() - screenshotMeta.getTime()) / (1000 * 60);
+    const isOnCooldown = diffMinutes < RATE_LIMIT_MINUTES;
+    const remainingMinutes = Math.ceil(RATE_LIMIT_MINUTES - diffMinutes);
+    
+    return { isOnCooldown, remainingMinutes: Math.max(0, remainingMinutes) };
+  }, [screenshotMeta]);
+
   const captureScreenshot = async () => {
+    // Double-check cooldown on client side
+    if (cooldownInfo.isOnCooldown) {
+      toast({
+        title: 'Cooldown aktiv',
+        description: `Bitte warte noch ${cooldownInfo.remainingMinutes} Minute${cooldownInfo.remainingMinutes > 1 ? 'n' : ''}.`,
+        variant: 'default',
+      });
+      return;
+    }
     setIsCapturing(true);
     try {
       const { data, error } = await supabase.functions.invoke('capture-webcam');
+      
+      // Handle rate limit response from backend
+      if (data?.rateLimited) {
+        toast({
+          title: 'Cooldown aktiv',
+          description: data.message,
+          variant: 'default',
+        });
+        // Refresh metadata to sync cooldown state
+        queryClient.invalidateQueries({ queryKey: ['webcam-screenshot-meta'] });
+        return;
+      }
       
       if (error) throw error;
       
@@ -105,19 +139,37 @@ export function WebcamBackground() {
         <span className="text-[10px] sm:text-xs text-white/80 bg-black/50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded backdrop-blur-sm">
           📷 {formatTimestamp(screenshotMeta)}
         </span>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={captureScreenshot}
-          disabled={isCapturing}
-          className="h-7 w-7 sm:h-8 sm:w-8 p-0 bg-black/50 hover:bg-black/70 text-white border-none backdrop-blur-sm"
-        >
-          {isCapturing ? (
-            <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
-          ) : (
-            <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          )}
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={captureScreenshot}
+                disabled={isCapturing || cooldownInfo.isOnCooldown}
+                className={`h-7 w-7 sm:h-8 sm:w-8 p-0 border-none backdrop-blur-sm ${
+                  cooldownInfo.isOnCooldown 
+                    ? 'bg-black/30 text-white/50 cursor-not-allowed' 
+                    : 'bg-black/50 hover:bg-black/70 text-white'
+                }`}
+              >
+                {isCapturing ? (
+                  <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+                ) : cooldownInfo.isOnCooldown ? (
+                  <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                ) : (
+                  <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="bg-black/80 text-white border-none">
+              {cooldownInfo.isOnCooldown 
+                ? `Noch ${cooldownInfo.remainingMinutes} Min. warten`
+                : 'Neuen Screenshot aufnehmen'
+              }
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </>
   );
