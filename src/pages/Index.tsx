@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Mountain, Trophy, Flame, HelpCircle } from 'lucide-react';
+import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Mountain, Trophy, Flame, HelpCircle, X } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Leaderboard } from '@/components/Leaderboard';
 import { Achievements } from '@/components/Achievements';
@@ -19,6 +19,7 @@ import { TodaysRunners } from '@/components/TodaysRunners';
 import { WebcamBackground } from '@/components/WebcamBackground';
 import { triggerFirstCheckInConfetti, triggerConfetti } from '@/lib/confetti';
 import { useWeather } from '@/hooks/useWeather';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 const MONTHS_FULL_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
@@ -69,6 +70,7 @@ export default function Index() {
     month: number;
   } | null>(null);
   const [isRefreshingSegments, setIsRefreshingSegments] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1; // 1-12
   const { toast } = useToast();
@@ -319,10 +321,7 @@ export default function Index() {
             <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
             <h1 
               className="text-2xl sm:text-4xl font-bold text-foreground cursor-pointer group relative"
-              onClick={() => {
-                // Easter Egg: Kate Bush - Running Up That Hill
-                window.open('https://www.youtube.com/watch?v=wp43OdtAAkM', '_blank');
-              }}
+              onClick={() => setShowVideoModal(true)}
               title="🎵"
             >
               <span className="relative z-10 group-hover:text-primary transition-colors duration-300">
@@ -332,6 +331,24 @@ export default function Index() {
               <span className="absolute inset-0 opacity-0 group-hover:opacity-100 blur-xl bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 transition-opacity duration-500 -z-10" />
             </h1>
           </div>
+
+          {/* Kate Bush Video Modal */}
+          <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
+            <DialogContent className="sm:max-w-[640px] p-0 bg-black border-none overflow-hidden">
+              <DialogTitle className="sr-only">Running Up That Hill - Kate Bush</DialogTitle>
+              <div className="relative pt-[56.25%]">
+                <iframe 
+                  className="absolute inset-0 w-full h-full"
+                  src={showVideoModal ? "https://www.youtube.com/embed/wp43OdtAAkM?si=bw5XnU0Qw20AHvl_&start=49&autoplay=1" : ""}
+                  title="Kate Bush - Running Up That Hill"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Hero Section - unterschiedlich für eingeloggt/nicht eingeloggt */}
           <Card className="p-10 sm:p-12 mb-8 text-center border-border/30 animate-fade-in relative overflow-hidden min-h-[340px]">
