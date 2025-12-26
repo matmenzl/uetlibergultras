@@ -33,27 +33,19 @@ Deno.serve(async (req) => {
       throw new Error('SCREENSHOTONE_ACCESS_KEY not configured');
     }
 
-    console.log('Starting webcam screenshot capture with ScreenshotOne (rate limit passed)...');
+    console.log('Starting webcam screenshot capture with ScreenshotOne (DEBUG MODE)...');
 
-    // Roundshot webcam URL - default panorama view
+    // Roundshot webcam URL
     const targetUrl = 'https://uetliberg.roundshot.com/';
-    
-    // NOTE: Previously we hid *too much* (e.g. `img` / overlays), which could result in a white/blank capture.
-    // Keep capture stable first; we can re-introduce targeted UI-hiding later once we know Roundshot's DOM.
 
-    // Build ScreenshotOne API URL
+    // Simplified params for debugging
     const params = new URLSearchParams({
       access_key: screenshotOneKey,
       url: targetUrl,
       viewport_width: '1920',
       viewport_height: '1080',
       format: 'jpeg',
-      // Give the panorama time to render
-      delay: '25',
-      block_ads: 'true',
-      block_cookie_banners: 'true',
-      block_trackers: 'true',
-      full_page: 'false',
+      delay: '10',
       cache: 'false',
     });
     
