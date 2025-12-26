@@ -116,7 +116,7 @@ export const Footer = () => {
         {/* Bottom bar */}
         <div className="mt-12 pt-6 border-t border-border/20">
           <p className="text-center text-xs text-muted-foreground/40">
-            Uetliberg Ultras — Run the mountain. Join the crew.
+            Uetliberg Ultras — running up that hill
           </p>
         </div>
       </div>
