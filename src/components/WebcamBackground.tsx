@@ -163,7 +163,7 @@ export function WebcamBackground() {
       
       {/* Weather overlay with live indicator */}
       {imageLoaded && (
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
           {/* Live indicator or timestamp */}
           {isLive ? (
             <div className="bg-red-600/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5">
