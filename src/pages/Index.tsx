@@ -334,31 +334,41 @@ export default function Index() {
           </div>
 
           {/* Hero Section - unterschiedlich für eingeloggt/nicht eingeloggt */}
-          <Card className="p-8 pb-14 sm:pb-8 mb-6 text-center border-primary/20 animate-fade-in relative overflow-hidden min-h-[300px]">
+          <Card className="p-10 sm:p-12 mb-8 text-center border-border/30 animate-fade-in relative overflow-hidden min-h-[340px]">
             {/* Webcam Screenshot als Hintergrund */}
             <WebcamBackground />
-            {/* Overlay für bessere Lesbarkeit */}
-            <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/50 to-background/70 z-10" />
+            {/* Stärkeres Overlay für bessere Lesbarkeit */}
+            <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/75 to-background/90 z-10" />
+            <div className="absolute inset-0 bg-background/40 z-10" />
             {/* Content */}
             <div className="relative z-20">
-              <Mountain className="w-16 h-16 text-primary mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">{getGreeting()}</h2>
+              <Mountain className="w-12 h-12 text-primary mx-auto mb-6 opacity-80" />
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 tracking-tight">{getGreeting()}</h2>
               {!user ? (
                 <>
-                  <p className="text-muted-foreground mb-6">
+                  <p className="text-muted-foreground mb-8 text-lg max-w-md mx-auto">
                     Der Uetliberg wartet auf dich! Verbinde dich mit Strava und sammle deine Uetliberg Runs.
                   </p>
-                  <Button onClick={() => navigate('/auth')} size="lg" className="animate-pulse-subtle">
+                  <Button 
+                    onClick={() => navigate('/auth')} 
+                    size="lg" 
+                    className="text-base px-8 py-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105"
+                  >
                     <MapPin className="w-4 h-4 mr-2" />
-                    Los geht's mit Strava! 🏃
+                    Los geht's mit Strava
                   </Button>
                 </>
               ) : (
                 <>
-                  <p className="text-muted-foreground mb-6">
+                  <p className="text-muted-foreground mb-8 text-lg">
                     Bereit für deinen nächsten Uetli Run?
                   </p>
-                  <Button onClick={() => scanMonth(currentYear, currentMonth)} disabled={isScanning} size="lg" className="text-lg px-8 py-6 animate-pulse-subtle hover:scale-105 transition-transform">
+                  <Button 
+                    onClick={() => scanMonth(currentYear, currentMonth)} 
+                    disabled={isScanning} 
+                    size="lg" 
+                    className="text-base sm:text-lg px-8 sm:px-10 py-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105"
+                  >
                     {isScanning ? (
                       <>
                         <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
@@ -367,7 +377,7 @@ export default function Index() {
                     ) : (
                       <>
                         <Flame className="w-5 h-5 mr-2" />
-                        Run einchecken 💪
+                        Run einchecken
                       </>
                     )}
                   </Button>
