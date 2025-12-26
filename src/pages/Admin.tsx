@@ -5,11 +5,13 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
-import { Shield, Plus, RefreshCw, AlertTriangle, Calendar } from 'lucide-react';
+import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink } from 'lucide-react';
 import { z } from 'zod';
 
 const segmentIdSchema = z.string()
@@ -21,15 +23,150 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, isAdmin, isLoading } = useUserRole();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [segmentId, setSegmentId] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanningMonth, setScanningMonth] = useState<number | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
   
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
   const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+
+  // Fetch pending suggestions
+  const { data: suggestions, isLoading: suggestionsLoading } = useQuery({
+    queryKey: ['segment-suggestions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('segment_suggestions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAdmin,
+  });
+
+  const extractSegmentId = (url: string): string | null => {
+    const match = url.match(/strava\.com\/segments\/(\d+)/);
+    return match ? match[1] : null;
+  };
+
+  const handleApprove = async (suggestion: { id: string; strava_segment_url: string }) => {
+    const segmentIdFromUrl = extractSegmentId(suggestion.strava_segment_url);
+    if (!segmentIdFromUrl) {
+      toast({
+        title: 'Ungültige URL',
+        description: 'Konnte keine Segment-ID aus der URL extrahieren.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setProcessingId(suggestion.id);
+    try {
+      // Check if segment already exists
+      const { data: existing } = await supabase
+        .from('uetliberg_segments')
+        .select('segment_id')
+        .eq('segment_id', parseInt(segmentIdFromUrl))
+        .maybeSingle();
+
+      if (existing) {
+        toast({
+          title: 'Segment existiert bereits',
+          description: `Segment ${segmentIdFromUrl} ist bereits in der Datenbank.`,
+          variant: 'destructive',
+        });
+        // Still mark as approved
+        await supabase
+          .from('segment_suggestions')
+          .update({ 
+            status: 'approved', 
+            reviewed_at: new Date().toISOString(),
+            reviewed_by: user?.id,
+            admin_notes: 'Segment existierte bereits'
+          })
+          .eq('id', suggestion.id);
+      } else {
+        // Add the segment
+        const { error: insertError } = await supabase
+          .from('uetliberg_segments')
+          .insert({
+            segment_id: parseInt(segmentIdFromUrl),
+            name: `Segment ${segmentIdFromUrl}`,
+            distance: 0,
+            avg_grade: 0,
+            climb_category: 0,
+            start_latlng: '(0,0)',
+            end_latlng: '(0,0)',
+            polyline: '',
+            priority: 'medium',
+          });
+
+        if (insertError) throw insertError;
+
+        // Mark suggestion as approved
+        await supabase
+          .from('segment_suggestions')
+          .update({ 
+            status: 'approved', 
+            reviewed_at: new Date().toISOString(),
+            reviewed_by: user?.id 
+          })
+          .eq('id', suggestion.id);
+
+        toast({
+          title: 'Segment hinzugefügt',
+          description: `Segment ${segmentIdFromUrl} wurde hinzugefügt und der Vorschlag genehmigt.`,
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['segment-suggestions'] });
+    } catch (error) {
+      console.error('Error approving suggestion:', error);
+      toast({
+        title: 'Fehler',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleReject = async (suggestionId: string) => {
+    setProcessingId(suggestionId);
+    try {
+      await supabase
+        .from('segment_suggestions')
+        .update({ 
+          status: 'rejected', 
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user?.id 
+        })
+        .eq('id', suggestionId);
+
+      toast({
+        title: 'Vorschlag abgelehnt',
+        description: 'Der Vorschlag wurde abgelehnt.',
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['segment-suggestions'] });
+    } catch (error) {
+      console.error('Error rejecting suggestion:', error);
+      toast({
+        title: 'Fehler',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   const scanMonth = async (year: number, month: number) => {
     if (!user) return;
@@ -239,6 +376,107 @@ export default function Admin() {
           <p className="text-muted-foreground mb-8">
             Segmente verwalten und Einstellungen ändern
           </p>
+
+          {/* Segment Suggestions */}
+          <Card className="p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-primary" />
+              Segment-Vorschläge
+              {suggestions && suggestions.filter(s => s.status === 'pending').length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {suggestions.filter(s => s.status === 'pending').length} offen
+                </Badge>
+              )}
+            </h2>
+            
+            {suggestionsLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : suggestions && suggestions.length > 0 ? (
+              <div className="space-y-3">
+                {suggestions.map((suggestion) => (
+                  <div 
+                    key={suggestion.id} 
+                    className={`p-3 rounded-lg border ${
+                      suggestion.status === 'pending' 
+                        ? 'bg-muted/50 border-border' 
+                        : suggestion.status === 'approved'
+                        ? 'bg-green-500/10 border-green-500/30'
+                        : 'bg-red-500/10 border-red-500/30'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                      <div className="flex-1 min-w-0">
+                        <a 
+                          href={suggestion.strava_segment_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline flex items-center gap-1 truncate"
+                        >
+                          {suggestion.strava_segment_url}
+                          <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                        </a>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(suggestion.created_at).toLocaleDateString('de-CH', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        {suggestion.status === 'pending' ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-green-600 hover:text-green-700 hover:bg-green-500/10"
+                              onClick={() => handleApprove(suggestion)}
+                              disabled={processingId === suggestion.id}
+                            >
+                              {processingId === suggestion.id ? (
+                                <RefreshCw className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Check className="w-4 h-4" />
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-500/10"
+                              onClick={() => handleReject(suggestion.id)}
+                              disabled={processingId === suggestion.id}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <Badge 
+                            variant="secondary"
+                            className={
+                              suggestion.status === 'approved' 
+                                ? 'bg-green-500/20 text-green-700 dark:text-green-400' 
+                                : 'bg-red-500/20 text-red-700 dark:text-red-400'
+                            }
+                          >
+                            {suggestion.status === 'approved' ? 'Genehmigt' : 'Abgelehnt'}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Keine Vorschläge vorhanden
+              </p>
+            )}
+          </Card>
 
           {/* Add Segment Form */}
           <Card className="p-6 mb-6">
