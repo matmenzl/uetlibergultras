@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const screenshotApiKey = Deno.env.get('SCREENSHOT_API_KEY');
+    const screenshotOneKey = Deno.env.get('SCREENSHOTONE_ACCESS_KEY');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -59,98 +59,36 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (!screenshotApiKey) {
-      throw new Error('SCREENSHOT_API_KEY not configured');
+    if (!screenshotOneKey) {
+      throw new Error('SCREENSHOTONE_ACCESS_KEY not configured');
     }
 
-    console.log('Starting webcam screenshot capture (rate limit passed)...');
+    console.log('Starting webcam screenshot capture with ScreenshotOne (rate limit passed)...');
 
-    // Roundshot webcam URL - no direction specified (default view)
+    // Roundshot webcam URL - default panorama view
     const targetUrl = 'https://uetliberg.roundshot.com/';
     
-    // Aggressive CSS injection to hide ALL UI overlays
-    const hideUiCss = encodeURIComponent(`
-      /* Hide everything except the panorama canvas */
-      * {
-        pointer-events: none !important;
-      }
-      
-      /* Target specific Roundshot UI elements */
-      img:not([class*="pnlm"]):not([id*="pnlm"]),
-      svg,
-      button,
-      a,
-      nav,
-      header,
-      footer,
-      aside,
-      [class*="logo"],
-      [class*="brand"],
-      [class*="control"],
-      [class*="zoom"],
-      [class*="nav"],
-      [class*="menu"],
-      [class*="toolbar"],
-      [class*="overlay"],
-      [class*="ui-"],
-      [class*="-ui"],
-      [class*="btn"],
-      [class*="button"],
-      [class*="icon"],
-      [class*="widget"],
-      [class*="panel"],
-      [class*="sidebar"],
-      [class*="header"],
-      [class*="footer"],
-      [class*="compass"],
-      [class*="timeline"],
-      [class*="share"],
-      [class*="fullscreen"],
-      [class*="info"],
-      [class*="help"],
-      [class*="settings"],
-      [id*="logo"],
-      [id*="control"],
-      [id*="nav"],
-      [id*="menu"],
-      [id*="ui"],
-      [id*="toolbar"],
-      div[style*="z-index"],
-      div[style*="position: absolute"],
-      div[style*="position: fixed"]
-      {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        width: 0 !important;
-        height: 0 !important;
-        overflow: hidden !important;
-      }
-      
-      /* Keep only the panorama container visible */
-      .pnlm-render-container,
-      .pnlm-container,
-      canvas,
-      [class*="panorama"],
-      [class*="pano"],
-      [id*="panorama"],
-      [id*="pano"]
-      {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        width: 100% !important;
-        height: 100% !important;
-      }
-    `);
+    // CSS selectors to hide UI elements (ScreenshotOne uses hide_selectors parameter)
+    const hideSelectors = 'button,nav,header,footer,aside,[class*="logo"],[class*="control"],[class*="zoom"],[class*="nav"],[class*="menu"],svg,a[href],[class*="toolbar"],[class*="overlay"],[class*="ui-"],[class*="icon"],[class*="widget"],[class*="panel"],[class*="sidebar"],[class*="compass"],[class*="timeline"],[class*="share"],[class*="fullscreen"],[class*="info"],[class*="help"],[class*="settings"]';
     
-    // Use remove_selector to physically remove UI elements from DOM before screenshot
-    const removeSelectors = encodeURIComponent('button, nav, header, footer, aside, [class*="logo"], [class*="control"], [class*="zoom"], [class*="nav"], [class*="menu"], svg, a[href]');
+    // Build ScreenshotOne API URL
+    const params = new URLSearchParams({
+      access_key: screenshotOneKey,
+      url: targetUrl,
+      viewport_width: '1920',
+      viewport_height: '1080',
+      format: 'jpeg',
+      delay: '15', // ScreenshotOne uses seconds, not milliseconds
+      block_ads: 'true',
+      block_cookie_banners: 'true',
+      hide_selectors: hideSelectors,
+      full_page: 'false',
+      cache: 'false',
+    });
     
-    // Call Screenshot API with CSS injection AND remove_selector
-    const screenshotUrl = `https://shot.screenshotapi.net/screenshot?token=${screenshotApiKey}&url=${encodeURIComponent(targetUrl)}&delay=15000&output=image&file_type=jpeg&width=1920&height=1080&full_page=false&fresh=true&css=${hideUiCss}&remove_selector=${removeSelectors}`;
+    const screenshotUrl = `https://api.screenshotone.com/take?${params.toString()}`;
 
-    console.log('Fetching screenshot from API...');
+    console.log('Fetching screenshot from ScreenshotOne API...');
     const screenshotResponse = await fetch(screenshotUrl);
 
     if (!screenshotResponse.ok) {
