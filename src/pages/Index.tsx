@@ -350,9 +350,6 @@ export default function Index() {
           <Card className="p-10 sm:p-12 mb-8 text-center border-border/30 animate-fade-in relative overflow-hidden min-h-[340px]">
             {/* Webcam Screenshot als Hintergrund */}
             <WebcamBackground />
-            {/* Stärkeres Overlay für bessere Lesbarkeit */}
-            <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/75 to-background/90 z-10" />
-            <div className="absolute inset-0 bg-background/40 z-10" />
             {/* Content */}
             <div className="relative z-20">
               <Mountain className="w-12 h-12 text-primary mx-auto mb-6 opacity-80" />
