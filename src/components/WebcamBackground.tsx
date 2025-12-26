@@ -72,30 +72,9 @@ export function WebcamBackground() {
   }, []);
 
   const captureScreenshot = async () => {
-    // Double-check cooldown on client side
-    if (cooldownInfo.isOnCooldown) {
-      toast({
-        title: 'Cooldown aktiv',
-        description: `Bitte warte noch ${cooldownInfo.remainingMinutes} Minute${cooldownInfo.remainingMinutes > 1 ? 'n' : ''}.`,
-        variant: 'default',
-      });
-      return;
-    }
     setIsCapturing(true);
     try {
       const { data, error } = await supabase.functions.invoke('capture-webcam');
-      
-      // Handle rate limit response from backend
-      if (data?.rateLimited) {
-        toast({
-          title: 'Cooldown aktiv',
-          description: data.message,
-          variant: 'default',
-        });
-        // Refresh metadata to sync cooldown state
-        queryClient.invalidateQueries({ queryKey: ['webcam-screenshot-meta'] });
-        return;
-      }
       
       if (error) throw error;
       
@@ -157,42 +136,22 @@ export function WebcamBackground() {
         />
       )}
       
-      {/* Webcam Controls Overlay - centered on mobile, right on desktop */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-2 sm:translate-x-0 z-30 flex items-center gap-1.5 sm:gap-2">
-        <span className="text-[10px] sm:text-xs text-white/80 bg-black/50 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded backdrop-blur-sm">
-          📷 {formatTimestamp(screenshotMeta)}
-        </span>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={captureScreenshot}
-                disabled={isCapturing || cooldownInfo.isOnCooldown}
-                className={`h-7 w-7 sm:h-8 sm:w-8 p-0 border-none backdrop-blur-sm ${
-                  cooldownInfo.isOnCooldown 
-                    ? 'bg-black/30 text-white/50 cursor-not-allowed' 
-                    : 'bg-black/50 hover:bg-black/70 text-white'
-                }`}
-              >
-                {isCapturing ? (
-                  <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
-                ) : cooldownInfo.isOnCooldown ? (
-                  <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                ) : (
-                  <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="bg-black/80 text-white border-none">
-              {cooldownInfo.isOnCooldown 
-                ? `Noch ${cooldownInfo.remainingMinutes} Min. warten`
-                : 'Neuen Screenshot aufnehmen'
-              }
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+      {/* Simple debug button */}
+      <div className="absolute bottom-2 right-2 z-30">
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={captureScreenshot}
+          disabled={isCapturing}
+          className="bg-black/50 hover:bg-black/70 text-white"
+        >
+          {isCapturing ? (
+            <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+          ) : (
+            <Camera className="w-4 h-4 mr-2" />
+          )}
+          Screenshot
+        </Button>
       </div>
     </>
   );
