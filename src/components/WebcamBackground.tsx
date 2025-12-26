@@ -154,22 +154,37 @@ export function WebcamBackground() {
         />
       )}
       
-      {/* Simple debug button */}
+      {/* Screenshot button with cooldown indicator */}
       <div className="absolute bottom-2 right-2 z-30">
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={captureScreenshot}
-          disabled={isCapturing}
-          className="bg-black/50 hover:bg-black/70 text-white"
-        >
-          {isCapturing ? (
-            <RefreshCw className="w-4 h-4 animate-spin mr-2" />
-          ) : (
-            <Camera className="w-4 h-4 mr-2" />
-          )}
-          Screenshot
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={captureScreenshot}
+                disabled={isCapturing || cooldownInfo.isOnCooldown}
+                className="bg-black/50 hover:bg-black/70 text-white disabled:opacity-70"
+              >
+                {isCapturing ? (
+                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                ) : cooldownInfo.isOnCooldown ? (
+                  <Clock className="w-4 h-4 mr-2" />
+                ) : (
+                  <Camera className="w-4 h-4 mr-2" />
+                )}
+                {cooldownInfo.isOnCooldown 
+                  ? `${cooldownInfo.remainingMinutes} Min`
+                  : 'Screenshot'}
+              </Button>
+            </TooltipTrigger>
+            {cooldownInfo.isOnCooldown && (
+              <TooltipContent>
+                <p>Nächster Screenshot in {cooldownInfo.remainingMinutes} Minute{cooldownInfo.remainingMinutes === 1 ? '' : 'n'} möglich</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </>
   );
