@@ -38,7 +38,21 @@ Deno.serve(async (req) => {
     // Roundshot webcam URL
     const targetUrl = 'https://uetliberg.roundshot.com/';
 
-    // Simplified params for debugging
+    // CSS to hide all UI overlays on the Roundshot page
+    const customCSS = `
+      mat-toolbar, .mat-toolbar, header, nav, footer, .overlay, .controls, 
+      .logo, .branding, button, .navigation, .menu, .sidebar, .info, .widget,
+      app-header, app-footer, app-toolbar, .cdk-overlay-container,
+      .mat-button, .mat-icon-button, .weather, .time, .date, .roundshot-logo,
+      [class*="toolbar"], [class*="header"], [class*="footer"], [class*="overlay"],
+      [class*="button"], [class*="control"], [class*="menu"], [class*="nav"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+      }
+    `;
+
+    // Params with hide_selectors and custom CSS
     const params = new URLSearchParams({
       access_key: screenshotOneKey,
       url: targetUrl,
@@ -47,6 +61,21 @@ Deno.serve(async (req) => {
       format: 'jpeg',
       delay: '10',
       cache: 'false',
+      styles: customCSS,
+    });
+
+    // Selectors to hide Roundshot UI elements
+    const hideSelectors = [
+      'mat-toolbar', '.mat-toolbar', 'header', 'nav', 'footer', '.footer',
+      '.overlay', '.controls', '.logo', '.branding', '.weather', '.time',
+      '.date', 'button', '.button', '.mat-button', '.toolbar', '.navigation',
+      '.menu', '.sidebar', '.info', '.widget', 'app-header', 'app-footer',
+      'app-toolbar', '.cdk-overlay-container', '.mat-icon-button',
+    ];
+
+    // Add each selector as hide_selectors[]
+    hideSelectors.forEach(selector => {
+      params.append('hide_selectors[]', selector);
     });
     
     const screenshotUrl = `https://api.screenshotone.com/take?${params.toString()}`;
