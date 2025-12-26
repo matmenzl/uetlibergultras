@@ -30,55 +30,65 @@ export default function NavBar() {
     navigate('/auth');
   };
 
-  const NavItems = ({ onNavigate }: { onNavigate?: () => void }) => (
-    <>
-      <Button 
-        variant="ghost" 
-        size="sm"
-        onClick={() => { navigate('/segments'); onNavigate?.(); }} 
-        className="text-white font-medium hover:text-white hover:bg-white/20 transition-colors w-full md:w-auto justify-start md:justify-center"
-      >
-        Segmente
-      </Button>
-      <Button 
-        variant="ghost" 
-        size="sm"
-        onClick={() => { navigate('/support'); onNavigate?.(); }} 
-        className="text-white font-medium hover:text-white hover:bg-white/20 transition-colors w-full md:w-auto justify-start md:justify-center"
-      >
-        Support
-      </Button>
-      {isAdmin && (
+  const NavItems = ({ onNavigate, inSheet = false }: { onNavigate?: () => void; inSheet?: boolean }) => {
+    // In sheet (mobile menu) or when scrolled, use foreground colors
+    // When not scrolled (over hero image), use white with text shadow
+    const buttonClass = inSheet 
+      ? "text-foreground font-medium hover:bg-accent transition-colors w-full justify-start"
+      : isScrolled
+        ? "text-foreground font-medium hover:bg-accent transition-colors"
+        : "text-white font-medium hover:text-white hover:bg-white/20 transition-colors [text-shadow:_0_1px_3px_rgba(0,0,0,0.5)]";
+    
+    return (
+      <>
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={() => { navigate('/admin'); onNavigate?.(); }}
-          className="text-white font-medium hover:text-white hover:bg-white/20 transition-colors w-full md:w-auto justify-start md:justify-center"
+          onClick={() => { navigate('/segments'); onNavigate?.(); }} 
+          className={cn(buttonClass, "w-full md:w-auto justify-start md:justify-center")}
         >
-          <Shield className="h-3.5 w-3.5 mr-1.5" />
-          Admin
+          Segmente
         </Button>
-      )}
-      {user ? (
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={() => { handleSignOut(); onNavigate?.(); }}
-          className="text-white font-medium hover:text-white hover:bg-white/20 w-full md:w-auto"
+          onClick={() => { navigate('/support'); onNavigate?.(); }} 
+          className={cn(buttonClass, "w-full md:w-auto justify-start md:justify-center")}
         >
-          Abmelden
+          Support
         </Button>
-      ) : (
-        <Button 
-          size="sm"
-          onClick={() => { navigate('/auth'); onNavigate?.(); }}
-          className="w-full md:w-auto"
-        >
-          Los geht's
-        </Button>
-      )}
-    </>
-  );
+        {isAdmin && (
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => { navigate('/admin'); onNavigate?.(); }}
+            className={cn(buttonClass, "w-full md:w-auto justify-start md:justify-center")}
+          >
+            <Shield className="h-3.5 w-3.5 mr-1.5" />
+            Admin
+          </Button>
+        )}
+        {user ? (
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => { handleSignOut(); onNavigate?.(); }}
+            className={cn(buttonClass, "w-full md:w-auto")}
+          >
+            Abmelden
+          </Button>
+        ) : (
+          <Button 
+            size="sm"
+            onClick={() => { navigate('/auth'); onNavigate?.(); }}
+            className="w-full md:w-auto"
+          >
+            Los geht's
+          </Button>
+        )}
+      </>
+    );
+  };
 
   return (
     <nav 
@@ -112,7 +122,7 @@ export default function NavBar() {
           </SheetTrigger>
           <SheetContent side="right" className="w-[280px]">
             <div className="flex flex-col gap-2 mt-8">
-              <NavItems />
+              <NavItems inSheet={true} />
             </div>
           </SheetContent>
         </Sheet>
