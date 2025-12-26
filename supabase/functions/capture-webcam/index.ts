@@ -26,38 +26,8 @@ Deno.serve(async (req) => {
     // Initialize Supabase client early for rate limit check
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check when the last screenshot was taken
-    const { data: files, error: listError } = await supabase.storage
-      .from('webcam-screenshots')
-      .list('', { search: 'latest.jpg' });
-
-    if (!listError && files && files.length > 0) {
-      const latestFile = files.find(f => f.name === 'latest.jpg');
-      if (latestFile) {
-        const lastUpdated = new Date(latestFile.updated_at);
-        const now = new Date();
-        const diffMinutes = (now.getTime() - lastUpdated.getTime()) / (1000 * 60);
-        
-        if (diffMinutes < RATE_LIMIT_MINUTES) {
-          const remainingMinutes = Math.ceil(RATE_LIMIT_MINUTES - diffMinutes);
-          console.log(`Rate limit: Last screenshot was ${diffMinutes.toFixed(1)} minutes ago. Need to wait ${remainingMinutes} more minutes.`);
-          
-          return new Response(
-            JSON.stringify({
-              success: false,
-              rateLimited: true,
-              message: `Bitte warte noch ${remainingMinutes} Minute${remainingMinutes > 1 ? 'n' : ''} bis zum nächsten Screenshot.`,
-              lastUpdated: lastUpdated.toISOString(),
-              nextAllowedAt: new Date(lastUpdated.getTime() + RATE_LIMIT_MINUTES * 60 * 1000).toISOString(),
-            }),
-            {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 429,
-            }
-          );
-        }
-      }
-    }
+    // RATE LIMIT TEMPORARILY DISABLED FOR DEBUGGING
+    console.log('Rate limit check SKIPPED (debugging mode)');
 
     if (!screenshotOneKey) {
       throw new Error('SCREENSHOTONE_ACCESS_KEY not configured');
