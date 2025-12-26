@@ -74,7 +74,11 @@ serve(async (req) => {
           WHERE command ILIKE '%capture-webcam%'
         `;
         
-        const jobs = result.rows;
+        // Convert BigInt to Number for JSON serialization
+        const jobs = result.rows.map((job: any) => ({
+          ...job,
+          jobid: job.jobid ? Number(job.jobid) : null
+        }));
         const isActive = jobs.length > 0 && jobs.some((j: any) => j.active);
         
         return new Response(
@@ -121,15 +125,12 @@ serve(async (req) => {
       }
 
       if (action === "disable") {
-        // Find and unschedule the cron job
-        const existing = await connection.queryObject`
-          SELECT jobid FROM cron.job WHERE command ILIKE '%capture-webcam%'
-        `;
-        
-        if (existing.rows.length > 0) {
-          for (const row of existing.rows) {
-            await connection.queryObject`SELECT cron.unschedule(${(row as any).jobid})`;
-          }
+        // Find and unschedule the cron job by name
+        try {
+          await connection.queryObject`SELECT cron.unschedule('webcam-screenshot-job')`;
+        } catch (e) {
+          // Job might not exist, that's ok
+          console.log("No existing job to unschedule:", e);
         }
 
         return new Response(
