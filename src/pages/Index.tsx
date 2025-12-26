@@ -325,7 +325,7 @@ export default function Index() {
               title="🎵"
             >
               <span className="relative z-10 group-hover:text-primary transition-colors duration-300">
-                Running up that hill
+                We're Running Up That Hill
               </span>
               {/* 80s Synthwave glow effect on hover */}
               <span className="absolute inset-0 opacity-0 group-hover:opacity-100 blur-xl bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 transition-opacity duration-500 -z-10" />
