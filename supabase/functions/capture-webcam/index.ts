@@ -38,87 +38,61 @@ Deno.serve(async (req) => {
     // Roundshot webcam URL
     const targetUrl = 'https://uetliberg.roundshot.com/';
 
-    // CSS to hide ALL UI overlays on the Roundshot page - using exact selectors from their Angular app
+    // AGGRESSIVE CSS: Hide EVERYTHING except the canvas element
     const customCSS = `
-      /* Top compass */
-      app-compass-top, .compass-container, .compass-row, .compass-label, .compass-indicator {
+      /* Hide all direct children of app-root except app-canvas */
+      app-root > *:not(app-canvas) {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
       }
       
-      /* Main menu / sidebar on the right */
-      app-main-menu-container, .main-menu-container, .main-menu, .main-menu-item, 
-      .main-menu-button, .menu-placeholder, .menu-scrollable {
+      /* Hide everything inside app-canvas except the actual canvas element */
+      app-canvas > *:not(canvas) {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
       }
       
-      /* Weather button */
-      app-weather-menu-button, .weather-button, .weather-content {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
+      /* Make sure canvas fills the viewport */
+      app-canvas, canvas {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
       }
       
-      /* Sponsor logos / branding (Uto Kulm, Bergstube) */
-      app-sponsors-container, .sponsors-container, .sponsor, .sponsor-logo,
-      app-branding, .branding-container, .branding-logo {
+      /* Hide any elements with Angular content attributes that are overlays */
+      app-compass-top,
+      app-main-menu-container,
+      app-weather-menu-button,
+      app-sponsors-container,
+      app-scrubber,
+      app-scrubber-container,
+      app-timeline,
+      app-zoom-control,
+      app-hotspots-container,
+      app-hotspot,
+      app-roundshot-logo,
+      app-tab-links,
+      app-entry-loader,
+      [class*="compass"],
+      [class*="menu"],
+      [class*="weather"],
+      [class*="sponsor"],
+      [class*="scrubber"],
+      [class*="timeline"],
+      [class*="zoom"],
+      [class*="hotspot"],
+      [class*="roundshot"],
+      [class*="branding"],
+      [class*="tab-link"],
+      a[href],
+      button,
+      img:not(canvas) {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
-      }
-      
-      /* Timeline / time scrubber at the bottom */
-      app-scrubber, app-timeline, .scrubber, .timeline, .time-slider,
-      app-scrubber-container, .scrubber-container {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
-      
-      /* Zoom controls */
-      app-zoom-control, .zoom-control, .zoom-container {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
-      
-      /* Hotspots (pins on the image) */
-      app-hotspots-container, app-hotspot, .hotspot, .hotspot-icon, .hotspot-title {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
-      
-      /* Roundshot logo */
-      app-roundshot-logo, .roundshot-logo, [class*="roundshot"] {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
-      
-      /* Tab links (Wetter, Hotel, Bergstube) */
-      app-tab-links, .tab-links, .tab-link {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
-      
-      /* Any remaining Angular Material buttons */
-      button, .mat-button, .mat-icon-button, a.mat-button {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
-      
-      /* Any absolute positioned overlays */
-      [style*="position: absolute"]:not(app-canvas):not(canvas),
-      [style*="position:absolute"]:not(app-canvas):not(canvas) {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
+        pointer-events: none !important;
       }
     `;
 
@@ -134,28 +108,24 @@ Deno.serve(async (req) => {
       styles: customCSS,
     });
 
-    // Exact Angular component selectors from Roundshot page
+    // Comprehensive list of Angular component selectors to hide
     const hideSelectors = [
-      // Top compass
-      'app-compass-top', '.compass-container',
-      // Right sidebar menu
-      'app-main-menu-container', '.main-menu-container', '.main-menu',
-      // Weather
-      'app-weather-menu-button', '.weather-button',
-      // Sponsor logos
-      'app-sponsors-container', '.sponsor',
-      // Bottom timeline/scrubber
-      'app-scrubber', 'app-timeline', '.scrubber', '.timeline',
-      // Zoom controls
-      'app-zoom-control', '.zoom-control',
-      // Hotspots
-      'app-hotspots-container', 'app-hotspot', '.hotspot',
-      // Roundshot logo
-      'app-roundshot-logo', '.roundshot-logo',
-      // Tab links at bottom
-      'app-tab-links', '.tab-links',
-      // General buttons
-      'button', '.mat-button',
+      'app-compass-top',
+      'app-main-menu-container',
+      'app-weather-menu-button', 
+      'app-sponsors-container',
+      'app-scrubber',
+      'app-scrubber-container',
+      'app-timeline',
+      'app-zoom-control',
+      'app-hotspots-container',
+      'app-hotspot',
+      'app-roundshot-logo',
+      'app-tab-links',
+      'app-entry-loader',
+      'button',
+      'a',
+      'img',
     ];
 
     // Add each selector
