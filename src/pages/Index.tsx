@@ -339,7 +339,7 @@ export default function Index() {
               <div className="relative pt-[56.25%]">
                 <iframe 
                   className="absolute inset-0 w-full h-full"
-                  src={showVideoModal ? "https://www.youtube.com/embed/wp43OdtAAkM?si=bw5XnU0Qw20AHvl_&start=49&autoplay=1" : ""}
+                  src={showVideoModal ? "https://www.youtube.com/embed/wp43OdtAAkM?si=bw5XnU0Qw20AHvl_&start=59&autoplay=1" : ""}
                   title="Kate Bush - Running Up That Hill"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
