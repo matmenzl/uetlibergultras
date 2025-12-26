@@ -26,14 +26,41 @@ Deno.serve(async (req) => {
     // Initialize Supabase client early for rate limit check
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // RATE LIMIT TEMPORARILY DISABLED FOR DEBUGGING
-    console.log('Rate limit check SKIPPED (debugging mode)');
+    // Check rate limit by looking at the file's last modified time
+    const { data: files } = await supabase.storage
+      .from('webcam-screenshots')
+      .list('', { search: 'latest.jpg' });
+
+    if (files && files.length > 0) {
+      const lastModified = new Date(files[0].updated_at);
+      const now = new Date();
+      const minutesSinceLastUpdate = (now.getTime() - lastModified.getTime()) / (1000 * 60);
+      
+      if (minutesSinceLastUpdate < RATE_LIMIT_MINUTES) {
+        const remainingMinutes = Math.ceil(RATE_LIMIT_MINUTES - minutesSinceLastUpdate);
+        console.log(`Rate limit active. ${remainingMinutes} minutes remaining.`);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: `Rate limited. Please wait ${remainingMinutes} more minute(s).`,
+            rateLimited: true,
+            remainingMinutes,
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 429,
+          }
+        );
+      }
+    }
+
+    console.log('Rate limit check passed.');
 
     if (!screenshotOneKey) {
       throw new Error('SCREENSHOTONE_ACCESS_KEY not configured');
     }
 
-    console.log('Starting webcam screenshot capture with ScreenshotOne (DEBUG MODE)...');
+    console.log('Starting webcam screenshot capture with ScreenshotOne...');
 
     // Roundshot webcam URL
     const targetUrl = 'https://uetliberg.roundshot.com/';
