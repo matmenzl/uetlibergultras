@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Mountain, Shield, Menu } from 'lucide-react';
+import { Mountain, Shield, Menu, Map, HeartHandshake, LogOut } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import {
   Sheet,
@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 
 export default function NavBar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAdmin } = useUserRole();
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -30,14 +31,40 @@ export default function NavBar() {
     navigate('/auth');
   };
 
+  const isActive = (path: string) => location.pathname === path;
+
   const NavItems = ({ onNavigate, inSheet = false }: { onNavigate?: () => void; inSheet?: boolean }) => {
+    // Base styles for all states
+    const baseClass = "font-medium transition-all duration-200 gap-2";
+    
     // In sheet (mobile menu) or when scrolled, use foreground colors
     // When not scrolled (over hero image), use white with text shadow
-    const buttonClass = inSheet 
-      ? "text-foreground font-medium hover:bg-accent transition-colors w-full justify-start"
-      : isScrolled
-        ? "text-foreground font-medium hover:bg-accent transition-colors"
-        : "text-white font-medium hover:text-white hover:bg-white/20 transition-colors [text-shadow:_0_1px_3px_rgba(0,0,0,0.5)]";
+    const getButtonClass = (path: string) => {
+      const active = isActive(path);
+      
+      if (inSheet) {
+        return cn(
+          baseClass,
+          "w-full justify-start text-foreground hover:bg-accent",
+          active && "bg-accent text-primary"
+        );
+      }
+      
+      if (isScrolled) {
+        return cn(
+          baseClass,
+          "text-foreground hover:bg-accent hover:text-primary",
+          active && "bg-accent/50 text-primary"
+        );
+      }
+      
+      // Over hero image - white text with shadow
+      return cn(
+        baseClass,
+        "text-white hover:bg-white/20 [text-shadow:_0_1px_4px_rgba(0,0,0,0.6)]",
+        active && "bg-white/20"
+      );
+    };
     
     return (
       <>
@@ -45,16 +72,18 @@ export default function NavBar() {
           variant="ghost" 
           size="sm"
           onClick={() => { navigate('/segments'); onNavigate?.(); }} 
-          className={cn(buttonClass, "w-full md:w-auto justify-start md:justify-center")}
+          className={cn(getButtonClass('/segments'), "w-full md:w-auto justify-start md:justify-center")}
         >
+          <Map className="h-4 w-4" />
           Segmente
         </Button>
         <Button 
           variant="ghost" 
           size="sm"
           onClick={() => { navigate('/support'); onNavigate?.(); }} 
-          className={cn(buttonClass, "w-full md:w-auto justify-start md:justify-center")}
+          className={cn(getButtonClass('/support'), "w-full md:w-auto justify-start md:justify-center")}
         >
+          <HeartHandshake className="h-4 w-4" />
           Support
         </Button>
         {isAdmin && (
@@ -62,9 +91,9 @@ export default function NavBar() {
             variant="ghost" 
             size="sm"
             onClick={() => { navigate('/admin'); onNavigate?.(); }}
-            className={cn(buttonClass, "w-full md:w-auto justify-start md:justify-center")}
+            className={cn(getButtonClass('/admin'), "w-full md:w-auto justify-start md:justify-center")}
           >
-            <Shield className="h-3.5 w-3.5 mr-1.5" />
+            <Shield className="h-4 w-4" />
             Admin
           </Button>
         )}
@@ -73,15 +102,24 @@ export default function NavBar() {
             variant="ghost" 
             size="sm"
             onClick={() => { handleSignOut(); onNavigate?.(); }}
-            className={cn(buttonClass, "w-full md:w-auto")}
+            className={cn(
+              baseClass,
+              inSheet 
+                ? "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10" 
+                : isScrolled
+                  ? "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  : "text-white/80 hover:text-white hover:bg-white/20 [text-shadow:_0_1px_4px_rgba(0,0,0,0.6)]",
+              "w-full md:w-auto"
+            )}
           >
+            <LogOut className="h-4 w-4" />
             Abmelden
           </Button>
         ) : (
           <Button 
             size="sm"
             onClick={() => { navigate('/auth'); onNavigate?.(); }}
-            className="w-full md:w-auto"
+            className="w-full md:w-auto shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 transition-shadow"
           >
             Los geht's
           </Button>
