@@ -25,11 +25,12 @@ serve(async (req) => {
     // Create Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const dbUrl = Deno.env.get("SUPABASE_DB_URL")!;
     
     // Verify user using their token
     const token = authHeader.replace("Bearer ", "");
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
     
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     
@@ -40,115 +41,63 @@ serve(async (req) => {
       );
     }
 
-    // Check if user is admin using service role
-    const serviceClient = createClient(
-      supabaseUrl,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-    
-    const { data: isAdmin } = await serviceClient.rpc("has_role", {
-      _user_id: user.id,
-      _role: "admin",
-    });
-
-    if (!isAdmin) {
-      return new Response(
-        JSON.stringify({ error: "Admin access required" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     const { action } = await req.json();
+    console.log("Action requested:", action, "by user:", user.id);
 
-    // Use postgres module for direct DB access to cron schema
-    const { Pool } = await import("https://deno.land/x/postgres@v0.17.0/mod.ts");
-    const pool = new Pool(dbUrl, 1, true);
-    const connection = await pool.connect();
-
-    try {
-      if (action === "status") {
-        // Check current cron job status
-        const result = await connection.queryObject`
-          SELECT jobid, schedule, active, jobname, command 
-          FROM cron.job 
-          WHERE command ILIKE '%capture-webcam%'
-        `;
-        
-        // Convert BigInt to Number for JSON serialization
-        const jobs = result.rows.map((job: any) => ({
-          ...job,
-          jobid: job.jobid ? Number(job.jobid) : null
-        }));
-        const isActive = jobs.length > 0 && jobs.some((j: any) => j.active);
-        
-        return new Response(
-          JSON.stringify({ 
-            status: isActive ? "active" : "inactive",
-            jobs: jobs
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+    if (action === "status") {
+      // Use the database function to get cron status
+      const { data, error } = await supabase.rpc("webcam_cron_status");
+      
+      if (error) {
+        console.error("Error getting cron status:", error);
+        throw error;
       }
+      
+      const isActive = data && data.length > 0 && data.some((j: { active: boolean }) => j.active);
+      
+      return new Response(
+        JSON.stringify({ 
+          status: isActive ? "active" : "inactive",
+          jobs: data || []
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-      if (action === "enable") {
-        // First check if job already exists
-        const existing = await connection.queryObject`
-          SELECT jobid FROM cron.job WHERE command ILIKE '%capture-webcam%'
-        `;
-        
-        if (existing.rows.length > 0) {
-          // Job exists - just make sure it's active (re-schedule it)
-          await connection.queryObject`SELECT cron.unschedule(${(existing.rows[0] as any).jobid})`;
-        }
-        
-        // Schedule the cron job - every 30 minutes during daytime (6:00-20:00)
-        const scheduleQuery = `
-          SELECT cron.schedule(
-            'webcam-screenshot-job',
-            '*/30 6-20 * * *',
-            $$
-            SELECT net.http_post(
-              url:='${supabaseUrl}/functions/v1/capture-webcam',
-              headers:='{"Content-Type": "application/json", "Authorization": "Bearer ${supabaseAnonKey}"}'::jsonb,
-              body:='{}'::jsonb
-            ) as request_id;
-            $$
-          );
-        `;
-        
-        await connection.queryObject(scheduleQuery);
-
-        return new Response(
-          JSON.stringify({ success: true, message: "Webcam-Cron aktiviert (alle 30 Min, 6:00-20:00 Uhr)" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      if (action === "disable") {
-        // Find and unschedule all webcam cron jobs
-        const existing = await connection.queryObject`
-          SELECT jobid FROM cron.job WHERE command ILIKE '%capture-webcam%'
-        `;
-        
-        for (const row of existing.rows) {
-          const jobId = Number((row as any).jobid);
-          console.log("Unscheduling job:", jobId);
-          await connection.queryObject`SELECT cron.unschedule(${jobId})`;
-        }
-
-        return new Response(
-          JSON.stringify({ success: true, message: "Webcam-Cron deaktiviert" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+    if (action === "enable") {
+      // Use the database function to enable cron
+      const { error } = await supabase.rpc("webcam_cron_set_enabled", { _enabled: true });
+      
+      if (error) {
+        console.error("Error enabling cron:", error);
+        throw error;
       }
 
       return new Response(
-        JSON.stringify({ error: "Invalid action. Use 'status', 'enable', or 'disable'" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ success: true, message: "Webcam-Cron aktiviert (alle 30 Min, 6:00-20:00 Uhr)" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
-    } finally {
-      connection.release();
     }
+
+    if (action === "disable") {
+      // Use the database function to disable cron
+      const { error } = await supabase.rpc("webcam_cron_set_enabled", { _enabled: false });
+      
+      if (error) {
+        console.error("Error disabling cron:", error);
+        throw error;
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, message: "Webcam-Cron deaktiviert" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ error: "Invalid action. Use 'status', 'enable', or 'disable'" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
 
   } catch (error: unknown) {
     console.error("Error:", error);

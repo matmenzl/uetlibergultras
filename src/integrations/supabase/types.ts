@@ -296,6 +296,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      webcam_cron_set_enabled: {
+        Args: { _enabled: boolean }
+        Returns: undefined
+      }
+      webcam_cron_status: {
+        Args: never
+        Returns: {
+          active: boolean
+          jobid: number
+          jobname: string
+          schedule: string
+        }[]
+      }
     }
     Enums: {
       achievement_type:
