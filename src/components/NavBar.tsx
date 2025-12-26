@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Mountain, Shield, Menu, Map, HeartHandshake, LogOut } from 'lucide-react';
+import { Mountain, Shield, Menu } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import {
   Sheet,
@@ -34,94 +34,67 @@ export default function NavBar() {
   const isActive = (path: string) => location.pathname === path;
 
   const NavItems = ({ onNavigate, inSheet = false }: { onNavigate?: () => void; inSheet?: boolean }) => {
-    // Base styles for all states
-    const baseClass = "font-medium transition-all duration-200 gap-2";
-    
-    // In sheet (mobile menu) or when scrolled, use foreground colors
-    // When not scrolled (over hero image), use white with text shadow
-    const getButtonClass = (path: string) => {
+    // Text link style - clean and minimal like in the screenshot
+    const getLinkClass = (path: string) => {
       const active = isActive(path);
       
       if (inSheet) {
         return cn(
-          baseClass,
-          "w-full justify-start text-foreground hover:bg-accent",
-          active && "bg-accent text-primary"
+          "text-base font-medium transition-colors py-2",
+          active ? "text-primary" : "text-foreground hover:text-primary"
         );
       }
       
-      if (isScrolled) {
-        return cn(
-          baseClass,
-          "text-foreground hover:bg-accent hover:text-primary",
-          active && "bg-accent/50 text-primary"
-        );
-      }
-      
-      // Over hero image - white text with shadow
       return cn(
-        baseClass,
-        "text-white hover:bg-white/20 [text-shadow:_0_1px_4px_rgba(0,0,0,0.6)]",
-        active && "bg-white/20"
+        "text-sm font-medium transition-colors px-3 py-1.5 rounded-md",
+        active 
+          ? "text-primary" 
+          : "text-muted-foreground hover:text-foreground"
       );
     };
     
     return (
       <>
-        <Button 
-          variant="ghost" 
-          size="sm"
+        <button 
           onClick={() => { navigate('/segments'); onNavigate?.(); }} 
-          className={cn(getButtonClass('/segments'), "w-full md:w-auto justify-start md:justify-center")}
+          className={getLinkClass('/segments')}
         >
-          <Map className="h-4 w-4" />
           Segmente
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm"
+        </button>
+        <button 
           onClick={() => { navigate('/support'); onNavigate?.(); }} 
-          className={cn(getButtonClass('/support'), "w-full md:w-auto justify-start md:justify-center")}
+          className={getLinkClass('/support')}
         >
-          <HeartHandshake className="h-4 w-4" />
           Support
-        </Button>
+        </button>
         {isAdmin && (
-          <Button 
-            variant="ghost" 
-            size="sm"
+          <button 
             onClick={() => { navigate('/admin'); onNavigate?.(); }}
-            className={cn(getButtonClass('/admin'), "w-full md:w-auto justify-start md:justify-center")}
+            className={cn(getLinkClass('/admin'), "flex items-center gap-1.5")}
           >
-            <Shield className="h-4 w-4" />
+            <Shield className="h-3.5 w-3.5" />
             Admin
-          </Button>
+          </button>
         )}
         {user ? (
-          <Button 
-            variant="ghost" 
-            size="sm"
+          <button 
             onClick={() => { handleSignOut(); onNavigate?.(); }}
             className={cn(
-              baseClass,
+              "text-sm font-medium transition-colors px-3 py-1.5",
               inSheet 
-                ? "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10" 
-                : isScrolled
-                  ? "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                  : "text-white/80 hover:text-white hover:bg-white/20 [text-shadow:_0_1px_4px_rgba(0,0,0,0.6)]",
-              "w-full md:w-auto"
+                ? "text-muted-foreground hover:text-destructive py-2" 
+                : "text-muted-foreground hover:text-destructive"
             )}
           >
-            <LogOut className="h-4 w-4" />
             Abmelden
-          </Button>
+          </button>
         ) : (
           <Button 
             size="sm"
             onClick={() => { navigate('/auth'); onNavigate?.(); }}
-            className="w-full md:w-auto shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 transition-shadow"
+            className="ml-2 px-4"
           >
-            Los geht's
+            Los
           </Button>
         )}
       </>
