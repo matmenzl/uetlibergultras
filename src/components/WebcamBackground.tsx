@@ -68,16 +68,24 @@ export function WebcamBackground() {
     staleTime: 15000,
   });
 
-  // Calculate cooldown based on last screenshot time
-  const cooldownInfo = useMemo(() => {
-    if (!screenshotMeta) return { isOnCooldown: false, remainingMinutes: 0 };
+  // Calculate cooldown and live status based on last screenshot time
+  const { cooldownInfo, isLive } = useMemo(() => {
+    if (!screenshotMeta) return { 
+      cooldownInfo: { isOnCooldown: false, remainingMinutes: 0 },
+      isLive: false 
+    };
     
     const now = new Date();
     const minutesSinceLastUpdate = (now.getTime() - screenshotMeta.getTime()) / (1000 * 60);
     const isOnCooldown = minutesSinceLastUpdate < RATE_LIMIT_MINUTES;
     const remainingMinutes = Math.ceil(RATE_LIMIT_MINUTES - minutesSinceLastUpdate);
+    // Consider "live" if screenshot is less than 30 minutes old
+    const isLive = minutesSinceLastUpdate < 30;
     
-    return { isOnCooldown, remainingMinutes };
+    return { 
+      cooldownInfo: { isOnCooldown, remainingMinutes },
+      isLive 
+    };
   }, [screenshotMeta]);
 
   const captureScreenshot = async () => {
@@ -153,17 +161,28 @@ export function WebcamBackground() {
         />
       )}
       
-      {/* Weather overlay */}
-      {imageLoaded && weatherData && (
-        <div className="absolute top-4 left-4 z-20">
-          <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2 text-white">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{weatherData.weather}</span>
-              {weatherData.temperature !== null && (
-                <span className="text-lg font-medium">{weatherData.temperature}°C</span>
-              )}
+      {/* Weather overlay with live indicator */}
+      {imageLoaded && (
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+          {/* Live indicator */}
+          {isLive && (
+            <div className="bg-red-600/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              <span className="text-white text-xs font-semibold uppercase tracking-wide">Live</span>
             </div>
-          </div>
+          )}
+          
+          {/* Weather info */}
+          {weatherData && (
+            <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-1.5 text-white">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{weatherData.weather}</span>
+                {weatherData.temperature !== null && (
+                  <span className="text-base font-medium">{weatherData.temperature}°C</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
       
