@@ -106,7 +106,7 @@ export function StreakCounter({ userId }: StreakCounterProps) {
   };
 
   return (
-    <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
+    <Card className="p-5 text-center">
       <div className={`flex justify-center mb-2 ${streak > 0 ? 'animate-pulse' : ''}`}>
         <Flame className={`w-6 h-6 sm:w-8 sm:h-8 ${getFlameColor(streak)}`} />
       </div>

@@ -314,7 +314,7 @@ export default function Index() {
       <NavBar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
             <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
             <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Din Uetli, dini Uetli Runs</h1>
@@ -376,42 +376,50 @@ export default function Index() {
             </div>
           </Card>
 
-          {/* ===== ÖFFENTLICHE KOMPONENTEN (für alle sichtbar) ===== */}
-          
-          {/* Today's Runners */}
-          <div className="mb-6">
-            <TodaysRunners />
-          </div>
+          {/* ===== BENTO GRID LAYOUT ===== */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {/* Today's Runners - Span 2 */}
+            <div className="md:col-span-2">
+              <TodaysRunners />
+            </div>
 
-          {/* Leaderboard */}
-          <div className="mb-6">
-            <Leaderboard />
-          </div>
-
-          {/* ===== PRIVATE KOMPONENTEN (nur für eingeloggte User) ===== */}
-          {user && (
-            <>
-              {/* Stats - count activities as check-ins */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
+            {/* Stats Sidebar - Span 1 */}
+            {user ? (
+              <div className="space-y-4">
+                <Card className="p-5 text-center">
                   <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-2xl sm:text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
+                  <p className="text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
                   <p className="text-sm text-muted-foreground">Uetli Runs</p>
                 </Card>
-                <Card className="p-4 text-center hover:scale-105 transition-transform cursor-default">
+                <Card className="p-5 text-center">
                   <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-2xl sm:text-3xl font-bold text-primary">
+                  <p className="text-3xl font-bold text-primary">
                     {new Set(validCheckIns.map(c => c.segment_id)).size}
                   </p>
                   <p className="text-sm text-muted-foreground">Uetli Segmente</p>
                 </Card>
                 <StreakCounter userId={user?.id} />
               </div>
+            ) : (
+              <div className="hidden md:block" />
+            )}
 
-              {/* Achievements */}
-              <div className="mb-6">
+            {/* Leaderboard - Span 2 */}
+            <div className="md:col-span-2">
+              <Leaderboard />
+            </div>
+
+            {/* Achievements - Span 1 */}
+            {user && (
+              <div>
                 <Achievements userId={user?.id} />
               </div>
+            )}
+          </div>
+
+          {/* ===== PRIVATE KOMPONENTEN (nur für eingeloggte User) ===== */}
+          {user && (
+            <>
 
               {/* Check-in History */}
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
