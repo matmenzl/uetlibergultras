@@ -10,7 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Mountain, Trophy, Flame, HelpCircle, X } from 'lucide-react';
+import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Trophy, Flame, HelpCircle, X, MapPinned } from 'lucide-react';
+import logo from '@/assets/uetlibergultras_logo.png';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Leaderboard } from '@/components/Leaderboard';
 import { Achievements } from '@/components/Achievements';
@@ -317,20 +318,17 @@ export default function Index() {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
-            <h1 
-              className="text-2xl sm:text-4xl font-bold text-foreground cursor-pointer group relative"
-              onClick={() => setShowVideoModal(true)}
-              title="🎵"
-            >
-              <span className="relative z-10 group-hover:text-primary transition-colors duration-300">
-                We're Running Up That Hill
-              </span>
-              {/* 80s Synthwave glow effect on hover */}
-              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 blur-xl bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 transition-opacity duration-500 -z-10" />
-            </h1>
-          </div>
+          <h1 
+            className="text-2xl sm:text-4xl font-bold text-foreground cursor-pointer group relative mb-2"
+            onClick={() => setShowVideoModal(true)}
+            title="🎵"
+          >
+            <span className="relative z-10 group-hover:text-primary transition-colors duration-300">
+              We're Running Up That Hill
+            </span>
+            {/* 80s Synthwave glow effect on hover */}
+            <span className="absolute inset-0 opacity-0 group-hover:opacity-100 blur-xl bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 transition-opacity duration-500 -z-10" />
+          </h1>
 
           {/* Kate Bush Video Modal */}
           <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
@@ -356,7 +354,7 @@ export default function Index() {
             <WebcamBackground />
             {/* Content */}
             <div className="relative z-20">
-              <Mountain className="w-12 h-12 text-primary mx-auto mb-6 opacity-80" />
+              <img src={logo} alt="Uetliberg Ultras" className="w-20 h-20 mx-auto mb-6" />
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 tracking-tight">{getGreeting()}</h2>
               {!user ? (
                 <>
@@ -416,7 +414,7 @@ export default function Index() {
                   <p className="text-sm text-muted-foreground">Uetli Runs</p>
                 </Card>
                 <Card className="p-5 text-center">
-                  <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
+                  <MapPinned className="w-6 h-6 text-primary mx-auto mb-2" />
                   <p className="text-3xl font-bold text-primary">
                     {new Set(validCheckIns.map(c => c.segment_id)).size}
                   </p>
@@ -537,7 +535,7 @@ export default function Index() {
                 </div>
               ) : (
                 <Card className="p-8 text-center animate-fade-in">
-                  <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <MapPinned className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-bold mb-2">Der Uetli wartet auf dich! 🏔️</h3>
                   <p className="text-muted-foreground mb-4">
                     Mach deinen ersten Run und check ihn ein.
