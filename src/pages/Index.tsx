@@ -326,8 +326,8 @@ export default function Index() {
             <span className="relative z-10 group-hover:text-primary transition-colors duration-300">
               We're Running Up That Hill
             </span>
-            {/* Logo-Farben Glow-Effekt: Orange → Gelb → Türkis */}
-            <span className="absolute inset-0 opacity-0 group-hover:opacity-100 blur-xl bg-gradient-to-r from-primary via-secondary to-turquoise transition-opacity duration-500 -z-10" />
+            {/* 80s Synthwave glow effect on hover */}
+            <span className="absolute inset-0 opacity-0 group-hover:opacity-100 blur-xl bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 transition-opacity duration-500 -z-10" />
           </h1>
 
           {/* Kate Bush Video Modal */}
@@ -408,21 +408,18 @@ export default function Index() {
             {/* Stats Sidebar - Span 1 */}
             {user ? (
               <div className="space-y-4">
-                {/* Runs - Orange (Primary) */}
-                <Card className="p-5 text-center border-primary/20 hover:border-primary/40 transition-colors">
+                <Card className="p-5 text-center">
                   <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
                   <p className="text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
                   <p className="text-sm text-muted-foreground">Uetli Runs</p>
                 </Card>
-                {/* Segmente - Türkis (Accent) */}
-                <Card className="p-5 text-center border-turquoise/20 hover:border-turquoise/40 transition-colors">
-                  <MapPinned className="w-6 h-6 text-turquoise mx-auto mb-2" />
-                  <p className="text-3xl font-bold text-turquoise">
+                <Card className="p-5 text-center">
+                  <MapPinned className="w-6 h-6 text-primary mx-auto mb-2" />
+                  <p className="text-3xl font-bold text-primary">
                     {new Set(validCheckIns.map(c => c.segment_id)).size}
                   </p>
                   <p className="text-sm text-muted-foreground">Uetli Segmente</p>
                 </Card>
-                {/* Streak - Gelb (Secondary) */}
                 <StreakCounter userId={user?.id} />
               </div>
             ) : (

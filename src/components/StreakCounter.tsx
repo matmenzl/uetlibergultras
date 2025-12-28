@@ -99,18 +99,18 @@ export function StreakCounter({ userId }: StreakCounterProps) {
 
   const getFlameColor = (weeks: number) => {
     if (weeks === 0) return "text-muted-foreground";
-    if (weeks < 2) return "text-secondary";
-    if (weeks < 4) return "text-primary";
-    if (weeks < 8) return "text-primary";
-    return "text-primary";
+    if (weeks < 2) return "text-orange-400";
+    if (weeks < 4) return "text-orange-500";
+    if (weeks < 8) return "text-red-500";
+    return "text-red-600";
   };
 
   return (
-    <Card className="p-5 text-center border-secondary/20 hover:border-secondary/40 transition-colors">
+    <Card className="p-5 text-center">
       <div className={`flex justify-center mb-2 ${streak > 0 ? 'animate-pulse' : ''}`}>
         <Flame className={`w-6 h-6 sm:w-8 sm:h-8 ${getFlameColor(streak)}`} />
       </div>
-      <p className="text-2xl sm:text-3xl font-bold text-secondary">{streak}</p>
+      <p className="text-2xl sm:text-3xl font-bold text-primary">{streak}</p>
       <p className="text-sm text-muted-foreground">Wochen Streak</p>
       <p className="text-xs text-muted-foreground mt-1">{getStreakMessage(streak)}</p>
     </Card>

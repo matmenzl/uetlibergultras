@@ -39,10 +39,6 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        turquoise: {
-          DEFAULT: "hsl(var(--turquoise))",
-          foreground: "hsl(var(--turquoise-foreground))",
-        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -74,7 +70,6 @@ export default {
       boxShadow: {
         'warm': 'var(--shadow-warm)',
         'glow': 'var(--shadow-glow)',
-        'turquoise': 'var(--shadow-turquoise)',
       },
       borderRadius: {
         lg: "var(--radius)",

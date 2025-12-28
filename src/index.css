@@ -19,24 +19,17 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 20 15% 15%;
 
-    /* Orange - Primary */
     --primary: 18 95% 60%;
     --primary-foreground: 0 0% 100%;
 
-    /* Gelb - Secondary */
-    --secondary: 45 100% 55%;
+    --secondary: 35 90% 68%;
     --secondary-foreground: 20 15% 15%;
 
     --muted: 40 20% 90%;
     --muted-foreground: 20 10% 45%;
 
-    /* Türkis - Accent */
-    --accent: 180 70% 45%;
+    --accent: 25 100% 50%;
     --accent-foreground: 0 0% 100%;
-
-    /* Türkis als eigene Farbe */
-    --turquoise: 180 70% 45%;
-    --turquoise-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
@@ -47,17 +40,15 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
-    /* Logo-Farben Gradient: Orange → Gelb → Türkis */
     --sunrise-start: 18 95% 60%;
-    --sunrise-mid: 45 100% 55%;
-    --sunrise-end: 180 70% 45%;
+    --sunrise-mid: 35 90% 68%;
+    --sunrise-end: 45 100% 80%;
     
-    --gradient-sunrise: linear-gradient(135deg, hsl(var(--sunrise-start)), hsl(var(--sunrise-mid)), hsl(var(--sunrise-end)));
+    --gradient-sunrise: linear-gradient(135deg, hsl(var(--sunrise-start)), hsl(var(--sunrise-mid)));
     --gradient-hero: linear-gradient(180deg, hsl(var(--sunrise-start) / 0.05), hsl(var(--background)));
     
     --shadow-warm: 0 20px 40px -15px hsl(var(--primary) / 0.3);
     --shadow-glow: 0 0 60px hsl(var(--primary) / 0.2);
-    --shadow-turquoise: 0 0 40px hsl(var(--turquoise) / 0.3);
     
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -81,24 +72,17 @@ All colors MUST be HSL.
     --popover: 20 15% 12%;
     --popover-foreground: 40 25% 95%;
 
-    /* Orange - Primary */
     --primary: 18 95% 60%;
     --primary-foreground: 0 0% 100%;
 
-    /* Gelb - Secondary */
-    --secondary: 45 100% 55%;
+    --secondary: 35 90% 68%;
     --secondary-foreground: 20 15% 10%;
 
     --muted: 20 15% 18%;
     --muted-foreground: 40 15% 60%;
 
-    /* Türkis - Accent */
-    --accent: 180 70% 45%;
+    --accent: 25 100% 50%;
     --accent-foreground: 0 0% 100%;
-
-    /* Türkis als eigene Farbe */
-    --turquoise: 180 70% 50%;
-    --turquoise-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 100%;
