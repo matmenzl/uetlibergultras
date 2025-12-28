@@ -354,11 +354,11 @@ export default function Index() {
             <WebcamBackground />
             {/* Content */}
             <div className="relative z-20">
-              <img src={logo} alt="Uetliberg Ultras" className="h-32 sm:h-40 w-auto mx-auto mb-6" />
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 tracking-tight">{getGreeting()}</h2>
+              <img src={logo} alt="Uetliberg Ultras" className="h-32 sm:h-40 w-auto mx-auto mb-6 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]" />
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 tracking-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] [text-shadow:_0_1px_2px_rgb(0_0_0_/_80%),_0_2px_8px_rgb(0_0_0_/_60%)]">{getGreeting()}</h2>
               {!user ? (
                 <>
-                  <p className="text-muted-foreground mb-8 text-lg max-w-md mx-auto">
+                  <p className="text-white/90 mb-8 text-lg max-w-md mx-auto drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] [text-shadow:_0_1px_3px_rgb(0_0_0_/_80%)]">
                     Der Uetliberg wartet auf dich! Verbinde dich mit Strava und sammle deine Uetliberg Runs.
                   </p>
                   <Button 
@@ -372,7 +372,7 @@ export default function Index() {
                 </>
               ) : (
                 <>
-                  <p className="text-muted-foreground mb-8 text-lg">
+                  <p className="text-white/90 mb-8 text-lg drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] [text-shadow:_0_1px_3px_rgb(0_0_0_/_80%)]">
                     Bereit für deinen nächsten Uetli Run?
                   </p>
                   <Button 
