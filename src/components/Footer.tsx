@@ -2,7 +2,7 @@ import { Settings, Map, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import poweredByStrava from "@/assets/api_logo_pwrdBy_strava_horiz_white.svg";
-import logo from "@/assets/uetlibergultras_logo.png";
+import logo from "@/assets/uetlibergultras_logo.svg";
 
 export const Footer = () => {
   const { isAdmin } = useUserRole();
