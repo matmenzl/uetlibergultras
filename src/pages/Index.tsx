@@ -11,7 +11,7 @@ import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Trophy, Flame, HelpCircle, X, MapPinned } from 'lucide-react';
-import logo from '@/assets/uetlibergultras_logo.png';
+import logo from '@/assets/uetlibergultras_logo.svg';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Leaderboard } from '@/components/Leaderboard';
 import { Achievements } from '@/components/Achievements';
