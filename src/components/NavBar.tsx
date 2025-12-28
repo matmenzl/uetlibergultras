@@ -116,7 +116,7 @@ export default function NavBar() {
           className="flex items-center gap-2 cursor-pointer group"
           onClick={() => navigate('/')}
         >
-          <img src={logo} alt="Uetliberg Ultras" className="h-8 w-auto group-hover:scale-105 transition-transform" />
+          <img src={logo} alt="Uetliberg Ultras" className="h-10 w-auto -my-1 group-hover:scale-105 transition-transform" />
           <span className="text-lg font-semibold tracking-tight">Uetliberg Ultras</span>
         </div>
 
