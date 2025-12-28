@@ -354,7 +354,7 @@ export default function Index() {
             <WebcamBackground />
             {/* Content */}
             <div className="relative z-20">
-              <img src={logo} alt="Uetliberg Ultras" className="w-20 h-20 mx-auto mb-6" />
+              <img src={logo} alt="Uetliberg Ultras" className="h-32 sm:h-40 w-auto mx-auto mb-6" />
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 tracking-tight">{getGreeting()}</h2>
               {!user ? (
                 <>
