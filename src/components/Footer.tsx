@@ -1,7 +1,8 @@
-import { Mountain, Settings, Map, ExternalLink } from "lucide-react";
+import { Settings, Map, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import poweredByStrava from "@/assets/api_logo_pwrdBy_strava_horiz_white.svg";
+import logo from "@/assets/uetlibergultras_logo.png";
 
 export const Footer = () => {
   const { isAdmin } = useUserRole();
@@ -16,9 +17,7 @@ export const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                <Mountain className="h-5 w-5 text-primary" />
-              </div>
+              <img src={logo} alt="Uetliberg Ultras" className="h-10 w-auto" />
               <h3 className="text-xl font-semibold tracking-tight text-foreground">
                 Uetliberg Ultras
               </h3>

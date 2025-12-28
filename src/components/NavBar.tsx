@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Mountain, Shield, Menu } from 'lucide-react';
+import { Shield, Menu } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import {
   Sheet,
@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/uetlibergultras_logo.png';
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -115,7 +116,7 @@ export default function NavBar() {
           className="flex items-center gap-2 cursor-pointer group"
           onClick={() => navigate('/')}
         >
-          <Mountain className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
+          <img src={logo} alt="Uetliberg Ultras" className="h-8 w-auto group-hover:scale-105 transition-transform" />
           <span className="text-lg font-semibold tracking-tight">Uetliberg Ultras</span>
         </div>
 
