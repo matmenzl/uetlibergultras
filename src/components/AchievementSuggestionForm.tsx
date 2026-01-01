@@ -1,19 +1,12 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
   Dialog,
   DialogContent,
@@ -21,14 +14,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { toast } from 'sonner';
-import { Lightbulb, Send } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { Lightbulb, Send } from "lucide-react";
 
 const formSchema = z.object({
-  title: z.string().min(3, 'Titel muss mindestens 3 Zeichen haben').max(50, 'Titel darf maximal 50 Zeichen haben'),
-  description: z.string().min(10, 'Beschreibung muss mindestens 10 Zeichen haben').max(200, 'Beschreibung darf maximal 200 Zeichen haben'),
-  howToEarn: z.string().min(20, 'Erklärung muss mindestens 20 Zeichen haben').max(500, 'Erklärung darf maximal 500 Zeichen haben'),
+  title: z.string().min(3, "Titel muss mindestens 3 Zeichen haben").max(50, "Titel darf maximal 50 Zeichen haben"),
+  description: z
+    .string()
+    .min(10, "Beschreibung muss mindestens 10 Zeichen haben")
+    .max(200, "Beschreibung darf maximal 200 Zeichen haben"),
+  howToEarn: z
+    .string()
+    .min(20, "Erklärung muss mindestens 20 Zeichen haben")
+    .max(500, "Erklärung darf maximal 500 Zeichen haben"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -44,21 +43,21 @@ export function AchievementSuggestionForm({ userId }: AchievementSuggestionFormP
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      description: '',
-      howToEarn: '',
+      title: "",
+      description: "",
+      howToEarn: "",
     },
   });
 
   const onSubmit = async (data: FormData) => {
     if (!userId) {
-      toast.error('Du musst angemeldet sein, um einen Vorschlag einzureichen.');
+      toast.error("Du musst angemeldet sein, um einen Vorschlag einzureichen.");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from('achievement_suggestions').insert({
+      const { error } = await supabase.from("achievement_suggestions").insert({
         user_id: userId,
         title: data.title,
         description: data.description,
@@ -67,12 +66,12 @@ export function AchievementSuggestionForm({ userId }: AchievementSuggestionFormP
 
       if (error) throw error;
 
-      toast.success('Danke für deinen Vorschlag! Wir werden ihn prüfen.');
+      toast.success("Danke für deinen Vorschlag! Wir werden ihn prüfen.");
       form.reset();
       setOpen(false);
     } catch (error) {
-      console.error('Error submitting achievement suggestion:', error);
-      toast.error('Fehler beim Einreichen des Vorschlags.');
+      console.error("Error submitting achievement suggestion:", error);
+      toast.error("Fehler beim Einreichen des Vorschlags.");
     } finally {
       setIsSubmitting(false);
     }
@@ -96,9 +95,7 @@ export function AchievementSuggestionForm({ userId }: AchievementSuggestionFormP
             <Lightbulb className="h-5 w-5 text-primary" />
             Achievement vorschlagen
           </DialogTitle>
-          <DialogDescription>
-            Hast du eine Idee für ein neues Achievement? Teile sie mit der Community!
-          </DialogDescription>
+          <DialogDescription>Hast du eine Idee für ein neues Achievement?</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -147,7 +144,7 @@ export function AchievementSuggestionForm({ userId }: AchievementSuggestionFormP
             />
             <Button type="submit" className="w-full gap-2" disabled={isSubmitting}>
               <Send className="h-4 w-4" />
-              {isSubmitting ? 'Wird eingereicht...' : 'Vorschlag einreichen'}
+              {isSubmitting ? "Wird eingereicht..." : "Vorschlag einreichen"}
             </Button>
           </form>
         </Form>
