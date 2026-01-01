@@ -4,6 +4,8 @@ import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Lightbulb, Send, Loader2, CheckCircle } from 'lucide-react';
@@ -24,15 +26,18 @@ interface SegmentSuggestionFormProps {
 
 export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps) {
   const [url, setUrl] = useState('');
+  const [email, setEmail] = useState('');
+  const [wantsUpdates, setWantsUpdates] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const submitSuggestion = async (userId: string, segmentUrl: string) => {
+  const submitSuggestion = async (userId: string, segmentUrl: string, userEmail?: string, updates?: boolean) => {
     // Validate URL
     const validation = stravaSegmentUrlSchema.safeParse(segmentUrl);
     if (!validation.success) {
@@ -40,15 +45,37 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
       return;
     }
 
+    // Validate email if provided
+    if (userEmail && updates) {
+      const emailValidation = z.string().email('Bitte gib eine gültige E-Mail-Adresse ein').safeParse(userEmail);
+      if (!emailValidation.success) {
+        setEmailError(emailValidation.error.errors[0].message);
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
+      const insertData: {
+        user_id: string;
+        strava_segment_url: string;
+        email?: string;
+        wants_updates?: boolean;
+      } = {
+        user_id: userId,
+        strava_segment_url: validation.data
+      };
+
+      // Only save email if user opted in
+      if (updates && userEmail) {
+        insertData.email = userEmail;
+        insertData.wants_updates = true;
+      }
+
       const { error: insertError } = await supabase
         .from('segment_suggestions')
-        .insert({
-          user_id: userId,
-          strava_segment_url: validation.data
-        });
+        .insert(insertData);
 
       if (insertError) throw insertError;
 
@@ -58,6 +85,8 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
       });
 
       setUrl('');
+      setEmail('');
+      setWantsUpdates(false);
       setShowSuccess(true);
       
       // Reset success state after 3 seconds
@@ -120,6 +149,7 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setEmailError(null);
 
     // Check if user is logged in
     if (!user) {
@@ -128,7 +158,7 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
       return;
     }
 
-    await submitSuggestion(user.id, url);
+    await submitSuggestion(user.id, url, email, wantsUpdates);
   };
 
   return (
@@ -184,6 +214,36 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
               />
               {error && (
                 <p className="text-sm text-destructive mt-1">{error}</p>
+              )}
+            </div>
+            <div className="space-y-2 pt-2 border-t border-border/50">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="wants-updates-segment"
+                  checked={wantsUpdates}
+                  onCheckedChange={(checked) => setWantsUpdates(checked === true)}
+                />
+                <Label htmlFor="wants-updates-segment" className="text-sm cursor-pointer">
+                  Benachrichtige mich über Status-Updates
+                </Label>
+              </div>
+              {wantsUpdates && (
+                <div>
+                  <Input
+                    type="email"
+                    placeholder="deine@email.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailError(null);
+                    }}
+                    className={emailError ? 'border-destructive' : ''}
+                    disabled={isSubmitting}
+                  />
+                  {emailError && (
+                    <p className="text-sm text-destructive mt-1">{emailError}</p>
+                  )}
+                </div>
               )}
             </div>
             <Button type="submit" disabled={isSubmitting || !url.trim()} className="w-full">

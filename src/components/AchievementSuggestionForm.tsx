@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
   Dialog,
@@ -28,6 +29,17 @@ const formSchema = z.object({
     .string()
     .min(20, "Erklärung muss mindestens 20 Zeichen haben")
     .max(500, "Erklärung darf maximal 500 Zeichen haben"),
+  email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein").optional().or(z.literal("")),
+  wantsUpdates: z.boolean().default(false),
+}).refine((data) => {
+  // If wantsUpdates is true, email must be provided
+  if (data.wantsUpdates && (!data.email || data.email === "")) {
+    return false;
+  }
+  return true;
+}, {
+  message: "E-Mail ist erforderlich wenn du Updates erhalten möchtest",
+  path: ["email"],
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -46,6 +58,8 @@ export function AchievementSuggestionForm({ userId }: AchievementSuggestionFormP
       title: "",
       description: "",
       howToEarn: "",
+      email: "",
+      wantsUpdates: false,
     },
   });
 
@@ -57,12 +71,27 @@ export function AchievementSuggestionForm({ userId }: AchievementSuggestionFormP
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("achievement_suggestions").insert({
+      const insertData: {
+        user_id: string;
+        title: string;
+        description: string;
+        how_to_earn: string;
+        email?: string;
+        wants_updates?: boolean;
+      } = {
         user_id: userId,
         title: data.title,
         description: data.description,
         how_to_earn: data.howToEarn,
-      });
+      };
+
+      // Only save email if user opted in
+      if (data.wantsUpdates && data.email) {
+        insertData.email = data.email;
+        insertData.wants_updates = true;
+      }
+
+      const { error } = await supabase.from("achievement_suggestions").insert(insertData);
 
       if (error) throw error;
 
@@ -142,6 +171,41 @@ export function AchievementSuggestionForm({ userId }: AchievementSuggestionFormP
                 </FormItem>
               )}
             />
+            <div className="space-y-3 pt-3 border-t border-border/50">
+              <FormField
+                control={form.control}
+                name="wantsUpdates"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="cursor-pointer">
+                        Benachrichtige mich über Status-Updates
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              {form.watch("wantsUpdates") && (
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="deine@email.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
             <Button type="submit" className="w-full gap-2" disabled={isSubmitting}>
               <Send className="h-4 w-4" />
               {isSubmitting ? "Wird eingereicht..." : "Vorschlag einreichen"}
