@@ -199,13 +199,19 @@ export function Achievements({ userId }: AchievementsProps) {
 
   return (
     <Card className="p-6 h-full">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-2">
         <Award className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-lg">Achievements</h3>
+        <Badge variant="outline" className="text-xs">
+          All-Time
+        </Badge>
         <Badge variant="secondary" className="ml-auto">
           {earnedCount}/{totalAchievements}
         </Badge>
       </div>
+      <p className="text-xs text-muted-foreground mb-4">
+        Einmal verdient, für immer deins
+      </p>
       
       {/* Exclusive Achievements (only if earned) */}
       {earnedExclusiveAchievements.length > 0 && (
