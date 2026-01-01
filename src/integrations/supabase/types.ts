@@ -19,6 +19,7 @@ export type Database = {
           admin_notes: string | null
           created_at: string
           description: string
+          email: string | null
           how_to_earn: string
           id: string
           reviewed_at: string | null
@@ -26,11 +27,13 @@ export type Database = {
           status: Database["public"]["Enums"]["suggestion_status"]
           title: string
           user_id: string
+          wants_updates: boolean | null
         }
         Insert: {
           admin_notes?: string | null
           created_at?: string
           description: string
+          email?: string | null
           how_to_earn: string
           id?: string
           reviewed_at?: string | null
@@ -38,11 +41,13 @@ export type Database = {
           status?: Database["public"]["Enums"]["suggestion_status"]
           title: string
           user_id: string
+          wants_updates?: boolean | null
         }
         Update: {
           admin_notes?: string | null
           created_at?: string
           description?: string
+          email?: string | null
           how_to_earn?: string
           id?: string
           reviewed_at?: string | null
@@ -50,6 +55,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["suggestion_status"]
           title?: string
           user_id?: string
+          wants_updates?: boolean | null
         }
         Relationships: []
       }
@@ -138,32 +144,38 @@ export type Database = {
         Row: {
           admin_notes: string | null
           created_at: string
+          email: string | null
           id: string
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["suggestion_status"]
           strava_segment_url: string
           user_id: string
+          wants_updates: boolean | null
         }
         Insert: {
           admin_notes?: string | null
           created_at?: string
+          email?: string | null
           id?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["suggestion_status"]
           strava_segment_url: string
           user_id: string
+          wants_updates?: boolean | null
         }
         Update: {
           admin_notes?: string | null
           created_at?: string
+          email?: string | null
           id?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["suggestion_status"]
           strava_segment_url?: string
           user_id?: string
+          wants_updates?: boolean | null
         }
         Relationships: []
       }
