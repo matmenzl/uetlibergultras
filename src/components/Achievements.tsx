@@ -39,7 +39,7 @@ interface AchievementConfig {
   icon: React.ReactNode;
   title: string;
   description: string;
-  howToEarn: string;
+  howToEarn: React.ReactNode;
   color: string;
   isExclusive?: boolean;
   target?: number;
@@ -154,14 +154,50 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     icon: <span className="text-lg">🍞</span>,
     title: "S'Brot isch no warm",
     description: 'Denzlerweg König',
-    howToEarn: 'Sei der Läufer mit den meisten Runs auf dem Denzlerweg-Segment.',
+    howToEarn: (
+      <>
+        Sei der Läufer mit den meisten Runs auf dem{' '}
+        <a 
+          href="https://www.strava.com/segments/5762702" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-primary underline hover:text-primary/80"
+          onClick={(e) => e.stopPropagation()}
+        >
+          Denzlerweg-Segment
+        </a>.
+      </>
+    ),
     color: 'text-amber-600',
   },
   coiffeur: {
     icon: <span className="text-lg">💇</span>,
     title: 'Zum Coiffeur',
     description: '10x pro Jahr Utokulm oder Denzlerweg',
-    howToEarn: 'Absolviere mindestens 10 Runs pro Jahr auf dem Segment Utokulm (4185072) oder Denzlerweg (10683811).',
+    howToEarn: (
+      <>
+        Absolviere mindestens 10 Runs pro Jahr auf dem Segment{' '}
+        <a 
+          href="https://www.strava.com/segments/4185072" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-primary underline hover:text-primary/80"
+          onClick={(e) => e.stopPropagation()}
+        >
+          Utokulm
+        </a>{' '}
+        oder{' '}
+        <a 
+          href="https://www.strava.com/segments/10683811" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-primary underline hover:text-primary/80"
+          onClick={(e) => e.stopPropagation()}
+        >
+          Denzlerweg
+        </a>.
+      </>
+    ),
     color: 'text-pink-500',
     target: 10,
     progressType: 'runs',
