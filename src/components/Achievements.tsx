@@ -173,10 +173,10 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
   coiffeur: {
     icon: <span className="text-lg">💇</span>,
     title: 'Zum Coiffeur',
-    description: '10x pro Jahr Utokulm oder Denzlerweg',
+    description: '10x pro Jahr auf Utokulm oder Denzlerweg',
     howToEarn: (
       <>
-        Absolviere mindestens 10 Runs pro Jahr auf dem Segment{' '}
+        Absolviere mindestens 10 Runs pro Jahr auf den Segmenten{' '}
         <a 
           href="https://www.strava.com/segments/4185072" 
           target="_blank" 
