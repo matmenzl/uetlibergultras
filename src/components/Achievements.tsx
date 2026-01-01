@@ -173,7 +173,7 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
   coiffeur: {
     icon: <span className="text-lg">💇</span>,
     title: 'Zum Coiffeur',
-    description: '10x pro Jahr auf Utokulm oder Denzlerweg',
+    description: '10x pro Jahr auf Coiffeurweg oder Technical hidden trail backwards',
     howToEarn: (
       <>
         Absolviere mindestens 10 Runs pro Jahr auf den Segmenten{' '}
@@ -184,7 +184,7 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
           className="text-primary underline hover:text-primary/80"
           onClick={(e) => e.stopPropagation()}
         >
-          Utokulm
+          Coiffeurweg
         </a>{' '}
         oder{' '}
         <a 
@@ -194,7 +194,7 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
           className="text-primary underline hover:text-primary/80"
           onClick={(e) => e.stopPropagation()}
         >
-          Denzlerweg
+          Technical hidden trail backwards
         </a>.
       </>
     ),
