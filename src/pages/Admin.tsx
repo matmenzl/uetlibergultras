@@ -11,7 +11,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
-import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff } from 'lucide-react';
+import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award } from 'lucide-react';
 import { z } from 'zod';
 
 const segmentIdSchema = z.string()
@@ -55,12 +55,27 @@ export default function Admin() {
   const currentMonth = new Date().getMonth() + 1;
   const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 
-  // Fetch pending suggestions
+  // Fetch pending segment suggestions
   const { data: suggestions, isLoading: suggestionsLoading } = useQuery({
     queryKey: ['segment-suggestions'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('segment_suggestions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAdmin,
+  });
+
+  // Fetch achievement suggestions
+  const { data: achievementSuggestions, isLoading: achievementSuggestionsLoading } = useQuery({
+    queryKey: ['achievement-suggestions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('achievement_suggestions')
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -178,6 +193,66 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ['segment-suggestions'] });
     } catch (error) {
       console.error('Error rejecting suggestion:', error);
+      toast({
+        title: 'Fehler',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleApproveAchievement = async (suggestionId: string) => {
+    setProcessingId(suggestionId);
+    try {
+      await supabase
+        .from('achievement_suggestions')
+        .update({ 
+          status: 'approved', 
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user?.id 
+        })
+        .eq('id', suggestionId);
+
+      toast({
+        title: 'Vorschlag genehmigt',
+        description: 'Der Achievement-Vorschlag wurde genehmigt. Er kann jetzt implementiert werden.',
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['achievement-suggestions'] });
+    } catch (error) {
+      console.error('Error approving achievement suggestion:', error);
+      toast({
+        title: 'Fehler',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleRejectAchievement = async (suggestionId: string) => {
+    setProcessingId(suggestionId);
+    try {
+      await supabase
+        .from('achievement_suggestions')
+        .update({ 
+          status: 'rejected', 
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user?.id 
+        })
+        .eq('id', suggestionId);
+
+      toast({
+        title: 'Vorschlag abgelehnt',
+        description: 'Der Achievement-Vorschlag wurde abgelehnt.',
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['achievement-suggestions'] });
+    } catch (error) {
+      console.error('Error rejecting achievement suggestion:', error);
       toast({
         title: 'Fehler',
         description: error instanceof Error ? error.message : 'Unbekannter Fehler',
@@ -529,7 +604,107 @@ export default function Admin() {
             )}
           </Card>
 
-          {/* Add Segment Form */}
+          {/* Achievement Suggestions */}
+          <Card className="p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Award className="w-5 h-5 text-primary" />
+              Achievement-Vorschläge
+              {achievementSuggestions && achievementSuggestions.filter(s => s.status === 'pending').length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {achievementSuggestions.filter(s => s.status === 'pending').length} offen
+                </Badge>
+              )}
+            </h2>
+            
+            {achievementSuggestionsLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : achievementSuggestions && achievementSuggestions.length > 0 ? (
+              <div className="space-y-3">
+                {achievementSuggestions.map((suggestion) => (
+                  <div 
+                    key={suggestion.id} 
+                    className={`p-3 rounded-lg border ${
+                      suggestion.status === 'pending' 
+                        ? 'bg-muted/50 border-border' 
+                        : suggestion.status === 'approved'
+                        ? 'bg-green-500/10 border-green-500/30'
+                        : 'bg-red-500/10 border-red-500/30'
+                    }`}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold">{suggestion.title}</p>
+                          <p className="text-xs text-muted-foreground">{suggestion.description}</p>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {suggestion.status === 'pending' ? (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-green-600 hover:text-green-700 hover:bg-green-500/10"
+                                onClick={() => handleApproveAchievement(suggestion.id)}
+                                disabled={processingId === suggestion.id}
+                              >
+                                {processingId === suggestion.id ? (
+                                  <RefreshCw className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Check className="w-4 h-4" />
+                                )}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-500/10"
+                                onClick={() => handleRejectAchievement(suggestion.id)}
+                                disabled={processingId === suggestion.id}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <Badge 
+                              variant="secondary"
+                              className={
+                                suggestion.status === 'approved' 
+                                  ? 'bg-green-500/20 text-green-700 dark:text-green-400' 
+                                  : 'bg-red-500/20 text-red-700 dark:text-red-400'
+                              }
+                            >
+                              {suggestion.status === 'approved' ? 'Genehmigt' : 'Abgelehnt'}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="text-xs text-muted-foreground bg-background/50 rounded p-2">
+                        <span className="font-medium">Wie verdienen: </span>{suggestion.how_to_earn}
+                      </div>
+                      
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(suggestion.created_at).toLocaleDateString('de-CH', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Keine Achievement-Vorschläge vorhanden
+              </p>
+            )}
+          </Card>
+
           <Card className="p-6 mb-6">
             <h2 className="text-lg font-semibold mb-4">Neues Segment hinzufügen</h2>
             <form onSubmit={handleAddSegment} className="space-y-4">
