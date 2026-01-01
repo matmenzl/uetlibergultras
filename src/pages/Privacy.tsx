@@ -27,7 +27,7 @@ const Privacy = () => {
               Verantwortlich für die Datenbearbeitung auf dieser Website ist:
             </p>
             <p className="mt-2">
-              kollektivauthentisch.ch<br />
+              uetlibergultras.ch<br />
               Zürich, Schweiz
             </p>
           </section>
