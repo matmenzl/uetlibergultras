@@ -79,7 +79,7 @@ export function Leaderboard() {
       // Fetch founding member status for each user
       const userIds = stats?.map(s => s.user_id).filter(Boolean) || [];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('id, is_founding_member, user_number')
         .in('id', userIds);
       
