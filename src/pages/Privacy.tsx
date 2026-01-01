@@ -17,7 +17,7 @@ const Privacy = () => {
         <div className="prose prose-lg max-w-none space-y-8 text-foreground/90">
           <section>
             <p className="text-muted-foreground">
-              Stand: Dezember 2024
+              Stand: Januar 2026
             </p>
           </section>
 
@@ -50,6 +50,11 @@ const Privacy = () => {
                 die über die Strava API abgerufen werden, um Check-ins und Achievements zu ermitteln.
               </li>
               <li>
+                <strong>E-Mail-Adresse (optional):</strong> Wenn Sie bei Segment- oder Achievement-Vorschlägen 
+                die Option «Benachrichtige mich über Status-Updates» aktivieren, speichern wir Ihre E-Mail-Adresse 
+                zusammen mit dem jeweiligen Vorschlag, um Sie über dessen Status informieren zu können.
+              </li>
+              <li>
                 <strong>Technische Daten:</strong> IP-Adresse (temporär für Rate Limiting), 
                 Browsertyp und Zugriffszeiten für die technische Bereitstellung der Website.
               </li>
@@ -62,6 +67,7 @@ const Privacy = () => {
             <ul className="list-disc pl-6 mt-2 space-y-2">
               <li>Bereitstellung und Betrieb der App-Funktionen (Leaderboard, Achievements, Streaks)</li>
               <li>Anzeige Ihres Profils und Ihrer Statistiken</li>
+              <li>Benachrichtigung über den Status Ihrer eingereichten Vorschläge (nur bei expliziter Einwilligung)</li>
               <li>Verbesserung der Benutzererfahrung</li>
               <li>Technische Sicherheit (Missbrauchsschutz)</li>
             </ul>
