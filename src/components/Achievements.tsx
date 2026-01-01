@@ -24,7 +24,8 @@ type AchievementType =
   | 'pioneer_10'
   | 'pioneer_25'
   | 'pioneer_50'
-  | 'founding_member';
+  | 'founding_member'
+  | 'denzlerweg_king';
 
 interface Achievement {
   id: string;
@@ -148,6 +149,14 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     howToEarn: 'Starte einen Run nach 20 Uhr abends.',
     color: 'text-slate-400',
   },
+  denzlerweg_king: {
+    icon: <span className="text-lg">🍞</span>,
+    title: "S'Brot isch no warm",
+    description: 'Denzlerweg König',
+    howToEarn: 'Sei der Läufer mit den meisten Runs auf dem Denzlerweg-Segment.',
+    color: 'text-amber-600',
+    isExclusive: true,
+  },
   pioneer_10: {
     icon: <Crown className="w-5 h-5" />,
     title: 'Top 10 Pioneer',
@@ -200,6 +209,7 @@ const REGULAR_ACHIEVEMENTS: AchievementType[] = [
 
 // Exclusive achievements (only show if earned)
 const EXCLUSIVE_ACHIEVEMENTS: AchievementType[] = [
+  'denzlerweg_king',
   'pioneer_10',
   'pioneer_25',
   'pioneer_50',

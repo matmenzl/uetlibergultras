@@ -22,7 +22,10 @@ type AchievementType =
   | 'pioneer_10'
   | 'pioneer_25'
   | 'pioneer_50'
-  | 'founding_member';
+  | 'founding_member'
+  | 'denzlerweg_king';
+
+const DENZLERWEG_SEGMENT_ID = 5762702;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -182,6 +185,46 @@ serve(async (req) => {
       }
       if (userProfile.is_founding_member && !existingSet.has('founding_member')) {
         newAchievements.push('founding_member');
+      }
+    }
+
+    // Check Denzlerweg King - competitive achievement
+    // Get the user with most runs on Denzlerweg
+    const { data: denzlerwegLeader } = await supabaseAdmin
+      .from('check_ins')
+      .select('user_id')
+      .eq('segment_id', DENZLERWEG_SEGMENT_ID);
+
+    if (denzlerwegLeader && denzlerwegLeader.length > 0) {
+      // Count runs per user
+      const runsByUser: Record<string, number> = {};
+      denzlerwegLeader.forEach(run => {
+        runsByUser[run.user_id] = (runsByUser[run.user_id] || 0) + 1;
+      });
+
+      // Find the user with most runs
+      let maxRuns = 0;
+      let leaderId: string | null = null;
+      Object.entries(runsByUser).forEach(([uid, count]) => {
+        if (count > maxRuns) {
+          maxRuns = count;
+          leaderId = uid;
+        }
+      });
+
+      // If current user is the leader and has at least 1 run
+      if (leaderId === userId && maxRuns >= 1) {
+        if (!existingSet.has('denzlerweg_king')) {
+          newAchievements.push('denzlerweg_king');
+        }
+      } else if (existingSet.has('denzlerweg_king') && leaderId !== userId) {
+        // Remove achievement if user is no longer the leader
+        await supabaseAdmin
+          .from('user_achievements')
+          .delete()
+          .eq('user_id', userId)
+          .eq('achievement', 'denzlerweg_king');
+        console.log(`Denzlerweg King achievement removed from user ${userId}, new leader is ${leaderId}`);
       }
     }
 

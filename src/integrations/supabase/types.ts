@@ -328,6 +328,7 @@ export type Database = {
         | "pioneer_25"
         | "pioneer_50"
         | "founding_member"
+        | "denzlerweg_king"
       app_role: "admin" | "user"
       suggestion_status: "pending" | "approved" | "rejected"
     }
@@ -474,6 +475,7 @@ export const Constants = {
         "pioneer_25",
         "pioneer_50",
         "founding_member",
+        "denzlerweg_king",
       ],
       app_role: ["admin", "user"],
       suggestion_status: ["pending", "approved", "rejected"],
