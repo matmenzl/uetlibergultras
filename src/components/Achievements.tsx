@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Award, Mountain, Flame, Sun, Moon, Star, Target, Zap, Trophy, Clock, Sparkles, Crown } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { AchievementSuggestionForm } from './AchievementSuggestionForm';
 
 type AchievementType = 
   | 'first_run'
@@ -447,9 +448,12 @@ export function Achievements({ userId }: AchievementsProps) {
           {earnedCount}/{totalAchievementsCount}
         </Badge>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">
-        Einmal verdient, für immer deins
-      </p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-xs text-muted-foreground">
+          Einmal verdient, für immer deins
+        </p>
+        <AchievementSuggestionForm userId={userId || null} />
+      </div>
       
       {/* Exclusive Achievements (only if earned) */}
       {earnedExclusiveAchievements.length > 0 && (
