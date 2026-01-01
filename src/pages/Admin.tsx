@@ -11,6 +11,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
+import { AdminEmailContacts } from '@/components/AdminEmailContacts';
 import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award } from 'lucide-react';
 import { z } from 'zod';
 
@@ -704,6 +705,9 @@ export default function Admin() {
               </p>
             )}
           </Card>
+
+          {/* Email Contacts */}
+          <AdminEmailContacts />
 
           <Card className="p-6 mb-6">
             <h2 className="text-lg font-semibold mb-4">Neues Segment hinzufügen</h2>
