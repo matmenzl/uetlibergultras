@@ -25,7 +25,8 @@ type AchievementType =
   | 'pioneer_25'
   | 'pioneer_50'
   | 'founding_member'
-  | 'denzlerweg_king';
+  | 'denzlerweg_king'
+  | 'coiffeur';
 
 interface Achievement {
   id: string;
@@ -156,6 +157,15 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     howToEarn: 'Sei der Läufer mit den meisten Runs auf dem Denzlerweg-Segment.',
     color: 'text-amber-600',
   },
+  coiffeur: {
+    icon: <span className="text-lg">💇</span>,
+    title: 'Zum Coiffeur',
+    description: '10x pro Jahr Utokulm oder Denzlerweg',
+    howToEarn: 'Absolviere mindestens 10 Runs pro Jahr auf dem Segment Utokulm (4185072) oder Denzlerweg (10683811).',
+    color: 'text-pink-500',
+    target: 10,
+    progressType: 'runs',
+  },
   pioneer_10: {
     icon: <Crown className="w-5 h-5" />,
     title: 'Top 10 Pioneer',
@@ -205,6 +215,7 @@ const REGULAR_ACHIEVEMENTS: AchievementType[] = [
   'early_bird',
   'night_owl',
   'denzlerweg_king',
+  'coiffeur',
 ];
 
 // Exclusive achievements (only show if earned)
@@ -331,6 +342,14 @@ export function Achievements({ userId }: AchievementsProps) {
   const uniqueSegments = new Set(checkIns?.map(c => c.segment_id) || []).size;
   const currentStreak = calculateStreak(checkIns || []);
   
+  // Calculate coiffeur runs (segments 4185072 or 10683811 in current year)
+  const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
+  const currentYear = new Date().getFullYear();
+  const coiffeurRuns = checkIns?.filter(c => {
+    const checkInYear = new Date(c.checked_in_at).getFullYear();
+    return checkInYear === currentYear && COIFFEUR_SEGMENT_IDS.includes(c.segment_id);
+  })?.length || 0;
+  
   // Filter exclusive achievements to only show earned ones
   const earnedExclusiveAchievements = EXCLUSIVE_ACHIEVEMENTS.filter(a => earnedSet.has(a));
   const totalAchievementsCount = REGULAR_ACHIEVEMENTS.length + earnedExclusiveAchievements.length;
@@ -348,6 +367,10 @@ export function Achievements({ userId }: AchievementsProps) {
     
     switch (config.progressType) {
       case 'runs':
+        // Special case for coiffeur achievement
+        if (achievementType === 'coiffeur') {
+          return { current: Math.min(coiffeurRuns, config.target || 0), target: config.target || 0 };
+        }
         return { current: Math.min(totalRuns, config.target || 0), target: config.target || 0 };
       case 'streak':
         return { current: Math.min(currentStreak, config.target || 0), target: config.target || 0 };

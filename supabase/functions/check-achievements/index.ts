@@ -23,9 +23,11 @@ type AchievementType =
   | 'pioneer_25'
   | 'pioneer_50'
   | 'founding_member'
-  | 'denzlerweg_king';
+  | 'denzlerweg_king'
+  | 'coiffeur';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
+const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -225,6 +227,21 @@ serve(async (req) => {
           .eq('user_id', userId)
           .eq('achievement', 'denzlerweg_king');
         console.log(`Denzlerweg King achievement removed from user ${userId}, new leader is ${leaderId}`);
+      }
+    }
+
+    // Check Coiffeur achievement - 10 runs per year on specific segments
+    if (!existingSet.has('coiffeur')) {
+      const currentYear = new Date().getFullYear();
+      const coiffeurRuns = checkIns.filter(c => {
+        const checkInYear = new Date(c.checked_in_at).getFullYear();
+        return checkInYear === currentYear && COIFFEUR_SEGMENT_IDS.includes(c.segment_id);
+      });
+      
+      // Count unique activities on coiffeur segments this year
+      const uniqueCoiffeurActivities = new Set(coiffeurRuns.map(c => c.activity_id));
+      if (uniqueCoiffeurActivities.size >= 10) {
+        newAchievements.push('coiffeur');
       }
     }
 
