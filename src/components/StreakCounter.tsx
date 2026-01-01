@@ -19,9 +19,17 @@ function getWeekNumber(date: Date): string {
 function calculateStreak(checkIns: CheckIn[]): number {
   if (!checkIns || checkIns.length === 0) return 0;
 
+  // Filter to current year only (streak resets each year)
+  const currentYear = new Date().getFullYear();
+  const currentYearCheckIns = checkIns.filter(c => 
+    new Date(c.checked_in_at).getFullYear() === currentYear
+  );
+  
+  if (currentYearCheckIns.length === 0) return 0;
+
   // Get unique weeks with activities
   const weeksWithActivity = new Set<string>();
-  checkIns.forEach(checkIn => {
+  currentYearCheckIns.forEach(checkIn => {
     const week = getWeekNumber(new Date(checkIn.checked_in_at));
     weeksWithActivity.add(week);
   });
