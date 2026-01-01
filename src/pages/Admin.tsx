@@ -552,6 +552,11 @@ export default function Admin() {
                             hour: '2-digit',
                             minute: '2-digit',
                           })}
+                          {suggestion.email && suggestion.wants_updates && (
+                            <span className="ml-2 text-primary">
+                              📧 {suggestion.email}
+                            </span>
+                          )}
                         </p>
                       </div>
                       
@@ -694,6 +699,11 @@ export default function Admin() {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
+                        {suggestion.email && suggestion.wants_updates && (
+                          <span className="ml-2 text-primary">
+                            📧 {suggestion.email}
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
