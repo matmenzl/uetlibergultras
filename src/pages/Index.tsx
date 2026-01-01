@@ -263,7 +263,20 @@ export default function Index() {
   // Filter check-ins to only show those with valid segment names
   const validCheckIns = checkIns?.filter(c => isValidSegment(c.segment_id)) || [];
 
-  // Group check-ins by activity first
+  // Filter for current year statistics (365-Day Challenge)
+  const currentYearCheckIns = validCheckIns.filter(c => 
+    new Date(c.checked_in_at).getFullYear() === currentYear
+  );
+
+  // Group current year check-ins by activity for stats
+  const currentYearActivitiesMap = currentYearCheckIns.reduce((groups, checkIn) => {
+    if (!groups[checkIn.activity_id]) {
+      groups[checkIn.activity_id] = true;
+    }
+    return groups;
+  }, {} as Record<number, boolean>);
+
+  // Group ALL check-ins by activity (for history display)
   const activitiesMap = validCheckIns.reduce((groups, checkIn) => {
     if (!groups[checkIn.activity_id]) {
       groups[checkIn.activity_id] = {
@@ -408,17 +421,17 @@ export default function Index() {
             {/* Stats Sidebar - Span 1 */}
             {user ? (
               <div className="space-y-4">
-                <Card className="p-5 text-center">
+              <Card className="p-5 text-center">
                   <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold text-primary">{Object.keys(activitiesMap).length}</p>
-                  <p className="text-sm text-muted-foreground">Uetli Runs</p>
+                  <p className="text-3xl font-bold text-primary">{Object.keys(currentYearActivitiesMap).length}</p>
+                  <p className="text-sm text-muted-foreground">Uetli Runs {currentYear}</p>
                 </Card>
                 <Card className="p-5 text-center">
                   <MapPinned className="w-6 h-6 text-primary mx-auto mb-2" />
                   <p className="text-3xl font-bold text-primary">
-                    {new Set(validCheckIns.map(c => c.segment_id)).size}
+                    {new Set(currentYearCheckIns.map(c => c.segment_id)).size}
                   </p>
-                  <p className="text-sm text-muted-foreground">Uetli Segmente</p>
+                  <p className="text-sm text-muted-foreground">Uetli Segmente {currentYear}</p>
                 </Card>
                 <StreakCounter userId={user?.id} />
               </div>
