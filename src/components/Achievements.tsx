@@ -155,7 +155,6 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     description: 'Denzlerweg König',
     howToEarn: 'Sei der Läufer mit den meisten Runs auf dem Denzlerweg-Segment.',
     color: 'text-amber-600',
-    isExclusive: true,
   },
   pioneer_10: {
     icon: <Crown className="w-5 h-5" />,
@@ -205,11 +204,11 @@ const REGULAR_ACHIEVEMENTS: AchievementType[] = [
   'streak_8',
   'early_bird',
   'night_owl',
+  'denzlerweg_king',
 ];
 
 // Exclusive achievements (only show if earned)
 const EXCLUSIVE_ACHIEVEMENTS: AchievementType[] = [
-  'denzlerweg_king',
   'pioneer_10',
   'pioneer_25',
   'pioneer_50',
