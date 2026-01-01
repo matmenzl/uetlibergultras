@@ -321,6 +321,30 @@ export type Database = {
         }
         Relationships: []
       }
+      public_profiles: {
+        Row: {
+          display_name: string | null
+          id: string | null
+          is_founding_member: boolean | null
+          profile_picture: string | null
+          user_number: number | null
+        }
+        Insert: {
+          display_name?: string | null
+          id?: string | null
+          is_founding_member?: boolean | null
+          profile_picture?: string | null
+          user_number?: number | null
+        }
+        Update: {
+          display_name?: string | null
+          id?: string | null
+          is_founding_member?: boolean | null
+          profile_picture?: string | null
+          user_number?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_strava_credentials: {
