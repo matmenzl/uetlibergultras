@@ -509,7 +509,7 @@ export function Achievements({ userId }: AchievementsProps) {
             <Sparkles className="w-3 h-3" />
             Exklusiv
           </p>
-          <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {earnedExclusiveAchievements.map((achievementType) => 
               renderAchievementTile(achievementType, true)
             )}
@@ -518,7 +518,7 @@ export function Achievements({ userId }: AchievementsProps) {
       )}
       
       {/* Regular Achievements Grid */}
-      <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {REGULAR_ACHIEVEMENTS.map((achievementType) => 
           renderAchievementTile(achievementType)
         )}
