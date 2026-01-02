@@ -436,121 +436,92 @@ export function Achievements({ userId }: AchievementsProps) {
     );
   };
 
+  // Helper to render a single achievement tile
+  const renderAchievementTile = (achievementType: AchievementType, isExclusive: boolean = false) => {
+    const config = ACHIEVEMENT_CONFIG[achievementType];
+    const isEarned = earnedSet.has(achievementType);
+    const earnedDate = getEarnedDate(achievementType);
+    const progress = getProgress(achievementType);
+
+    return (
+      <Popover key={achievementType}>
+        <PopoverTrigger asChild>
+          <button
+            className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all cursor-pointer hover:scale-105 aspect-square ${
+              isExclusive
+                ? 'bg-gradient-to-br from-amber-500/20 via-yellow-400/10 to-amber-500/20 border border-amber-500/40'
+                : isEarned 
+                  ? 'bg-primary/10 border border-primary/30' 
+                  : 'bg-muted/30 opacity-50'
+            }`}
+          >
+            <div className={`${isEarned || isExclusive ? config.color : 'text-muted-foreground'} mb-1`}>
+              {config.icon}
+            </div>
+            <p className="text-[10px] font-medium text-center leading-tight line-clamp-2 px-1">
+              {config.title}
+            </p>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-64">
+          <div className="flex flex-col items-center text-center gap-2">
+            <div className={`${isEarned || isExclusive ? config.color : 'text-muted-foreground'} scale-150`}>
+              {config.icon}
+            </div>
+            <h4 className="font-bold">{config.title}</h4>
+            <p className="text-sm text-muted-foreground">{config.howToEarn}</p>
+            {earnedDate ? (
+              <p className="text-xs text-green-500 mt-1">
+                Verdient am {earnedDate}
+              </p>
+            ) : (
+              <>
+                {renderProgressBar(achievementType, isEarned)}
+                {!progress && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Noch nicht verdient
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
   return (
-    <Card className="p-6 h-full">
-      <div className="flex items-center gap-2 mb-2">
+    <Card className="p-4 h-full">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-4">
         <Award className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-lg">Achievements</h3>
-        <Badge variant="outline" className="text-xs">
-          All-Time
-        </Badge>
-        <Badge variant="secondary" className="ml-auto">
+        <Badge variant="secondary" className="ml-auto text-xs">
           {earnedCount}/{totalAchievementsCount}
         </Badge>
-      </div>
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-xs text-muted-foreground">
-          Einmal verdient, für immer deins
-        </p>
         <AchievementSuggestionForm userId={userId || null} />
       </div>
       
       {/* Exclusive Achievements (only if earned) */}
       {earnedExclusiveAchievements.length > 0 && (
-        <div className="mb-4">
-          <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-amber-500" />
-            Exklusive Achievements
+        <div className="mb-3">
+          <p className="text-[10px] uppercase tracking-wider text-amber-500 font-medium mb-2 flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            Exklusiv
           </p>
-          <div className="flex flex-wrap gap-2">
-            {earnedExclusiveAchievements.map((achievementType) => {
-              const config = ACHIEVEMENT_CONFIG[achievementType];
-              const earnedDate = getEarnedDate(achievementType);
-              return (
-                <Popover key={achievementType}>
-                  <PopoverTrigger asChild>
-                    <button
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-amber-500/20 via-yellow-400/20 to-amber-500/20 border border-amber-500/30 cursor-pointer hover:scale-105 transition-transform"
-                    >
-                      <div className={config.color}>
-                        {config.icon}
-                      </div>
-                      <p className="text-sm font-medium">{config.title}</p>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className={`${config.color} scale-150`}>
-                        {config.icon}
-                      </div>
-                      <h4 className="font-bold">{config.title}</h4>
-                      <p className="text-sm text-muted-foreground">{config.howToEarn}</p>
-                      {earnedDate && (
-                        <p className="text-xs text-green-500 mt-1">
-                          Verdient am {earnedDate}
-                        </p>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              );
-            })}
+          <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+            {earnedExclusiveAchievements.map((achievementType) => 
+              renderAchievementTile(achievementType, true)
+            )}
           </div>
         </div>
       )}
       
       {/* Regular Achievements Grid */}
-      <div className="grid grid-cols-3 gap-3">
-        {REGULAR_ACHIEVEMENTS.map((achievementType) => {
-          const config = ACHIEVEMENT_CONFIG[achievementType];
-          const isEarned = earnedSet.has(achievementType);
-          const earnedDate = getEarnedDate(achievementType);
-          const progress = getProgress(achievementType);
-          
-          return (
-            <Popover key={achievementType}>
-              <PopoverTrigger asChild>
-                <button
-                  className={`flex flex-col items-center p-3 rounded-lg transition-all cursor-pointer hover:scale-105 ${
-                    isEarned 
-                      ? 'bg-primary/10 border border-primary/30' 
-                      : 'bg-muted/30 opacity-40'
-                  }`}
-                >
-                  <div className={isEarned ? config.color : 'text-muted-foreground'}>
-                    {config.icon}
-                  </div>
-                  <p className="text-xs font-medium mt-1 text-center truncate w-full">
-                    {config.title}
-                  </p>
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64">
-                <div className="flex flex-col items-center text-center gap-2">
-                  <div className={`${isEarned ? config.color : 'text-muted-foreground'} scale-150`}>
-                    {config.icon}
-                  </div>
-                  <h4 className="font-bold">{config.title}</h4>
-                  <p className="text-sm text-muted-foreground">{config.howToEarn}</p>
-                  {earnedDate ? (
-                    <p className="text-xs text-green-500 mt-1">
-                      Verdient am {earnedDate}
-                    </p>
-                  ) : (
-                    <>
-                      {renderProgressBar(achievementType, isEarned)}
-                      {!progress && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Noch nicht verdient
-                        </p>
-                      )}
-                    </>
-                  )}
-                </div>
-              </PopoverContent>
-            </Popover>
-          );
-        })}
+      <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+        {REGULAR_ACHIEVEMENTS.map((achievementType) => 
+          renderAchievementTile(achievementType)
+        )}
       </div>
     </Card>
   );
