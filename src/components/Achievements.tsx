@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Progress } from '@/components/ui/progress';
-import { Award, Mountain, Flame, Sun, Moon, Star, Target, Zap, Trophy, Clock, Sparkles, Crown } from 'lucide-react';
+import { Award, Mountain, Flame, Sun, Moon, Star, Target, Zap, Trophy, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { AchievementSuggestionForm } from './AchievementSuggestionForm';
@@ -23,9 +23,6 @@ type AchievementType =
   | 'early_bird'
   | 'night_owl'
   | 'pioneer_10'
-  | 'pioneer_25'
-  | 'pioneer_50'
-  | 'founding_member'
   | 'denzlerweg_king'
   | 'coiffeur';
 
@@ -42,7 +39,6 @@ interface AchievementConfig {
   description: string;
   howToEarn: React.ReactNode;
   color: string;
-  isExclusive?: boolean;
   target?: number;
   progressType?: 'runs' | 'streak' | 'segments';
 }
@@ -204,40 +200,15 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     progressType: 'runs',
   },
   pioneer_10: {
-    icon: <Crown className="w-5 h-5" />,
-    title: 'Top 10 Pioneer',
-    description: 'Einer der ersten 10 User',
-    howToEarn: 'Dieses exklusive Achievement wurde an die ersten 10 Nutzer vergeben.',
+    icon: <Trophy className="w-5 h-5" />,
+    title: 'Leaderboard Top 10',
+    description: 'Platz in Top 10',
+    howToEarn: 'Erreiche einen Platz in den Top 10 der Rangliste.',
     color: 'text-amber-400',
-    isExclusive: true,
-  },
-  pioneer_25: {
-    icon: <Sparkles className="w-5 h-5" />,
-    title: 'Top 25 Pioneer',
-    description: 'Einer der ersten 25 User',
-    howToEarn: 'Dieses exklusive Achievement wurde an die ersten 25 Nutzer vergeben.',
-    color: 'text-amber-500',
-    isExclusive: true,
-  },
-  pioneer_50: {
-    icon: <Sparkles className="w-5 h-5" />,
-    title: 'Top 50 Pioneer',
-    description: 'Einer der ersten 50 User',
-    howToEarn: 'Dieses exklusive Achievement wurde an die ersten 50 Nutzer vergeben.',
-    color: 'text-amber-600',
-    isExclusive: true,
-  },
-  founding_member: {
-    icon: <Sparkles className="w-5 h-5" />,
-    title: 'Founding Member',
-    description: 'Früher Unterstützer',
-    howToEarn: 'Dieses exklusive Achievement wurde an frühe Unterstützer vergeben.',
-    color: 'text-yellow-500',
-    isExclusive: true,
   },
 };
 
-// Regular achievements (always visible)
+// All achievements (always visible)
 const REGULAR_ACHIEVEMENTS: AchievementType[] = [
   'first_run',
   'runs_5',
@@ -251,16 +222,9 @@ const REGULAR_ACHIEVEMENTS: AchievementType[] = [
   'streak_8',
   'early_bird',
   'night_owl',
+  'pioneer_10',
   'denzlerweg_king',
   'coiffeur',
-];
-
-// Exclusive achievements (only show if earned)
-const EXCLUSIVE_ACHIEVEMENTS: AchievementType[] = [
-  'pioneer_10',
-  'pioneer_25',
-  'pioneer_50',
-  'founding_member',
 ];
 
 // Helper to calculate streak from check-ins
@@ -387,10 +351,8 @@ export function Achievements({ userId }: AchievementsProps) {
     return checkInYear === currentYear && COIFFEUR_SEGMENT_IDS.includes(c.segment_id);
   })?.length || 0;
   
-  // Filter exclusive achievements to only show earned ones
-  const earnedExclusiveAchievements = EXCLUSIVE_ACHIEVEMENTS.filter(a => earnedSet.has(a));
-  const totalAchievementsCount = REGULAR_ACHIEVEMENTS.length + earnedExclusiveAchievements.length;
-  const earnedCount = [...REGULAR_ACHIEVEMENTS, ...earnedExclusiveAchievements].filter(a => earnedSet.has(a)).length;
+  const totalAchievementsCount = REGULAR_ACHIEVEMENTS.length;
+  const earnedCount = REGULAR_ACHIEVEMENTS.filter(a => earnedSet.has(a)).length;
 
   const getEarnedDate = (achievementType: AchievementType) => {
     const earnedAt = earnedMap.get(achievementType);
@@ -437,7 +399,7 @@ export function Achievements({ userId }: AchievementsProps) {
   };
 
   // Helper to render a single achievement tile
-  const renderAchievementTile = (achievementType: AchievementType, isExclusive: boolean = false) => {
+  const renderAchievementTile = (achievementType: AchievementType) => {
     const config = ACHIEVEMENT_CONFIG[achievementType];
     const isEarned = earnedSet.has(achievementType);
     const earnedDate = getEarnedDate(achievementType);
@@ -448,14 +410,12 @@ export function Achievements({ userId }: AchievementsProps) {
         <PopoverTrigger asChild>
           <button
             className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all cursor-pointer hover:scale-105 aspect-square ${
-              isExclusive
-                ? 'bg-gradient-to-br from-amber-500/20 via-yellow-400/10 to-amber-500/20 border border-amber-500/40'
-                : isEarned 
-                  ? 'bg-primary/10 border border-primary/30' 
-                  : 'bg-muted/30 opacity-50'
+              isEarned 
+                ? 'bg-primary/10 border border-primary/30' 
+                : 'bg-muted/30 opacity-50'
             }`}
           >
-            <div className={`${isEarned || isExclusive ? config.color : 'text-muted-foreground'} mb-1`}>
+            <div className={`${isEarned ? config.color : 'text-muted-foreground'} mb-1`}>
               {config.icon}
             </div>
             <p className="text-[10px] font-medium text-center leading-tight line-clamp-2 px-1">
@@ -465,7 +425,7 @@ export function Achievements({ userId }: AchievementsProps) {
         </PopoverTrigger>
         <PopoverContent className="w-64">
           <div className="flex flex-col items-center text-center gap-2">
-            <div className={`${isEarned || isExclusive ? config.color : 'text-muted-foreground'} scale-150`}>
+            <div className={`${isEarned ? config.color : 'text-muted-foreground'} scale-150`}>
               {config.icon}
             </div>
             <h4 className="font-bold">{config.title}</h4>
@@ -502,22 +462,7 @@ export function Achievements({ userId }: AchievementsProps) {
         <AchievementSuggestionForm userId={userId || null} />
       </div>
       
-      {/* Exclusive Achievements (only if earned) */}
-      {earnedExclusiveAchievements.length > 0 && (
-        <div className="mb-3">
-          <p className="text-[10px] uppercase tracking-wider text-amber-500 font-medium mb-2 flex items-center gap-1">
-            <Sparkles className="w-3 h-3" />
-            Exklusiv
-          </p>
-          <div className="grid grid-cols-4 gap-2">
-            {earnedExclusiveAchievements.map((achievementType) => 
-              renderAchievementTile(achievementType, true)
-            )}
-          </div>
-        </div>
-      )}
-      
-      {/* Regular Achievements Grid */}
+      {/* Achievements Grid */}
       <div className="grid grid-cols-4 gap-2">
         {REGULAR_ACHIEVEMENTS.map((achievementType) => 
           renderAchievementTile(achievementType)

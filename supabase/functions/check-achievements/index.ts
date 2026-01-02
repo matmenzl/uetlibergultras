@@ -20,9 +20,6 @@ type AchievementType =
   | 'early_bird'
   | 'night_owl'
   | 'pioneer_10'
-  | 'pioneer_25'
-  | 'pioneer_50'
-  | 'founding_member'
   | 'denzlerweg_king'
   | 'coiffeur';
 
@@ -166,27 +163,26 @@ serve(async (req) => {
       newAchievements.push('all_segments');
     }
 
-    // Check Pioneer achievements based on user number
-    const { data: userProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('user_number, is_founding_member')
-      .eq('id', userId)
-      .single();
+    // Check Top 10 Leaderboard achievement
+    const { data: leaderboardData } = await supabaseAdmin
+      .from('leaderboard_stats')
+      .select('user_id, total_runs')
+      .order('total_runs', { ascending: false })
+      .limit(10);
 
-    if (userProfile) {
-      const userNumber = userProfile.user_number;
+    if (leaderboardData) {
+      const top10UserIds = leaderboardData.map(entry => entry.user_id);
       
-      if (userNumber && userNumber <= 10 && !existingSet.has('pioneer_10')) {
+      if (top10UserIds.includes(userId) && !existingSet.has('pioneer_10')) {
         newAchievements.push('pioneer_10');
-      }
-      if (userNumber && userNumber <= 25 && !existingSet.has('pioneer_25')) {
-        newAchievements.push('pioneer_25');
-      }
-      if (userNumber && userNumber <= 50 && !existingSet.has('pioneer_50')) {
-        newAchievements.push('pioneer_50');
-      }
-      if (userProfile.is_founding_member && !existingSet.has('founding_member')) {
-        newAchievements.push('founding_member');
+      } else if (!top10UserIds.includes(userId) && existingSet.has('pioneer_10')) {
+        // Remove achievement if user is no longer in Top 10
+        await supabaseAdmin
+          .from('user_achievements')
+          .delete()
+          .eq('user_id', userId)
+          .eq('achievement', 'pioneer_10');
+        console.log(`Top 10 achievement removed from user ${userId}`);
       }
     }
 
