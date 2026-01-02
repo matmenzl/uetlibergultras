@@ -55,11 +55,11 @@ interface ActivityGroup {
 // Get time-based greeting
 const getGreeting = (): string => {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 11) return "Guten Morgen, Bergläufer! ☀️";
-  if (hour >= 11 && hour < 14) return "Mittags-Power! 🌤️";
-  if (hour >= 14 && hour < 18) return "Nachmittags-Energy! 🏃";
-  if (hour >= 18 && hour < 22) return "Abend-Session! 🌅";
-  return "Nachtläufer unterwegs! 🌙";
+  if (hour >= 5 && hour < 11) return "Der frühe Vogel und so... ☀️";
+  if (hour >= 11 && hour < 14) return "Auf zum Lunch-Run";
+  if (hour >= 14 && hour < 18) return "Brainstorming geht auch mit einem Trailrun 🏃";
+  if (hour >= 18 && hour < 22) return "Ab zum Sundowner 🌅";
+  return "Night Mode is on ... 🌙";
 };
 
 export default function Index() {
