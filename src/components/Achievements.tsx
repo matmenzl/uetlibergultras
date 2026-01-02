@@ -453,12 +453,14 @@ export function Achievements({ userId }: AchievementsProps) {
   return (
     <Card className="p-4 h-full">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-2">
         <Award className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-lg">Achievements</h3>
         <Badge variant="secondary" className="ml-auto text-xs">
           {earnedCount}/{totalAchievementsCount}
         </Badge>
+      </div>
+      <div className="mb-4">
         <AchievementSuggestionForm userId={userId || null} />
       </div>
       
