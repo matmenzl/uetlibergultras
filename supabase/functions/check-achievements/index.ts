@@ -21,10 +21,15 @@ type AchievementType =
   | 'night_owl'
   | 'pioneer_10'
   | 'denzlerweg_king'
-  | 'coiffeur';
+  | 'coiffeur'
+  | 'snow_bunny'
+  | 'frosty';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
+
+// WMO weather codes for snow conditions
+const SNOW_CODES = [71, 73, 75, 77, 85, 86];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -65,10 +70,10 @@ serve(async (req) => {
     
     const existingSet = new Set(existingAchievements?.map(a => a.achievement) || []);
 
-    // Get check-in stats
+    // Get check-in stats (including weather data)
     const { data: checkIns } = await supabaseAdmin
       .from('check_ins')
-      .select('activity_id, segment_id, checked_in_at')
+      .select('activity_id, segment_id, checked_in_at, weather_code, temperature')
       .eq('user_id', userId);
 
     if (!checkIns || checkIns.length === 0) {
@@ -239,6 +244,25 @@ serve(async (req) => {
       if (uniqueCoiffeurActivities.size >= 10) {
         newAchievements.push('coiffeur');
       }
+    }
+
+    // Check weather-based achievements
+    // Snow-Bunny: 3 runs in snow conditions (WMO codes 71-77, 85-86)
+    const snowRuns = checkIns.filter(c => 
+      c.weather_code !== null && SNOW_CODES.includes(c.weather_code)
+    );
+    const uniqueSnowActivities = new Set(snowRuns.map(c => c.activity_id));
+    if (uniqueSnowActivities.size >= 3 && !existingSet.has('snow_bunny')) {
+      newAchievements.push('snow_bunny');
+    }
+
+    // Frosty: 5 runs below 0°C
+    const frostRuns = checkIns.filter(c => 
+      c.temperature !== null && c.temperature < 0
+    );
+    const uniqueFrostActivities = new Set(frostRuns.map(c => c.activity_id));
+    if (uniqueFrostActivities.size >= 5 && !existingSet.has('frosty')) {
+      newAchievements.push('frosty');
     }
 
     // Insert new achievements

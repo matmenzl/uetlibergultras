@@ -13,6 +13,34 @@ const RATE_LIMIT = {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Uetliberg coordinates for weather API
+const UETLIBERG_LAT = 47.3494;
+const UETLIBERG_LON = 8.4916;
+
+// Fetch current weather from Open-Meteo (free, no API key needed)
+async function fetchCurrentWeather(): Promise<{ weather_code: number | null; temperature: number | null }> {
+  try {
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${UETLIBERG_LAT}&longitude=${UETLIBERG_LON}&current=temperature_2m,weather_code`;
+    const response = await fetch(weatherUrl);
+    
+    if (!response.ok) {
+      console.error(`Weather API error: ${response.status}`);
+      return { weather_code: null, temperature: null };
+    }
+    
+    const data = await response.json();
+    console.log(`Weather fetched: code=${data.current?.weather_code}, temp=${data.current?.temperature_2m}°C`);
+    
+    return {
+      weather_code: data.current?.weather_code ?? null,
+      temperature: data.current?.temperature_2m ?? null,
+    };
+  } catch (error) {
+    console.error('Failed to fetch weather:', error);
+    return { weather_code: null, temperature: null };
+  }
+}
+
 // Process a single activity webhook event
 async function processActivityEvent(
   supabaseAdmin: any,
@@ -156,6 +184,9 @@ async function processActivityEvent(
       return;
     }
 
+    // Fetch current weather for all check-ins
+    const weather = await fetchCurrentWeather();
+
     // Create check-ins for each matching segment
     for (const effort of matchingEfforts) {
       const { error: checkInError } = await supabaseAdmin
@@ -170,6 +201,8 @@ async function processActivityEvent(
           checked_in_at: activity.start_date,
           activity_distance: activity.distance,
           activity_elapsed_time: activity.elapsed_time,
+          weather_code: weather.weather_code,
+          temperature: weather.temperature,
         }, {
           onConflict: 'user_id,segment_id,activity_id',
         });
@@ -177,7 +210,7 @@ async function processActivityEvent(
       if (checkInError) {
         console.error(`Failed to create check-in for segment ${effort.segment.id}:`, checkInError);
       } else {
-        console.log(`Created/updated check-in for segment ${effort.segment.name} (${effort.segment.id})`);
+        console.log(`Created/updated check-in for segment ${effort.segment.name} (${effort.segment.id}), weather: code=${weather.weather_code}, temp=${weather.temperature}°C`);
       }
     }
 

@@ -24,7 +24,9 @@ type AchievementType =
   | 'night_owl'
   | 'pioneer_10'
   | 'denzlerweg_king'
-  | 'coiffeur';
+  | 'coiffeur'
+  | 'snow_bunny'
+  | 'frosty';
 
 interface Achievement {
   id: string;
@@ -206,7 +208,28 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     howToEarn: 'Erreiche einen Platz in den Top 10 der Rangliste.',
     color: 'text-amber-400',
   },
+  snow_bunny: {
+    icon: <span className="text-lg">🐰❄️</span>,
+    title: 'Snow-Bunny',
+    description: '3 Runs bei Schnee',
+    howToEarn: 'Absolviere 3 Runs bei Schneefall. Das Wetter wird automatisch erfasst.',
+    color: 'text-sky-300',
+    target: 3,
+    progressType: 'runs',
+  },
+  frosty: {
+    icon: <span className="text-lg">🥶</span>,
+    title: 'Frosty',
+    description: '5 Runs unter 0°C',
+    howToEarn: 'Absolviere 5 Runs bei Temperaturen unter dem Gefrierpunkt.',
+    color: 'text-blue-400',
+    target: 5,
+    progressType: 'runs',
+  },
 };
+
+// WMO weather codes for snow conditions
+const SNOW_CODES = [71, 73, 75, 77, 85, 86];
 
 // All achievements (always visible)
 const REGULAR_ACHIEVEMENTS: AchievementType[] = [
@@ -225,6 +248,8 @@ const REGULAR_ACHIEVEMENTS: AchievementType[] = [
   'pioneer_10',
   'denzlerweg_king',
   'coiffeur',
+  'snow_bunny',
+  'frosty',
 ];
 
 // Helper to calculate streak from check-ins
@@ -307,14 +332,14 @@ export function Achievements({ userId }: AchievementsProps) {
     enabled: !!userId,
   });
 
-  // Fetch user stats for progress
+  // Fetch user stats for progress (including weather data)
   const { data: checkIns } = useQuery({
     queryKey: ['achievement-checkins', userId],
     queryFn: async () => {
       if (!userId) return [];
       const { data, error } = await supabase
         .from('check_ins')
-        .select('checked_in_at, segment_id')
+        .select('checked_in_at, segment_id, activity_id, weather_code, temperature')
         .eq('user_id', userId);
       
       if (error) throw error;
@@ -351,6 +376,17 @@ export function Achievements({ userId }: AchievementsProps) {
     return checkInYear === currentYear && COIFFEUR_SEGMENT_IDS.includes(c.segment_id);
   })?.length || 0;
   
+  // Calculate weather-based runs
+  const snowRuns = new Set(
+    checkIns?.filter(c => c.weather_code !== null && SNOW_CODES.includes(c.weather_code))
+      .map(c => c.activity_id) || []
+  ).size;
+  
+  const frostRuns = new Set(
+    checkIns?.filter(c => c.temperature !== null && c.temperature < 0)
+      .map(c => c.activity_id) || []
+  ).size;
+  
   const totalAchievementsCount = REGULAR_ACHIEVEMENTS.length;
   const earnedCount = REGULAR_ACHIEVEMENTS.filter(a => earnedSet.has(a)).length;
 
@@ -366,9 +402,15 @@ export function Achievements({ userId }: AchievementsProps) {
     
     switch (config.progressType) {
       case 'runs':
-        // Special case for coiffeur achievement
+        // Special cases for specific achievements
         if (achievementType === 'coiffeur') {
           return { current: Math.min(coiffeurRuns, config.target || 0), target: config.target || 0 };
+        }
+        if (achievementType === 'snow_bunny') {
+          return { current: Math.min(snowRuns, config.target || 0), target: config.target || 0 };
+        }
+        if (achievementType === 'frosty') {
+          return { current: Math.min(frostRuns, config.target || 0), target: config.target || 0 };
         }
         return { current: Math.min(totalRuns, config.target || 0), target: config.target || 0 };
       case 'streak':
