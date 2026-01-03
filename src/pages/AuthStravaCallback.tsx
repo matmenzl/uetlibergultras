@@ -44,10 +44,22 @@ export default function AuthStravaCallback() {
 
         // Set the session manually
         if (data.session) {
-          await supabase.auth.setSession({
+          const { error: setError } = await supabase.auth.setSession({
             access_token: data.session.access_token,
             refresh_token: data.session.refresh_token,
           });
+          
+          if (setError) {
+            console.error('Error setting session:', setError);
+            throw new Error('Failed to set session');
+          }
+          
+          // Verify the session is properly stored by attempting a refresh
+          // This ensures the refresh token is valid and persisted
+          const { error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshError) {
+            console.warn('Session refresh warning:', refreshError);
+          }
         }
 
         setStatus('success');

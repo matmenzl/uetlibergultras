@@ -103,9 +103,28 @@ export default function Index() {
   const { data: weatherData } = useWeather();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
+    const initSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        // Session exists, try to refresh to ensure it's valid
+        const { data: { session: refreshedSession }, error: refreshError } = 
+          await supabase.auth.refreshSession();
+        
+        if (refreshError) {
+          console.log('Session expired or invalid, clearing...');
+          await supabase.auth.signOut();
+          setUser(null);
+        } else {
+          setUser(refreshedSession?.user ?? null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+    
+    initSession();
+    
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
