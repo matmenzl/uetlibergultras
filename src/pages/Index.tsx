@@ -434,7 +434,7 @@ export default function Index() {
             {/* Webcam Screenshot als Hintergrund */}
             <WebcamBackground />
             {/* Content */}
-            <div className="relative z-20">
+            <div className="relative z-20 pb-16 md:pb-8">
               <img
                 src={logo}
                 alt="Uetliberg Ultras"
