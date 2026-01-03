@@ -71,7 +71,9 @@ export type Database = {
           elapsed_time: number | null
           id: string
           segment_id: number
+          temperature: number | null
           user_id: string
+          weather_code: number | null
         }
         Insert: {
           activity_distance?: number | null
@@ -84,7 +86,9 @@ export type Database = {
           elapsed_time?: number | null
           id?: string
           segment_id: number
+          temperature?: number | null
           user_id: string
+          weather_code?: number | null
         }
         Update: {
           activity_distance?: number | null
@@ -97,7 +101,9 @@ export type Database = {
           elapsed_time?: number | null
           id?: string
           segment_id?: number
+          temperature?: number | null
           user_id?: string
+          weather_code?: number | null
         }
         Relationships: []
       }
@@ -405,6 +411,8 @@ export type Database = {
         | "founding_member"
         | "denzlerweg_king"
         | "coiffeur"
+        | "snow_bunny"
+        | "frosty"
       app_role: "admin" | "user"
       suggestion_status: "pending" | "approved" | "rejected"
     }
@@ -553,6 +561,8 @@ export const Constants = {
         "founding_member",
         "denzlerweg_king",
         "coiffeur",
+        "snow_bunny",
+        "frosty",
       ],
       app_role: ["admin", "user"],
       suggestion_status: ["pending", "approved", "rejected"],
