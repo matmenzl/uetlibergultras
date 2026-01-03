@@ -83,7 +83,7 @@ const getGreeting = (): string => {
   if (hour >= 5 && hour < 11) return "Der frühe Vogel und so... ☀️";
   if (hour >= 11 && hour < 14) return "Mittagessen braucht niemand, der Uetliberg wartet auf dich!";
   if (hour >= 14 && hour < 18) return "Die Uetliberg-Trails warten auf dich🏃";
-  if (hour >= 18 && hour < 22) return "Und auf geht's zum Sundowner 🌅";
+  if (hour >= 18 && hour < 20) return "Und auf geht's zum Sundowner 🌅";
   return "Night Mode is on ... 🌙";
 };
 
