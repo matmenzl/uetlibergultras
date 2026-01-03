@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Camera, RefreshCw, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWeather } from '@/hooks/useWeather';
 
 const RATE_LIMIT_MINUTES = 15;
@@ -161,69 +160,101 @@ export function WebcamBackground() {
         />
       )}
       
-      {/* Live indicator - top left */}
+      {/* Webcam Info Bar - Bottom */}
       {imageLoaded && (
-        <div className="absolute top-4 left-4 z-20">
-          {isLive ? (
-            <div className="bg-red-600/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5">
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              <span className="text-white text-xs font-semibold uppercase tracking-wide">Live</span>
+        <div className="absolute bottom-0 left-0 right-0 z-20">
+          <div className="bg-black/60 backdrop-blur-sm">
+            {/* Desktop: single line */}
+            <div className="hidden md:flex items-center justify-between px-4 py-2.5">
+              <div className="flex items-center gap-4 text-white">
+                <span className="flex items-center gap-1.5">
+                  <Camera className="w-4 h-4" />
+                  <span className="text-sm font-medium">Uetliberg Webcam</span>
+                </span>
+                {weatherData && (
+                  <span className="text-sm">
+                    {weatherData.weather} {weatherData.temperature}°C
+                  </span>
+                )}
+                <span className="text-sm text-white/80">
+                  {isLive ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                      Live
+                    </span>
+                  ) : (
+                    formatTime(screenshotMeta)
+                  )}
+                </span>
+              </div>
+              <Button
+                size="sm"
+                onClick={captureScreenshot}
+                disabled={isCapturing || cooldownInfo.isOnCooldown}
+                className="bg-white/20 hover:bg-white/30 text-white border-0"
+              >
+                {isCapturing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin mr-1.5" />
+                    Lädt...
+                  </>
+                ) : cooldownInfo.isOnCooldown ? (
+                  <>
+                    <Clock className="w-4 h-4 mr-1.5" />
+                    {cooldownInfo.remainingMinutes} Min
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-1.5" />
+                    Aktualisieren
+                  </>
+                )}
+              </Button>
             </div>
-          ) : screenshotMeta && (
-            <div className="bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5">
-              <Clock className="w-3 h-3 text-white/80" />
-              <span className="text-white text-xs font-medium">{formatTime(screenshotMeta)}</span>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Weather info - top right */}
-      {imageLoaded && weatherData && (
-        <div className="absolute top-4 right-4 z-20">
-          <div className="bg-black/40 backdrop-blur-sm rounded-lg px-3 py-1.5 text-white">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">{weatherData.weather}</span>
-              {weatherData.temperature !== null && (
-                <span className="text-base font-medium">{weatherData.temperature}°C</span>
-              )}
+
+            {/* Mobile: two lines */}
+            <div className="md:hidden px-3 py-2">
+              <div className="flex items-center gap-1.5 text-white text-sm mb-1.5">
+                <Camera className="w-3.5 h-3.5" />
+                <span className="font-medium">Uetliberg Webcam</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-white/90 text-xs">
+                  {weatherData && (
+                    <span>{weatherData.weather} {weatherData.temperature}°C</span>
+                  )}
+                  <span>·</span>
+                  {isLive ? (
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                      Live
+                    </span>
+                  ) : (
+                    <span>{formatTime(screenshotMeta)}</span>
+                  )}
+                </div>
+                <Button
+                  size="sm"
+                  onClick={captureScreenshot}
+                  disabled={isCapturing || cooldownInfo.isOnCooldown}
+                  className="bg-white/20 hover:bg-white/30 text-white border-0 h-8 px-2.5 text-xs"
+                >
+                  {isCapturing ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : cooldownInfo.isOnCooldown ? (
+                    <>⏳ {cooldownInfo.remainingMinutes}m</>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                      Neu
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       )}
-      
-      {/* Screenshot button with timestamp and cooldown */}
-      <div className="absolute bottom-2 right-2 z-30">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={captureScreenshot}
-                disabled={isCapturing || cooldownInfo.isOnCooldown}
-                className="bg-black/50 hover:bg-black/70 text-white disabled:opacity-70"
-              >
-                {isCapturing ? (
-                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
-                ) : cooldownInfo.isOnCooldown ? (
-                  <Clock className="w-4 h-4 mr-2" />
-                ) : (
-                  <Camera className="w-4 h-4 mr-2" />
-                )}
-                {screenshotMeta ? formatTime(screenshotMeta) : 'Screenshot'}
-                {cooldownInfo.isOnCooldown && ` (${cooldownInfo.remainingMinutes} Min)`}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {cooldownInfo.isOnCooldown 
-                ? <p>Nächster Screenshot in {cooldownInfo.remainingMinutes} Minute{cooldownInfo.remainingMinutes === 1 ? '' : 'n'} möglich</p>
-                : <p>Neuen Screenshot aufnehmen</p>
-              }
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
     </>
   );
 }
