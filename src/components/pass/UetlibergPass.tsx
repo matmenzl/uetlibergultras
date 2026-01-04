@@ -399,7 +399,7 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
   const earnedCount = allAchievements.filter(a => earnedSet.has(a)).length;
 
   return (
-    <Card className="bg-pass-paper dark:bg-card border-pass-border dark:border-border overflow-hidden">
+    <Card className="bg-pass-paper dark:bg-card border-0 shadow-md overflow-hidden">
       {/* Paper texture overlay */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E')]" />
       
@@ -436,7 +436,7 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
         ) : (
           // Full view with tabs
           <Tabs defaultValue="milestone" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-pass-paper dark:bg-muted/30 border border-pass-border dark:border-border">
+            <TabsList className="grid w-full grid-cols-4 bg-transparent">
               <TabsTrigger value="milestone" className="text-xs sm:text-sm data-[state=active]:bg-stamp-milestone/20 data-[state=active]:text-stamp-milestone">
                 Meilensteine
               </TabsTrigger>
