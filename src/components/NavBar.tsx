@@ -10,7 +10,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import logo from '@/assets/uu_logo.png';
+import logo from '@/assets/uu_logo.svg';
 
 export default function NavBar() {
   const navigate = useNavigate();
