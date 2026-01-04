@@ -520,11 +520,9 @@ export default function Index() {
             </div>
 
             {/* Pass Preview (replaces old Achievements) - Span 1 */}
-            {user && (
-              <div>
-                <PassPreview userId={user?.id} />
-              </div>
-            )}
+            <div>
+              <PassPreview userId={user?.id} />
+            </div>
           </div>
 
           {/* ===== PRIVATE KOMPONENTEN (nur für eingeloggte User) ===== */}
