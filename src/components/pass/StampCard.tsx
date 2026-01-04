@@ -25,22 +25,22 @@ interface StampCardProps {
 
 const categoryStyles = {
   milestone: {
-    earned: 'border-stamp-milestone bg-gradient-to-br from-stamp-milestone/20 via-stamp-milestone/10 to-transparent shadow-stamp-milestone',
+    earned: 'border-stamp-milestone bg-gradient-to-br from-stamp-milestone/15 via-stamp-milestone/5 to-transparent',
     unearned: 'border-stamp-milestone/25',
     glow: 'hsl(var(--stamp-milestone-glow))',
   },
   endurance: {
-    earned: 'border-stamp-endurance bg-gradient-to-br from-stamp-endurance/20 via-stamp-endurance/10 to-transparent shadow-stamp-endurance',
+    earned: 'border-stamp-endurance bg-gradient-to-br from-stamp-endurance/15 via-stamp-endurance/5 to-transparent',
     unearned: 'border-stamp-endurance/25',
     glow: 'hsl(var(--stamp-endurance-glow))',
   },
   special: {
-    earned: 'border-stamp-special bg-gradient-to-br from-stamp-special/20 via-stamp-special/10 to-transparent shadow-stamp-special',
+    earned: 'border-stamp-special bg-gradient-to-br from-stamp-special/15 via-stamp-special/5 to-transparent',
     unearned: 'border-stamp-special/25',
     glow: 'hsl(var(--stamp-special-glow))',
   },
   legend: {
-    earned: 'border-stamp-legend bg-gradient-to-br from-stamp-legend/25 via-stamp-legend/15 to-transparent shadow-stamp-legend animate-glow-pulse',
+    earned: 'border-stamp-legend bg-gradient-to-br from-stamp-legend/20 via-stamp-legend/10 to-transparent',
     unearned: 'border-stamp-legend/25',
     glow: 'hsl(var(--stamp-legend-glow))',
   },
@@ -115,10 +115,10 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
           onMouseLeave={() => setIsHovered(false)}
         >
 
-          {/* Shimmer effect for earned stamps */}
+          {/* Subtle shimmer effect for earned stamps */}
           {isEarned && (
             <div 
-              className="absolute inset-0 rounded-full opacity-40 pointer-events-none animate-shimmer"
+              className="absolute inset-0 rounded-full opacity-20 pointer-events-none animate-shimmer"
               style={{
                 background: `linear-gradient(90deg, transparent 0%, ${categoryStyles[config.category].glow} 50%, transparent 100%)`,
                 backgroundSize: '200% 100%',
@@ -162,10 +162,10 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
             {config.icon}
           </div>
 
-          {/* Inner glow for earned stamps */}
+          {/* Subtle inner glow for earned stamps */}
           {isEarned && (
             <div 
-              className="absolute inset-2 rounded-full opacity-20 blur-sm pointer-events-none"
+              className="absolute inset-3 rounded-full opacity-10 blur-sm pointer-events-none"
               style={{ backgroundColor: categoryStyles[config.category].glow }}
             />
           )}
