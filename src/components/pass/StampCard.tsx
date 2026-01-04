@@ -74,9 +74,9 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
   };
 
   const borderWidth = {
-    sm: 'border-2',
-    md: 'border-[3px]',
-    lg: 'border-[3px]',
+    sm: 'border',
+    md: 'border-2',
+    lg: 'border-2',
   };
 
   const earnedDate = earnedAt ? format(new Date(earnedAt), 'd. MMM yyyy', { locale: de }) : null;
@@ -114,10 +114,6 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* Outer decorative ring for earned stamps */}
-          {isEarned && (
-            <div className="absolute inset-[-2px] rounded-full border border-current opacity-30 pointer-events-none" />
-          )}
 
           {/* Shimmer effect for earned stamps */}
           {isEarned && (

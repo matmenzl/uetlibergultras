@@ -9,7 +9,7 @@ interface PassHeaderProps {
 
 export function PassHeader({ displayName, earnedCount, totalCount }: PassHeaderProps) {
   return (
-    <div className="flex flex-col items-center text-center mb-6 pb-4 border-b border-pass-border dark:border-border">
+    <div className="flex flex-col items-center text-center mb-8">
       {/* Logo */}
       <img 
         src={logo} 
