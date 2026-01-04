@@ -60,11 +60,15 @@ All colors MUST be HSL.
     --stamp-ink: 18 85% 45%;
     --stamp-ink-faded: 18 40% 70%;
     
-    /* Stamp category colors */
-    --stamp-milestone: 45 90% 55%;
-    --stamp-endurance: 15 90% 55%;
-    --stamp-special: 280 70% 60%;
-    --stamp-legend: 180 60% 45%;
+    /* Stamp category colors - enhanced with richer tones */
+    --stamp-milestone: 43 95% 52%;
+    --stamp-milestone-glow: 45 100% 65%;
+    --stamp-endurance: 20 95% 50%;
+    --stamp-endurance-glow: 25 100% 60%;
+    --stamp-special: 275 80% 55%;
+    --stamp-special-glow: 280 90% 70%;
+    --stamp-legend: 168 70% 42%;
+    --stamp-legend-glow: 170 80% 55%;
 
     --sidebar-background: 40 25% 97%;
     --sidebar-foreground: 20 15% 15%;
@@ -108,10 +112,14 @@ All colors MUST be HSL.
     /* Pass/Stamp Dark Mode */
     --pass-paper: 25 20% 15%;
     --pass-border: 25 15% 25%;
-    --stamp-milestone: 45 80% 50%;
-    --stamp-endurance: 15 80% 50%;
-    --stamp-special: 280 60% 55%;
-    --stamp-legend: 180 50% 40%;
+    --stamp-milestone: 43 90% 55%;
+    --stamp-milestone-glow: 45 100% 70%;
+    --stamp-endurance: 20 85% 55%;
+    --stamp-endurance-glow: 25 100% 65%;
+    --stamp-special: 275 70% 60%;
+    --stamp-special-glow: 280 85% 75%;
+    --stamp-legend: 168 60% 48%;
+    --stamp-legend-glow: 170 75% 60%;
     
     --sidebar-background: 20 15% 10%;
     --sidebar-foreground: 40 25% 95%;
