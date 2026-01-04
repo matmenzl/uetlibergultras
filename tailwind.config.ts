@@ -90,25 +90,48 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "stamp-press": {
+          "0%": { 
+            transform: "scale(2.5) rotate(-15deg)", 
+            opacity: "0",
+            filter: "blur(4px)"
           },
-          to: {
-            height: "0",
+          "50%": { 
+            transform: "scale(1.1) rotate(2deg)", 
+            opacity: "1",
+            filter: "blur(0px)"
           },
+          "70%": { 
+            transform: "scale(0.95) rotate(-1deg)", 
+            opacity: "1" 
+          },
+          "85%": { 
+            transform: "scale(1.02) rotate(0.5deg)", 
+            opacity: "1" 
+          },
+          "100%": { 
+            transform: "scale(1) rotate(0deg)", 
+            opacity: "1" 
+          },
+        },
+        "stamp-ink": {
+          "0%": { opacity: "0" },
+          "50%": { opacity: "0.8" },
+          "100%": { opacity: "0.2" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "stamp-press": "stamp-press 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+        "stamp-ink": "stamp-ink 0.8s ease-out forwards",
       },
     },
   },
