@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,6 +7,9 @@ import { PassHeader } from './PassHeader';
 import { PassPage } from './PassPage';
 import { StampConfig } from './StampCard';
 import { Star, Mountain, Flame, Sun, Moon, Zap, Trophy, Clock, Target, Award } from 'lucide-react';
+
+// Time window for "newly earned" animation (30 seconds)
+const NEW_ACHIEVEMENT_WINDOW_MS = 30000;
 
 type AchievementType = 
   | 'first_run' | 'runs_5' | 'runs_10' | 'runs_25' | 'runs_50' | 'runs_100'
@@ -348,6 +352,38 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
     }
   };
 
+  // Track which achievements were already seen (for animation)
+  const seenAchievementsRef = useRef<Set<string>>(new Set());
+  const [newlyEarnedAchievements, setNewlyEarnedAchievements] = useState<Set<string>>(new Set());
+
+  // Check for newly earned achievements
+  useEffect(() => {
+    if (!earnedAchievements) return;
+
+    const newlyEarned = new Set<string>();
+    const now = Date.now();
+
+    earnedAchievements.forEach(a => {
+      const earnedTime = new Date(a.earned_at).getTime();
+      const isRecent = now - earnedTime < NEW_ACHIEVEMENT_WINDOW_MS;
+      const notSeenBefore = !seenAchievementsRef.current.has(a.achievement);
+
+      if (isRecent && notSeenBefore) {
+        newlyEarned.add(a.achievement);
+      }
+      seenAchievementsRef.current.add(a.achievement);
+    });
+
+    if (newlyEarned.size > 0) {
+      setNewlyEarnedAchievements(newlyEarned);
+      // Clear the "newly earned" state after animation completes
+      const timer = setTimeout(() => {
+        setNewlyEarnedAchievements(new Set());
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [earnedAchievements]);
+
   // Build achievement data for each category
   const buildAchievementData = (types: AchievementType[]) => 
     types.map(type => ({
@@ -356,6 +392,7 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
       isEarned: earnedSet.has(type),
       earnedAt: earnedMap.get(type),
       progress: getProgress(type),
+      isNewlyEarned: newlyEarnedAchievements.has(type),
     }));
 
   const allAchievements = [...MILESTONE_ACHIEVEMENTS, ...ENDURANCE_ACHIEVEMENTS, ...SPECIAL_ACHIEVEMENTS, ...LEGEND_ACHIEVEMENTS];

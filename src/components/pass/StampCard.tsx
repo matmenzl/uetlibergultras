@@ -3,6 +3,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { useState, useEffect } from 'react';
 
 export interface StampConfig {
   icon: React.ReactNode;
@@ -19,6 +20,7 @@ interface StampCardProps {
   earnedAt?: string;
   progress?: { current: number; target: number } | null;
   size?: 'sm' | 'md' | 'lg';
+  isNewlyEarned?: boolean;
 }
 
 const categoryColors = {
@@ -35,7 +37,21 @@ const categoryColorsFaded = {
   legend: 'border-stamp-legend/30',
 };
 
-export function StampCard({ config, isEarned, earnedAt, progress, size = 'md' }: StampCardProps) {
+export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', isNewlyEarned = false }: StampCardProps) {
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    if (isNewlyEarned && !hasAnimated) {
+      // Small delay to ensure the component is mounted
+      const timer = setTimeout(() => {
+        setShowAnimation(true);
+        setHasAnimated(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isNewlyEarned, hasAnimated]);
+
   const sizeClasses = {
     sm: 'w-16 h-16',
     md: 'w-20 h-20',
@@ -51,8 +67,8 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md' }:
   const earnedDate = earnedAt ? format(new Date(earnedAt), 'd. MMM yyyy', { locale: de }) : null;
   const progressPercent = progress ? Math.min((progress.current / progress.target) * 100, 100) : 0;
 
-  // Random rotation for authentic stamp feel
-  const rotation = isEarned ? (Math.random() * 6 - 3) : 0;
+  // Random rotation for authentic stamp feel (consistent per render)
+  const rotation = isEarned ? ((config.title.length % 7) - 3) : 0;
 
   return (
     <Popover>
@@ -69,12 +85,18 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md' }:
               : cn(
                   categoryColorsFaded[config.category],
                   'bg-pass-paper/50 dark:bg-pass-paper-dark/50 opacity-60 hover:opacity-80 border-dashed'
-                )
+                ),
+            showAnimation && 'animate-stamp-press'
           )}
           style={{
-            transform: isEarned ? `rotate(${rotation}deg)` : undefined,
+            transform: !showAnimation && isEarned ? `rotate(${rotation}deg)` : undefined,
           }}
         >
+          {/* Ink splash effect during animation */}
+          {showAnimation && (
+            <div className="absolute inset-0 rounded-full bg-current opacity-0 animate-stamp-ink pointer-events-none" />
+          )}
+
           {/* Stamp texture overlay for earned */}
           {isEarned && (
             <div className="absolute inset-0 rounded-full opacity-20 bg-[radial-gradient(circle_at_30%_30%,transparent_0%,transparent_50%,currentColor_50%,currentColor_51%,transparent_51%)] pointer-events-none" />

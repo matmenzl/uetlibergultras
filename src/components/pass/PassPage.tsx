@@ -11,6 +11,7 @@ interface PassPageProps {
     isEarned: boolean;
     earnedAt?: string;
     progress?: { current: number; target: number } | null;
+    isNewlyEarned?: boolean;
   }[];
   category: 'milestone' | 'endurance' | 'special' | 'legend';
 }
@@ -56,6 +57,7 @@ export function PassPage({ title, icon: Icon, achievements, category }: PassPage
             earnedAt={achievement.earnedAt}
             progress={achievement.progress}
             size="md"
+            isNewlyEarned={achievement.isNewlyEarned}
           />
         ))}
       </div>
