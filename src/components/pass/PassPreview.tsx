@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Mountain, Flame, Star, Sun, Snowflake, Crown } from 'lucide-react';
-import logo from '@/assets/uetlibergultras_logo.svg';
+import logo from '@/assets/uu_logo.png';
 import { StampCard, type StampConfig } from './StampCard';
 
 type AchievementType = 

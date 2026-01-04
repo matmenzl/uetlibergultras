@@ -23,7 +23,7 @@ import {
   X,
   MapPinned,
 } from "lucide-react";
-import logo from "@/assets/uetlibergultras_logo.svg";
+import logo from "@/assets/uu_logo.png";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Leaderboard } from "@/components/Leaderboard";
 import { Achievements } from "@/components/Achievements";

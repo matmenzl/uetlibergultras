@@ -1,5 +1,5 @@
 import { Mountain } from 'lucide-react';
-import logo from '@/assets/uetlibergultras_logo.svg';
+import logo from '@/assets/uu_logo.png';
 
 interface PassHeaderProps {
   displayName?: string;
