@@ -11,6 +11,7 @@ import Admin from "./pages/Admin";
 import Support from "./pages/Support";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Pass from "./pages/Pass";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -21,6 +22,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/pass" element={<Pass />} />
           <Route path="/segments" element={<Segments />} />
           <Route path="/support" element={<Support />} />
           <Route path="/privacy" element={<Privacy />} />

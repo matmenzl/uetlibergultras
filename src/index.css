@@ -52,6 +52,20 @@ All colors MUST be HSL.
     
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
+    /* Pass/Stamp Card Design System */
+    --pass-paper: 35 30% 92%;
+    --pass-paper-dark: 25 20% 15%;
+    --pass-border: 30 20% 75%;
+    --pass-border-dark: 25 15% 25%;
+    --stamp-ink: 18 85% 45%;
+    --stamp-ink-faded: 18 40% 70%;
+    
+    /* Stamp category colors */
+    --stamp-milestone: 45 90% 55%;
+    --stamp-endurance: 15 90% 55%;
+    --stamp-special: 280 70% 60%;
+    --stamp-legend: 180 60% 45%;
+
     --sidebar-background: 40 25% 97%;
     --sidebar-foreground: 20 15% 15%;
     --sidebar-primary: 18 95% 60%;
@@ -90,6 +104,14 @@ All colors MUST be HSL.
     --border: 20 15% 20%;
     --input: 20 15% 20%;
     --ring: 18 95% 60%;
+
+    /* Pass/Stamp Dark Mode */
+    --pass-paper: 25 20% 15%;
+    --pass-border: 25 15% 25%;
+    --stamp-milestone: 45 80% 50%;
+    --stamp-endurance: 15 80% 50%;
+    --stamp-special: 280 60% 55%;
+    --stamp-legend: 180 50% 40%;
     
     --sidebar-background: 20 15% 10%;
     --sidebar-foreground: 40 25% 95%;
