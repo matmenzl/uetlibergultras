@@ -27,6 +27,7 @@ import logo from "@/assets/uetlibergultras_logo.svg";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Leaderboard } from "@/components/Leaderboard";
 import { Achievements } from "@/components/Achievements";
+import { PassPreview } from "@/components/pass/PassPreview";
 import { StreakCounter } from "@/components/StreakCounter";
 import { TodaysRunners } from "@/components/TodaysRunners";
 import { WebcamBackground } from "@/components/WebcamBackground";
@@ -518,10 +519,10 @@ export default function Index() {
               <Leaderboard />
             </div>
 
-            {/* Achievements - Span 1 */}
+            {/* Pass Preview (replaces old Achievements) - Span 1 */}
             {user && (
               <div>
-                <Achievements userId={user?.id} />
+                <PassPreview userId={user?.id} />
               </div>
             )}
           </div>

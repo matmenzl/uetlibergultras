@@ -62,6 +62,18 @@ export default {
           mid: "hsl(var(--sunrise-mid))",
           end: "hsl(var(--sunrise-end))",
         },
+        pass: {
+          paper: "hsl(var(--pass-paper))",
+          border: "hsl(var(--pass-border))",
+        },
+        stamp: {
+          ink: "hsl(var(--stamp-ink))",
+          faded: "hsl(var(--stamp-ink-faded))",
+          milestone: "hsl(var(--stamp-milestone))",
+          endurance: "hsl(var(--stamp-endurance))",
+          special: "hsl(var(--stamp-special))",
+          legend: "hsl(var(--stamp-legend))",
+        },
       },
       backgroundImage: {
         'gradient-sunrise': 'var(--gradient-sunrise)',
