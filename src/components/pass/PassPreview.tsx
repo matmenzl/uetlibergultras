@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mountain, ChevronRight, Star, Flame, Trophy, Award } from 'lucide-react';
+import { ChevronRight, Mountain, Flame, Star, Sun, Snowflake, Crown } from 'lucide-react';
 import logo from '@/assets/uetlibergultras_logo.svg';
+import { StampCard, type StampConfig } from './StampCard';
 
 type AchievementType = 
   | 'first_run' | 'runs_5' | 'runs_10' | 'runs_25' | 'runs_50' | 'runs_100'
@@ -15,28 +16,18 @@ type AchievementType =
 interface Achievement {
   id: string;
   achievement: AchievementType;
+  earned_at: string;
 }
 
-// Simple icon mapping for preview
-const iconMap: Record<string, React.ReactNode> = {
-  first_run: <Star className="w-5 h-5 text-yellow-500" />,
-  runs_5: <Mountain className="w-5 h-5 text-green-500" />,
-  runs_10: <Flame className="w-5 h-5 text-orange-500" />,
-  runs_25: <Flame className="w-5 h-5 text-blue-500" />,
-  runs_50: <Trophy className="w-5 h-5 text-purple-500" />,
-  runs_100: <Award className="w-5 h-5 text-primary" />,
-  streak_2: <Flame className="w-5 h-5 text-indigo-500" />,
-  streak_4: <Flame className="w-5 h-5 text-red-500" />,
-  streak_8: <Flame className="w-5 h-5 text-rose-600" />,
-  all_segments: <Mountain className="w-5 h-5 text-teal-500" />,
-  early_bird: <span className="text-lg">☀️</span>,
-  night_owl: <span className="text-lg">🌙</span>,
-  pioneer_10: <Trophy className="w-5 h-5 text-amber-400" />,
-  snow_bunny: <span className="text-lg">🐰</span>,
-  frosty: <span className="text-lg">🥶</span>,
-  denzlerweg_king: <span className="text-lg">🍞</span>,
-  coiffeur: <span className="text-lg">💇</span>,
-};
+// Achievement configs for preview - subset of main configs
+const PREVIEW_ACHIEVEMENTS: { id: AchievementType; config: StampConfig }[] = [
+  { id: 'first_run', config: { title: 'Erstbesteigung', description: 'Dein erster Uetliberg-Run', howToEarn: 'Absolviere deinen ersten Run', icon: <Star className="w-5 h-5" />, color: 'text-yellow-500', category: 'milestone' } },
+  { id: 'runs_5', config: { title: 'Bergfreund', description: '5 Runs geschafft', howToEarn: 'Absolviere 5 Runs', icon: <Mountain className="w-5 h-5" />, color: 'text-green-500', category: 'milestone' } },
+  { id: 'streak_2', config: { title: 'Dranbleiber', description: '2 Wochen am Stück', howToEarn: '2 Wochen in Folge laufen', icon: <Flame className="w-5 h-5" />, color: 'text-orange-500', category: 'endurance' } },
+  { id: 'early_bird', config: { title: 'Frühaufsteher', description: 'Run vor 7 Uhr morgens', howToEarn: 'Starte einen Run vor 7 Uhr', icon: <Sun className="w-5 h-5" />, color: 'text-amber-400', category: 'special' } },
+  { id: 'snow_bunny', config: { title: 'Snow Bunny', description: 'Run bei Schneefall', howToEarn: 'Laufe bei Schneefall', icon: <Snowflake className="w-5 h-5" />, color: 'text-sky-300', category: 'special' } },
+  { id: 'denzlerweg_king', config: { title: "S'Brot isch no warm", description: 'Denzlerweg Segment', howToEarn: 'Absolviere das Denzlerweg Segment', icon: <Crown className="w-5 h-5" />, color: 'text-amber-600', category: 'legend' } },
+];
 
 const ALL_ACHIEVEMENTS: AchievementType[] = [
   'first_run', 'runs_5', 'runs_10', 'runs_25', 'runs_50', 'runs_100',
@@ -58,7 +49,7 @@ export function PassPreview({ userId }: PassPreviewProps) {
       if (!userId) return [];
       const { data, error } = await supabase
         .from('user_achievements')
-        .select('id, achievement')
+        .select('id, achievement, earned_at')
         .eq('user_id', userId);
       if (error) throw error;
       return data as Achievement[];
@@ -66,11 +57,8 @@ export function PassPreview({ userId }: PassPreviewProps) {
     enabled: !!userId,
   });
 
-  const earnedSet = new Set(earnedAchievements?.map(a => a.achievement) || []);
+  const earnedMap = new Map(earnedAchievements?.map(a => [a.achievement, a.earned_at]) || []);
   const earnedCount = earnedAchievements?.length || 0;
-
-  // Get first 6 achievements to show
-  const previewAchievements = ALL_ACHIEVEMENTS.slice(0, 6);
 
   return (
     <Card 
@@ -90,26 +78,18 @@ export function PassPreview({ userId }: PassPreviewProps) {
         </div>
       </div>
 
-      {/* Stamp preview */}
-      <div className="flex flex-wrap gap-2 justify-center mb-4">
-        {previewAchievements.map(type => {
-          const isEarned = earnedSet.has(type);
+      {/* Stamp preview grid */}
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        {PREVIEW_ACHIEVEMENTS.map(({ id, config }) => {
+          const earnedAt = earnedMap.get(id);
           return (
-            <div 
-              key={type}
-              className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${
-                isEarned 
-                  ? 'border-primary bg-primary/10 shadow-sm' 
-                  : 'border-dashed border-muted-foreground/30 opacity-40'
-              }`}
-              style={{
-                transform: isEarned ? `rotate(${Math.random() * 6 - 3}deg)` : undefined,
-              }}
-            >
-              <span className={isEarned ? '' : 'opacity-50'}>
-                {iconMap[type]}
-              </span>
-            </div>
+            <StampCard
+              key={id}
+              config={config}
+              isEarned={!!earnedAt}
+              earnedAt={earnedAt}
+              size="sm"
+            />
           );
         })}
       </div>
@@ -119,6 +99,10 @@ export function PassPreview({ userId }: PassPreviewProps) {
         variant="ghost" 
         size="sm" 
         className="w-full text-primary group-hover:bg-primary/10"
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate('/pass');
+        }}
       >
         Pass öffnen
         <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
