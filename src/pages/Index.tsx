@@ -488,14 +488,19 @@ export default function Index() {
 
           {/* ===== BENTO GRID LAYOUT ===== */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {/* Today's Runners - Span 2 */}
-            <div className="md:col-span-2">
+            {/* Today's Runners - Span 2 (order-1 on mobile, order-1 on desktop) */}
+            <div className="md:col-span-2 order-1">
               <TodaysRunners />
             </div>
 
-            {/* Stats Sidebar - Span 1 */}
+            {/* Leaderboard - Span 2 (order-2 on mobile so it's right after TodaysRunners) */}
+            <div className="md:col-span-2 order-2 md:order-3">
+              <Leaderboard />
+            </div>
+
+            {/* Stats Sidebar - Span 1 (order-3 on mobile = after community components) */}
             {user ? (
-              <div className="space-y-4">
+              <div className="space-y-4 order-3 md:order-2">
                 <Card className="p-5 text-center">
                   <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
                   <p className="text-3xl font-bold text-primary">{Object.keys(currentYearActivitiesMap).length}</p>
@@ -511,16 +516,11 @@ export default function Index() {
                 <StreakCounter userId={user?.id} />
               </div>
             ) : (
-              <div className="hidden md:block" />
+              <div className="hidden md:block order-3 md:order-2" />
             )}
 
-            {/* Leaderboard - Span 2 */}
-            <div className="md:col-span-2">
-              <Leaderboard />
-            </div>
-
-            {/* Pass Preview (replaces old Achievements) - Span 1 */}
-            <div>
+            {/* Pass Preview (replaces old Achievements) - Span 1 (order-4 = last on mobile) */}
+            <div className="order-4">
               <PassPreview userId={user?.id} />
             </div>
           </div>
