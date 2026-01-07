@@ -499,25 +499,23 @@ export default function Index() {
             </div>
 
             {/* Stats Sidebar - Span 1 (order-3 on mobile = after community components) */}
-            {user ? (
-              <div className="space-y-4 order-3 md:order-2">
-                <Card className="p-5 text-center">
-                  <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold text-primary">{Object.keys(currentYearActivitiesMap).length}</p>
-                  <p className="text-sm text-muted-foreground">Uetli Runs {currentYear}</p>
-                </Card>
-                <Card className="p-5 text-center">
-                  <MapPinned className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold text-primary">
-                    {new Set(currentYearCheckIns.map((c) => c.segment_id)).size}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Uetli Segmente {currentYear}</p>
-                </Card>
-                <StreakCounter userId={user?.id} />
-              </div>
-            ) : (
-              <div className="hidden md:block order-3 md:order-2" />
-            )}
+            <div className="space-y-4 order-3 md:order-2">
+              <Card className="p-5 text-center">
+                <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
+                <p className="text-3xl font-bold text-primary">
+                  {user ? Object.keys(currentYearActivitiesMap).length : 0}
+                </p>
+                <p className="text-sm text-muted-foreground">Uetli Runs {currentYear}</p>
+              </Card>
+              <Card className="p-5 text-center">
+                <MapPinned className="w-6 h-6 text-primary mx-auto mb-2" />
+                <p className="text-3xl font-bold text-primary">
+                  {user ? new Set(currentYearCheckIns.map((c) => c.segment_id)).size : 0}
+                </p>
+                <p className="text-sm text-muted-foreground">Uetli Segmente {currentYear}</p>
+              </Card>
+              <StreakCounter userId={user?.id} />
+            </div>
 
             {/* Pass Preview (replaces old Achievements) - Span 1 (order-4 = last on mobile) */}
             <div className="order-4">
