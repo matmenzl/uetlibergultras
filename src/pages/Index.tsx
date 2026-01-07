@@ -29,6 +29,7 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { Achievements } from "@/components/Achievements";
 import { PassPreview } from "@/components/pass/PassPreview";
 import { StreakCounter } from "@/components/StreakCounter";
+import { CommunityCounter } from "@/components/CommunityCounter";
 import { TodaysRunners } from "@/components/TodaysRunners";
 import { WebcamBackground } from "@/components/WebcamBackground";
 import { SyncProgress } from "@/components/SyncProgress";
@@ -504,6 +505,10 @@ export default function Index() {
 
             {/* Stats Sidebar - Span 1 (order-3 on mobile = after community components) */}
             <div className="space-y-4 order-3 md:order-2">
+              {/* Community Counter - für alle sichtbar */}
+              <CommunityCounter />
+
+              {/* Persönliche Stats */}
               <Card className="p-5 text-center">
                 <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
                 <p className="text-3xl font-bold text-primary">
