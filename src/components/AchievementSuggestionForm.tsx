@@ -29,17 +29,8 @@ const formSchema = z.object({
     .string()
     .min(20, "Erklärung muss mindestens 20 Zeichen haben")
     .max(500, "Erklärung darf maximal 500 Zeichen haben"),
-  email: z.string().email("Bitte gib eine gültige E-Mail-Adresse ein").optional().or(z.literal("")),
+  email: z.string().trim().min(1, "E-Mail ist erforderlich").email("Bitte gib eine gültige E-Mail-Adresse ein"),
   wantsUpdates: z.boolean().default(false),
-}).refine((data) => {
-  // If wantsUpdates is true, email must be provided
-  if (data.wantsUpdates && (!data.email || data.email === "")) {
-    return false;
-  }
-  return true;
-}, {
-  message: "E-Mail ist erforderlich wenn du Updates erhalten möchtest",
-  path: ["email"],
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -71,27 +62,14 @@ export function AchievementSuggestionForm({ userId }: AchievementSuggestionFormP
 
     setIsSubmitting(true);
     try {
-      const insertData: {
-        user_id: string;
-        title: string;
-        description: string;
-        how_to_earn: string;
-        email?: string;
-        wants_updates?: boolean;
-      } = {
+      const { error } = await supabase.from("achievement_suggestions").insert({
         user_id: userId,
         title: data.title,
         description: data.description,
         how_to_earn: data.howToEarn,
-      };
-
-      // Only save email if user opted in
-      if (data.wantsUpdates && data.email) {
-        insertData.email = data.email;
-        insertData.wants_updates = true;
-      }
-
-      const { error } = await supabase.from("achievement_suggestions").insert(insertData);
+        email: data.email,
+        wants_updates: data.wantsUpdates,
+      });
 
       if (error) throw error;
 
@@ -171,41 +149,38 @@ export function AchievementSuggestionForm({ userId }: AchievementSuggestionFormP
                 </FormItem>
               )}
             />
-            <div className="space-y-3 pt-3 border-t border-border/50">
-              <FormField
-                control={form.control}
-                name="wantsUpdates"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="cursor-pointer">
-                        Benachrichtige mich über Status-Updates
-                      </FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              {form.watch("wantsUpdates") && (
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input placeholder="deine@email.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>E-Mail</FormLabel>
+                  <FormControl>
+                    <Input placeholder="deine@email.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
+            />
+            <FormField
+              control={form.control}
+              name="wantsUpdates"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="cursor-pointer">
+                      Benachrichtige mich über Status-Updates
+                    </FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
             <Button type="submit" className="w-full gap-2" disabled={isSubmitting}>
               <Send className="h-4 w-4" />
               {isSubmitting ? "Wird eingereicht..." : "Vorschlag einreichen"}
