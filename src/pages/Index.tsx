@@ -136,7 +136,7 @@ export default function Index() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch check-in history
+  // Fetch check-in history for current user only
   const {
     data: checkIns,
     isLoading: checkInsLoading,
@@ -144,9 +144,12 @@ export default function Index() {
   } = useQuery({
     queryKey: ["check-ins", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("check_ins").select("*").order("checked_in_at", {
-        ascending: false,
-      });
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("check_ins")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("checked_in_at", { ascending: false });
       if (error) throw error;
       return data as CheckIn[];
     },
