@@ -327,6 +327,7 @@ export type Database = {
     Views: {
       community_stats: {
         Row: {
+          total_distance_km: number | null
           total_runners: number | null
           total_runs: number | null
         }
