@@ -324,8 +324,8 @@ export default function Index() {
     {} as Record<number, boolean>,
   );
 
-  // Group ALL check-ins by activity (for history display)
-  const activitiesMap = validCheckIns.reduce(
+  // Group current year check-ins by activity (for history display)
+  const currentYearActivitiesMapForDisplay = currentYearCheckIns.reduce(
     (groups, checkIn) => {
       if (!groups[checkIn.activity_id]) {
         groups[checkIn.activity_id] = {
@@ -348,7 +348,7 @@ export default function Index() {
   );
 
   // Group activities by date, sorted newest first
-  const activitiesByDate = Object.values(activitiesMap)
+  const currentYearActivitiesByDate = Object.values(currentYearActivitiesMapForDisplay)
     .sort((a, b) => new Date(b.checked_in_at).getTime() - new Date(a.checked_in_at).getTime())
     .reduce(
       (groups, activity) => {
@@ -367,9 +367,9 @@ export default function Index() {
     );
 
   // Get sorted date entries (newest first)
-  const sortedDateEntries = Object.entries(activitiesByDate).sort((a, b) => {
+  const sortedCurrentYearDateEntries = Object.entries(currentYearActivitiesByDate).sort((a, b) => {
     const dateA = new Date(
-      Object.values(activitiesMap).find(
+      Object.values(currentYearActivitiesMapForDisplay).find(
         (act) =>
           new Date(act.checked_in_at).toLocaleDateString("de-DE", {
             year: "numeric",
@@ -379,7 +379,7 @@ export default function Index() {
       )?.checked_in_at || 0,
     );
     const dateB = new Date(
-      Object.values(activitiesMap).find(
+      Object.values(currentYearActivitiesMapForDisplay).find(
         (act) =>
           new Date(act.checked_in_at).toLocaleDateString("de-DE", {
             year: "numeric",
@@ -533,7 +533,7 @@ export default function Index() {
               {/* Check-in History */}
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <Activity className="w-5 h-5 text-primary" />
-                Deine Runs
+                Deine Runs in {currentYear}
               </h2>
 
               {checkInsLoading ? (
@@ -545,9 +545,9 @@ export default function Index() {
                     </Card>
                   ))}
                 </div>
-              ) : validCheckIns.length > 0 ? (
+              ) : currentYearCheckIns.length > 0 ? (
                 <div className="space-y-6">
-                  {sortedDateEntries.map(([date, activities]) => (
+                  {sortedCurrentYearDateEntries.map(([date, activities]) => (
                     <div key={date} className="animate-fade-in">
                       <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
                         <Clock className="w-4 h-4" />
@@ -621,8 +621,8 @@ export default function Index() {
               ) : (
                 <Card className="p-8 text-center animate-fade-in">
                   <MapPinned className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-bold mb-2">Der Uetli wartet auf dich! 🏔️</h3>
-                  <p className="text-muted-foreground mb-4">Mach deinen ersten Run und check ihn ein.</p>
+                  <h3 className="text-lg font-bold mb-2">Noch keine Runs in {currentYear}! 🏔️</h3>
+                  <p className="text-muted-foreground mb-4">Zeit für deinen ersten Run dieses Jahr.</p>
                   <p className="text-sm text-muted-foreground">Klick auf "Run einchecken" um loszulegen!</p>
                 </Card>
               )}
