@@ -133,7 +133,7 @@ export function PassPreview({
       e.stopPropagation();
       navigate('/pass');
     }}>
-        Stempfelbuch öffnen
+        Stempelbuch öffnen
         <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
       </Button>
     </Card>;
