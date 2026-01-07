@@ -31,6 +31,7 @@ import { PassPreview } from "@/components/pass/PassPreview";
 import { StreakCounter } from "@/components/StreakCounter";
 import { TodaysRunners } from "@/components/TodaysRunners";
 import { WebcamBackground } from "@/components/WebcamBackground";
+import { SyncProgress } from "@/components/SyncProgress";
 import { triggerFirstCheckInConfetti, triggerConfetti } from "@/lib/confetti";
 import { useWeather } from "@/hooks/useWeather";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -485,6 +486,9 @@ export default function Index() {
               )}
             </div>
           </Card>
+
+          {/* Sync Progress - zeigt Fortschritt für neue User */}
+          {user && <SyncProgress userId={user.id} />}
 
           {/* ===== BENTO GRID LAYOUT ===== */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
