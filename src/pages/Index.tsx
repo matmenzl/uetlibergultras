@@ -517,14 +517,14 @@ export default function Index() {
                 <p className="text-3xl font-bold text-primary">
                   {user ? Object.keys(currentYearActivitiesMap).length : 0}
                 </p>
-                <p className="text-sm text-muted-foreground">Uetli Runs {currentYear}</p>
+                <p className="text-sm text-muted-foreground">Deine Uetli Runs {currentYear}</p>
               </Card>
               <Card className="p-5 text-center">
                 <MapPinned className="w-6 h-6 text-primary mx-auto mb-2" />
                 <p className="text-3xl font-bold text-primary">
                   {user ? new Set(currentYearCheckIns.map((c) => c.segment_id)).size : 0}
                 </p>
-                <p className="text-sm text-muted-foreground">Uetli Segmente {currentYear}</p>
+                <p className="text-sm text-muted-foreground">Deine Uetli Segmente {currentYear}</p>
               </Card>
               <StreakCounter userId={user?.id} />
             </div>
