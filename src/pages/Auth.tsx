@@ -59,7 +59,7 @@ export default function Auth() {
             <img 
               src={stravaConnectButton} 
               alt="Connect with Strava" 
-              className="h-12"
+              className="h-12 pointer-events-none select-none"
             />
           </button>
 
