@@ -325,6 +325,13 @@ export type Database = {
       }
     }
     Views: {
+      community_stats: {
+        Row: {
+          total_runners: number | null
+          total_runs: number | null
+        }
+        Relationships: []
+      }
       leaderboard_stats: {
         Row: {
           achievement_count: number | null
