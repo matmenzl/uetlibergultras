@@ -157,37 +157,44 @@ export function Leaderboard() {
       
       {user && leaderboard && (
         <div className="space-y-2">
-          {leaderboard.map((entry, index) => (
-            <div
-              key={entry.user_id}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(index + 1)}`}
-            >
-              <div className="w-6 flex justify-center">
-                {getRankIcon(index + 1)}
+          {leaderboard.map((entry, index) => {
+            // Calculate actual rank with ties
+            const rank = leaderboard.findIndex(
+              (e) => e.total_runs === entry.total_runs && e.achievement_count === entry.achievement_count
+            ) + 1;
+            
+            return (
+              <div
+                key={entry.user_id}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(rank)}`}
+              >
+                <div className="w-6 flex justify-center">
+                  {getRankIcon(rank)}
+                </div>
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={entry.profile_picture || undefined} />
+                  <AvatarFallback>
+                    <User className="w-4 h-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate text-sm">
+                    {entry.display_name}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Mountain className="w-3 h-3" />
+                    {entry.total_runs}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Award className="w-3 h-3" />
+                    {entry.achievement_count}
+                  </span>
+                </div>
               </div>
-              <Avatar className="w-8 h-8">
-                <AvatarImage src={entry.profile_picture || undefined} />
-                <AvatarFallback>
-                  <User className="w-4 h-4" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate text-sm">
-                  {entry.display_name}
-                </p>
-              </div>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Mountain className="w-3 h-3" />
-                  {entry.total_runs}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Award className="w-3 h-3" />
-                  {entry.achievement_count}
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </Card>
