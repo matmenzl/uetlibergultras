@@ -11,10 +11,10 @@ const corsHeaders = {
 const UETLIBERG_CENTER = { lat: 47.350393, lng: 8.489874 };
 const RADIUS_KM = 2.0;
 
-// Rate limiting configuration
+// Rate limiting configuration (optimized for new Strava limits: 600/15min, 6000/day)
 const RATE_LIMIT = {
-  delayBetweenRequests: 200, // ms
-  delayEvery10Requests: 2000, // ms
+  delayBetweenRequests: 100, // ms
+  delayEvery10Requests: 1000, // ms
 };
 
 // Calculate distance between two points using Haversine formula

@@ -113,6 +113,9 @@ export type Database = {
           display_name: string | null
           first_name: string | null
           id: string
+          initial_sync_completed: boolean | null
+          initial_sync_months_done: number | null
+          initial_sync_started_at: string | null
           is_founding_member: boolean | null
           last_name: string | null
           profile_picture: string | null
@@ -125,6 +128,9 @@ export type Database = {
           display_name?: string | null
           first_name?: string | null
           id: string
+          initial_sync_completed?: boolean | null
+          initial_sync_months_done?: number | null
+          initial_sync_started_at?: string | null
           is_founding_member?: boolean | null
           last_name?: string | null
           profile_picture?: string | null
@@ -137,6 +143,9 @@ export type Database = {
           display_name?: string | null
           first_name?: string | null
           id?: string
+          initial_sync_completed?: boolean | null
+          initial_sync_months_done?: number | null
+          initial_sync_started_at?: string | null
           is_founding_member?: boolean | null
           last_name?: string | null
           profile_picture?: string | null

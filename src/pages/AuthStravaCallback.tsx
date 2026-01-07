@@ -4,12 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Progress } from '@/components/ui/progress';
 
 export default function AuthStravaCallback() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'syncing' | 'error'>('loading');
   const [message, setMessage] = useState('Verbinde mit Strava...');
+  const [syncProgress, setSyncProgress] = useState(0);
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -55,22 +57,51 @@ export default function AuthStravaCallback() {
           }
           
           // Verify the session is properly stored by attempting a refresh
-          // This ensures the refresh token is valid and persisted
           const { error: refreshError } = await supabase.auth.refreshSession();
           if (refreshError) {
             console.warn('Session refresh warning:', refreshError);
           }
-        }
 
-        setStatus('success');
-        setMessage('Erfolgreich angemeldet!');
-        toast.success('Mit Strava angemeldet');
+          // Check if initial sync is needed
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('initial_sync_completed')
+              .eq('id', user.id)
+              .single();
+
+            if (profile && !profile.initial_sync_completed) {
+              setStatus('syncing');
+              setMessage('Synchronisiere deine Runs...');
+              
+              // Trigger initial sync (fire-and-forget)
+              supabase.functions.invoke('initial-sync').then(({ data: syncData, error: syncError }) => {
+                if (syncError) {
+                  console.error('Initial sync error:', syncError);
+                } else {
+                  console.log('Initial sync triggered:', syncData);
+                }
+              });
+              
+              toast.success('Mit Strava angemeldet! Deine Runs werden im Hintergrund synchronisiert.');
+            } else {
+              setStatus('success');
+              setMessage('Erfolgreich angemeldet!');
+              toast.success('Mit Strava angemeldet');
+            }
+          } else {
+            setStatus('success');
+            setMessage('Erfolgreich angemeldet!');
+            toast.success('Mit Strava angemeldet');
+          }
+        }
 
         // Get return URL or default to home
         const returnUrl = sessionStorage.getItem('auth_return_url') || '/';
         sessionStorage.removeItem('auth_return_url');
         
-        setTimeout(() => navigate(returnUrl), 1000);
+        setTimeout(() => navigate(returnUrl), 2000);
 
       } catch (err) {
         console.error('Callback error:', err);
@@ -92,6 +123,14 @@ export default function AuthStravaCallback() {
             <>
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
               <h2 className="text-2xl font-bold">{message}</h2>
+            </>
+          )}
+          {status === 'syncing' && (
+            <>
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              <h2 className="text-2xl font-bold">{message}</h2>
+              <p className="text-muted-foreground">Dies geschieht im Hintergrund...</p>
+              <Progress value={syncProgress} className="w-full h-2" />
             </>
           )}
           {status === 'success' && (

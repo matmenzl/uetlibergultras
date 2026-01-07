@@ -20,3 +20,6 @@ verify_jwt = true
 
 [functions.capture-webcam]
 verify_jwt = false
+
+[functions.initial-sync]
+verify_jwt = true
