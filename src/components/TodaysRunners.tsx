@@ -99,11 +99,11 @@ export const TodaysRunners = () => {
       const userIds = [...new Set(checkIns.map((c) => c.user_id))];
       const segmentIds = [...new Set(checkIns.map((c) => c.segment_id))];
 
-      // Get profiles and segments in parallel
+      // Get profiles (using public_profiles view for RLS) and segments in parallel
       const [profilesResult, segmentsResult] = await Promise.all([
         supabase
-          .from("profiles")
-          .select("id, display_name, first_name, last_name, profile_picture")
+          .from("public_profiles")
+          .select("id, display_name, profile_picture")
           .in("id", userIds),
         supabase
           .from("uetliberg_segments")
@@ -158,17 +158,9 @@ export const TodaysRunners = () => {
         const profile = profiles?.find((p) => p.id === userId);
         const stats = userStats.get(userId)!;
         
-        // Construct display name: prefer display_name, then first+last name, then first name only
-        let displayName = profile?.display_name;
-        if (!displayName && profile?.first_name) {
-          displayName = profile.last_name 
-            ? `${profile.first_name} ${profile.last_name}` 
-            : profile.first_name;
-        }
-        
         return {
           user_id: userId,
-          display_name: displayName || "Unbekannt",
+          display_name: profile?.display_name || "Unbekannt",
           profile_picture: profile?.profile_picture || null,
           total_segments: stats.segments.size,
           best_time: stats.bestTime === Infinity ? 0 : stats.bestTime,
