@@ -15,6 +15,7 @@ import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 const stravaSegmentUrlSchema = z.string()
   .trim()
   .min(1, 'URL ist erforderlich')
+  .max(500, 'URL darf maximal 500 Zeichen haben')
   .regex(
     /^https:\/\/(www\.)?strava\.com\/segments\/\d+/,
     'Bitte gib eine gültige Strava-Segment-URL ein (z.B. https://www.strava.com/segments/123456)'
@@ -49,6 +50,7 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
     const emailValidation = z.string()
       .trim()
       .min(1, 'E-Mail ist erforderlich')
+      .max(255, 'E-Mail darf maximal 255 Zeichen haben')
       .email('Bitte gib eine gültige E-Mail-Adresse ein')
       .safeParse(userEmail);
     if (!emailValidation.success) {
