@@ -37,29 +37,40 @@ serve(async (req) => {
   }
 
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('Missing authorization header');
-    }
-
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    // Client for user authentication
-    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
-    
-    // Service client for inserting achievements
+    // Service client for database operations
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
-    if (userError || !user) {
-      throw new Error('Authentication failed');
+    let userId: string;
+    
+    // Check if user_id is passed in body (called from webhook with service role)
+    const body = await req.json().catch(() => ({}));
+    
+    if (body.user_id) {
+      // Called from another edge function (e.g., strava-webhook) with service role
+      console.log(`Processing achievements for user_id from body: ${body.user_id}`);
+      userId = body.user_id;
+    } else {
+      // Called directly by user - authenticate via header
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        throw new Error('Missing authorization header or user_id');
+      }
+      
+      const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
+      
+      const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
+      if (userError || !user) {
+        throw new Error('Authentication failed');
+      }
+      userId = user.id;
+      console.log(`Processing achievements for authenticated user: ${userId}`);
     }
-
-    const userId = user.id;
     const newAchievements: AchievementType[] = [];
 
     // Get existing achievements
