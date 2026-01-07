@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PassHeader } from './PassHeader';
 import { PassPage } from './PassPage';
 import { StampConfig } from './StampCard';
+import { AchievementSuggestionForm } from '@/components/AchievementSuggestionForm';
 import { Star, Mountain, Flame, Sun, Moon, Zap, Trophy, Clock, Target, Award } from 'lucide-react';
 
 // Time window for "newly earned" animation (30 seconds)
@@ -490,6 +491,13 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
               />
             </TabsContent>
           </Tabs>
+        )}
+
+        {/* Suggestion form for logged-in users */}
+        {userId && (
+          <div className="mt-6 pt-4 border-t border-border/50 flex justify-center">
+            <AchievementSuggestionForm userId={userId} />
+          </div>
         )}
       </div>
     </Card>
