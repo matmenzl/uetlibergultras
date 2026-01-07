@@ -12,11 +12,11 @@ import {
   HelpCircle, 
   Mountain, 
   Trophy, 
-  Award, 
   Flame, 
   Link as LinkIcon,
   CheckCircle,
-  Users
+  Users,
+  Stamp
 } from 'lucide-react';
 
 const faqs = [
@@ -26,7 +26,7 @@ const faqs = [
     questions: [
       {
         q: 'Was ist Uetliberg Ultras?',
-        a: 'Uetliberg Ultras ist eine Community für alle, die gerne auf den Uetliberg laufen. Wir tracken deine Läufe über Strava-Segmente und belohnen dich mit Achievements für deine Fortschritte.'
+        a: 'Uetliberg Ultras ist eine Community für alle, die gerne auf den Uetliberg laufen. Wir tracken deine Läufe über Strava-Segmente und belohnen dich mit Stempeln in deinem persönlichen Stempelbuch.'
       },
       {
         q: 'Wie verbinde ich mein Strava-Konto?',
@@ -57,54 +57,67 @@ const faqs = [
     ]
   },
   {
-    category: 'Achievements',
-    icon: <Award className="w-5 h-5" />,
+    category: 'Stempelbuch',
+    icon: <Stamp className="w-5 h-5" />,
     questions: [
       {
-        q: 'Wie verdiene ich Achievements?',
-        a: 'Achievements werden automatisch vergeben, wenn du bestimmte Meilensteine erreichst. Dazu gehören: Anzahl Läufe (5, 10, 25, 50, 100), Wochen-Streaks, alle Segmente laufen, oder zu bestimmten Zeiten laufen.'
+        q: 'Was ist das Stempelbuch?',
+        a: 'Das Stempelbuch ist deine persönliche Sammlung von Stempeln, die du durch deine Läufe verdienst. Es ist in vier Kategorien unterteilt: Meilensteine, Ausdauer, Spezial und Lokal-Legenden.'
       },
       {
-        q: 'Welche Achievements gibt es?',
-        a: `Es gibt 12 reguläre Achievements:
-• Erstbesteigung ⭐ – Dein erster Uetli Run
-• Bergfreund 🏔️ – 5 Uetli Runs
-• Bergläufer 🔥 – 10 Uetli Runs
-• Uetli-Veteran ⚡ – 25 Uetli Runs
-• Gipfelstürmer 🏆 – 50 Uetli Runs
-• Uetli-Legende 🎖️ – 100 Uetli Runs
-• Segmentjäger 🎯 – Alle Segmente mindestens einmal gelaufen
+        q: 'Welche Stempel gibt es?',
+        a: `Es gibt 17 Stempel in vier Kategorien:
+
+Meilensteine (Anzahl Runs):
+• Erstbesteigung ⭐ – Erster Uetli Run
+• Bergfreund 🏔️ – 5 Runs
+• Bergläufer 🔥 – 10 Runs
+• Uetli-Veteran ⚡ – 25 Runs
+• Gipfelstürmer 🏆 – 50 Runs
+• Uetli-Legende 🎖️ – 100 Runs
+
+Ausdauer (Konsistenz):
 • Dranbleiber ⏰ – 2 Wochen Streak
 • Durchhalter 🔥 – 4 Wochen Streak
 • Unaufhaltsam 🔥 – 8 Wochen Streak
-• Frühaufsteher ☀️ – Ein Run vor 7 Uhr morgens
-• Nachteule 🌙 – Ein Run nach 20 Uhr abends`
-      },
-      {
-        q: 'Was sind exklusive Achievements?',
-        a: `Exklusive Achievements sind limitiert und können nicht mehr verdient werden! Sie werden nur angezeigt, wenn du sie besitzt:
-• Top 10 Pioneer 👑 – Einer der ersten 10 User
-• Top 25 Pioneer ✨ – Einer der ersten 25 User
-• Top 50 Pioneer ✨ – Einer der ersten 50 User
-• Founding Member ✨ – Unter den ersten 50 registrierten Usern`
+• Segmentjäger 🎯 – Alle Segmente gelaufen
+
+Spezial (Besondere Bedingungen):
+• Frühaufsteher ☀️ – Run vor 7 Uhr
+• Nachteule 🌙 – Run nach 20 Uhr
+• Leaderboard Top 10 🏆 – Platz in den Top 10
+• Snow-Bunny 🐰❄️ – 3 Runs bei Schnee
+• Frosty 🥶 – 5 Runs unter 0°C
+
+Lokal-Legenden:
+• S'Brot isch no warm 🍞 – Meiste Runs auf dem Denzlerweg
+• Zum Coiffeur 💇 – 10x Coiffeurweg pro Jahr`
       },
       {
         q: 'Was ist ein Streak?',
         a: 'Ein Streak zählt aufeinanderfolgende Wochen, in denen du mindestens einen Uetliberg-Run absolviert hast. Der Streak bricht ab, wenn eine Woche ohne Run vergeht.'
+      },
+      {
+        q: 'Wie sehe ich meinen Fortschritt?',
+        a: 'Im Stempelbuch siehst du bei jedem Stempel einen Fortschrittsbalken, der anzeigt, wie weit du vom Ziel entfernt bist. Verdiente Stempel werden farbig und mit Datum angezeigt.'
       }
     ]
   },
   {
-    category: 'Leaderboard',
+    category: 'Leaderboards',
     icon: <Trophy className="w-5 h-5" />,
     questions: [
       {
-        q: 'Wie funktioniert das Leaderboard?',
-        a: 'Das Leaderboard zeigt die Top 10 Läufer, sortiert nach der Gesamtanzahl ihrer Uetliberg-Runs. Es werden auch die Anzahl der verdienten Achievements angezeigt.'
+        q: 'Welche Leaderboards gibt es?',
+        a: `Es gibt zwei Leaderboards:
+
+1. 365-Tage Challenge: Zeigt die Top 10 Läufer nach Anzahl Runs im aktuellen Kalenderjahr. Hier zählt jede Aktivität mit einem Uetliberg-Segment.
+
+2. Uetliberg-Ultras unterwegs: Zeigt Läufer sortiert nach Anzahl unterschiedlicher Segmente. Du kannst nach Zeitraum filtern (Heute, Woche, Monat, Jahr).`
       },
       {
-        q: 'Wie kann ich aufsteigen?',
-        a: 'Laufe regelmässig Uetliberg-Segmente! Jeder Check-in zählt zu deiner Gesamtzahl. Je mehr Runs, desto höher dein Rang.'
+        q: 'Wie kann ich im Leaderboard aufsteigen?',
+        a: 'Laufe regelmässig Uetliberg-Segmente! In der 365-Tage Challenge zählt jeder Check-in. Bei "Uetliberg-Ultras unterwegs" zählt die Anzahl verschiedener Segmente.'
       }
     ]
   },
@@ -114,7 +127,7 @@ const faqs = [
     questions: [
       {
         q: 'Wie wird mein Streak berechnet?',
-        a: 'Ein Streak zählt aufeinanderfolgende Kalenderwochen (Montag bis Sonntag), in denen du mindestens einen Uetliberg-Run absolviert hast.'
+        a: 'Ein Streak zählt aufeinanderfolgende Kalenderwochen (Montag bis Sonntag), in denen du mindestens einen Uetliberg-Run absolviert hast. Der Streak gilt nur für das aktuelle Jahr.'
       },
       {
         q: 'Was passiert, wenn ich eine Woche auslasse?',
