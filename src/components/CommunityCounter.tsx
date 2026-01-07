@@ -12,17 +12,15 @@ export const CommunityCounter = () => {
     queryKey: ["community-stats"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("check_ins")
-        .select("activity_id, user_id");
+        .from("community_stats")
+        .select("total_runs, total_runners")
+        .single();
 
       if (error) throw error;
 
-      const uniqueActivities = new Set(data?.map((c) => c.activity_id));
-      const uniqueUsers = new Set(data?.map((c) => c.user_id));
-
       return {
-        totalRuns: uniqueActivities.size,
-        totalRunners: uniqueUsers.size,
+        totalRuns: data?.total_runs ?? 0,
+        totalRunners: data?.total_runners ?? 0,
       };
     },
   });
