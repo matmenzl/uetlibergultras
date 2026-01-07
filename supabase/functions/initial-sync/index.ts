@@ -278,9 +278,11 @@ async function performBackgroundSync(userId: string, token: string) {
 
     if (!uetlibergSegments || uetlibergSegments.length === 0) {
       console.log('No Uetliberg segments found, marking sync as complete');
+      const now = new Date();
+      const monthsSinceJan2026 = (now.getUTCFullYear() - 2026) * 12 + now.getUTCMonth() + 1;
       await supabaseAdmin
         .from('profiles')
-        .update({ initial_sync_completed: true, initial_sync_months_done: 12 })
+        .update({ initial_sync_completed: true, initial_sync_months_done: Math.max(1, monthsSinceJan2026) })
         .eq('id', userId);
       return;
     }
@@ -288,12 +290,27 @@ async function performBackgroundSync(userId: string, token: string) {
     const highPrioritySegments = uetlibergSegments.filter((s) => s.ends_at_uetliberg);
     const mediumPrioritySegments = uetlibergSegments.filter((s) => !s.ends_at_uetliberg);
 
-    // Process 12 months backwards
+    // Sync cutoff: 1. Januar 2026
+    const SYNC_CUTOFF = new Date(Date.UTC(2026, 0, 1));
     const now = new Date();
+    
+    // Calculate months to sync (from current month back to Jan 2026)
+    const currentYear = now.getUTCFullYear();
+    const currentMonth = now.getUTCMonth(); // 0-indexed
+    const monthsSinceJan2026 = (currentYear - 2026) * 12 + currentMonth + 1;
+    const monthsToSync = Math.max(1, monthsSinceJan2026);
+    
+    console.log(`Syncing ${monthsToSync} months back to Jan 2026`);
+    
     let totalRuns = 0;
+    let monthsDone = 0;
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < monthsToSync; i++) {
       const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      
+      // Safety check: don't go before Jan 2026
+      if (targetDate < SYNC_CUTOFF) break;
+      
       const year = targetDate.getFullYear();
       const month = targetDate.getMonth() + 1;
 
@@ -309,17 +326,18 @@ async function performBackgroundSync(userId: string, token: string) {
       );
 
       totalRuns += result.runsFound;
+      monthsDone = i + 1;
 
       // Update progress
       await supabaseAdmin
         .from('profiles')
-        .update({ initial_sync_months_done: i + 1 })
+        .update({ initial_sync_months_done: monthsDone })
         .eq('id', userId);
 
-      console.log(`Progress: ${i + 1}/12 months done`);
+      console.log(`Progress: ${monthsDone}/${monthsToSync} months done`);
 
       // Pause between months
-      if (i < 11) {
+      if (i < monthsToSync - 1) {
         await delay(RATE_LIMIT.delayBetweenMonths);
       }
     }
@@ -330,7 +348,7 @@ async function performBackgroundSync(userId: string, token: string) {
       .update({ initial_sync_completed: true })
       .eq('id', userId);
 
-    console.log(`Sync complete! Found ${totalRuns} Uetliberg runs across 12 months`);
+    console.log(`Sync complete! Found ${totalRuns} Uetliberg runs across ${monthsDone} months`);
   } catch (error) {
     console.error('Background sync error:', error);
   }
