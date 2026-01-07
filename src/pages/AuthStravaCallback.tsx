@@ -55,12 +55,6 @@ export default function AuthStravaCallback() {
             console.error('Error setting session:', setError);
             throw new Error('Failed to set session');
           }
-          
-          // Verify the session is properly stored by attempting a refresh
-          const { error: refreshError } = await supabase.auth.refreshSession();
-          if (refreshError) {
-            console.warn('Session refresh warning:', refreshError);
-          }
 
           // Check if initial sync is needed
           const { data: { user } } = await supabase.auth.getUser();
