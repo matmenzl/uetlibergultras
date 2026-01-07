@@ -610,6 +610,25 @@ export default function Index() {
                       </div>
                     </div>
                   </Card>
+
+                  {/* CTA for missing segments */}
+                  <Card className="p-4 mt-3 bg-muted/30 border-dashed">
+                    <div className="flex items-start gap-3">
+                      <MapPinned className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-medium text-foreground">Segment fehlt?</span> Schlage Uetliberg-Segmente vor, die getrackt werden sollen.
+                        </p>
+                        <Button
+                          variant="link"
+                          className="h-auto p-0 text-primary mt-1"
+                          onClick={() => navigate("/segments")}
+                        >
+                          Segment vorschlagen →
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
                 </div>
               ) : (
                 <Card className="p-8 text-center animate-fade-in">
