@@ -37,7 +37,7 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const submitSuggestion = async (userId: string, segmentUrl: string, userEmail?: string, updates?: boolean) => {
+  const submitSuggestion = async (userId: string, segmentUrl: string, userEmail: string, updates?: boolean) => {
     // Validate URL
     const validation = stravaSegmentUrlSchema.safeParse(segmentUrl);
     if (!validation.success) {
@@ -45,37 +45,28 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
       return;
     }
 
-    // Validate email if provided
-    if (userEmail && updates) {
-      const emailValidation = z.string().email('Bitte gib eine gültige E-Mail-Adresse ein').safeParse(userEmail);
-      if (!emailValidation.success) {
-        setEmailError(emailValidation.error.errors[0].message);
-        return;
-      }
+    // Validate email (required)
+    const emailValidation = z.string()
+      .trim()
+      .min(1, 'E-Mail ist erforderlich')
+      .email('Bitte gib eine gültige E-Mail-Adresse ein')
+      .safeParse(userEmail);
+    if (!emailValidation.success) {
+      setEmailError(emailValidation.error.errors[0].message);
+      return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const insertData: {
-        user_id: string;
-        strava_segment_url: string;
-        email?: string;
-        wants_updates?: boolean;
-      } = {
-        user_id: userId,
-        strava_segment_url: validation.data
-      };
-
-      // Only save email if user opted in
-      if (updates && userEmail) {
-        insertData.email = userEmail;
-        insertData.wants_updates = true;
-      }
-
       const { error: insertError } = await supabase
         .from('segment_suggestions')
-        .insert(insertData);
+        .insert({
+          user_id: userId,
+          strava_segment_url: validation.data,
+          email: emailValidation.data,
+          wants_updates: updates ?? false
+        });
 
       if (insertError) throw insertError;
 
@@ -120,10 +111,7 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
         if (pendingUrl) {
           sessionStorage.removeItem('pending_segment_url');
           setUrl(pendingUrl);
-          // Auto-submit after a short delay to let the UI update
-          setTimeout(() => {
-            submitSuggestion(session.user.id, pendingUrl);
-          }, 500);
+          // Note: email is still required, so don't auto-submit
         }
       }
     });
@@ -216,37 +204,33 @@ export function SegmentSuggestionForm({ onSuccess }: SegmentSuggestionFormProps)
                 <p className="text-sm text-destructive mt-1">{error}</p>
               )}
             </div>
-            <div className="space-y-2 pt-2 border-t border-border/50">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="wants-updates-segment"
-                  checked={wantsUpdates}
-                  onCheckedChange={(checked) => setWantsUpdates(checked === true)}
-                />
-                <Label htmlFor="wants-updates-segment" className="text-sm cursor-pointer">
-                  Benachrichtige mich über Status-Updates
-                </Label>
-              </div>
-              {wantsUpdates && (
-                <div>
-                  <Input
-                    type="email"
-                    placeholder="deine@email.com"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setEmailError(null);
-                    }}
-                    className={emailError ? 'border-destructive' : ''}
-                    disabled={isSubmitting}
-                  />
-                  {emailError && (
-                    <p className="text-sm text-destructive mt-1">{emailError}</p>
-                  )}
-                </div>
+            <div>
+              <Input
+                type="email"
+                placeholder="deine@email.com"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailError(null);
+                }}
+                className={emailError ? 'border-destructive' : ''}
+                disabled={isSubmitting}
+              />
+              {emailError && (
+                <p className="text-sm text-destructive mt-1">{emailError}</p>
               )}
             </div>
-            <Button type="submit" disabled={isSubmitting || !url.trim()} className="w-full">
+            <div className="flex items-center space-x-2 pt-1">
+              <Checkbox
+                id="wants-updates-segment"
+                checked={wantsUpdates}
+                onCheckedChange={(checked) => setWantsUpdates(checked === true)}
+              />
+              <Label htmlFor="wants-updates-segment" className="text-sm cursor-pointer">
+                Benachrichtige mich über Status-Updates
+              </Label>
+            </div>
+            <Button type="submit" disabled={isSubmitting || !url.trim() || !email.trim()} className="w-full">
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
