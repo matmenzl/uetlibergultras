@@ -353,14 +353,14 @@ export type Database = {
           user_number: number | null
         }
         Insert: {
-          display_name?: string | null
+          display_name?: never
           id?: string | null
           is_founding_member?: boolean | null
           profile_picture?: string | null
           user_number?: number | null
         }
         Update: {
-          display_name?: string | null
+          display_name?: never
           id?: string | null
           is_founding_member?: boolean | null
           profile_picture?: string | null
