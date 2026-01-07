@@ -12,8 +12,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { AdminEmailContacts } from '@/components/AdminEmailContacts';
-import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award } from 'lucide-react';
+import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award, RotateCcw } from 'lucide-react';
 import { z } from 'zod';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const segmentIdSchema = z.string()
   .trim()
@@ -32,6 +33,8 @@ export default function Admin() {
   const [scanningMonth, setScanningMonth] = useState<number | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [isTogglingCron, setIsTogglingCron] = useState(false);
+  const [isResyncing, setIsResyncing] = useState(false);
+  const [resyncSegmentId, setResyncSegmentId] = useState<string>('');
 
   // Fetch webcam cron status
   const { data: cronStatus, refetch: refetchCronStatus } = useQuery({
@@ -79,6 +82,21 @@ export default function Admin() {
         .from('achievement_suggestions')
         .select('*')
         .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAdmin,
+  });
+
+  // Fetch all segments for re-sync dropdown
+  const { data: allSegments } = useQuery({
+    queryKey: ['all-segments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('uetliberg_segments')
+        .select('segment_id, name')
+        .order('name');
       
       if (error) throw error;
       return data;
@@ -434,6 +452,35 @@ export default function Admin() {
       });
     } finally {
       setIsTogglingCron(false);
+    }
+  };
+
+  const handleResync = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return;
+    
+    setIsResyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-resync-segment', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { segment_id: resyncSegmentId || null },
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Re-Sync gestartet',
+        description: data.message,
+      });
+    } catch (error) {
+      console.error('Re-sync error:', error);
+      toast({
+        title: 'Fehler beim Re-Sync',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsResyncing(false);
     }
   };
 
@@ -832,6 +879,46 @@ export default function Admin() {
                   <PowerOff className="w-4 h-4 mr-2" />
                 )}
                 Deaktivieren
+              </Button>
+            </div>
+          </Card>
+
+          {/* Segment Re-Sync */}
+          <Card className="p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <RotateCcw className="w-5 h-5" />
+              Segment Re-Sync
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Prüft alle User-Aktivitäten erneut auf das gewählte Segment und erstellt fehlende Check-ins.
+              Nützlich wenn ein neues Segment hinzugefügt wurde.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Select value={resyncSegmentId} onValueChange={setResyncSegmentId}>
+                <SelectTrigger className="w-full sm:w-[280px]">
+                  <SelectValue placeholder="Alle Segmente" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Alle Segmente</SelectItem>
+                  {allSegments?.map((segment) => (
+                    <SelectItem key={segment.segment_id} value={segment.segment_id.toString()}>
+                      {segment.name || `Segment ${segment.segment_id}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button onClick={handleResync} disabled={isResyncing}>
+                {isResyncing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Re-Sync läuft...
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Re-Sync starten
+                  </>
+                )}
               </Button>
             </div>
           </Card>

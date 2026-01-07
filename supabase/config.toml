@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.initial-sync]
 verify_jwt = true
+
+[functions.admin-resync-segment]
+verify_jwt = false
