@@ -14,34 +14,48 @@ export default function Pass() {
   const [displayName, setDisplayName] = useState<string | undefined>();
 
   useEffect(() => {
-    const initSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        // Fetch display name
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name, first_name')
-          .eq('id', session.user.id)
-          .single();
-        if (profile) {
-          setDisplayName(profile.display_name || profile.first_name || undefined);
-        }
-      } else {
-        navigate('/auth');
-      }
-    };
-    
-    initSession();
-    
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         navigate('/auth');
       } else {
         setUser(session.user);
+        // Fetch display name in a deferred way to avoid deadlock
+        setTimeout(() => {
+          supabase
+            .from('profiles')
+            .select('display_name, first_name')
+            .eq('id', session.user.id)
+            .single()
+            .then(({ data: profile }) => {
+              if (profile) {
+                setDisplayName(profile.display_name || profile.first_name || undefined);
+              }
+            });
+        }, 0);
       }
     });
-    
+
+    // THEN get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        // Fetch display name
+        supabase
+          .from('profiles')
+          .select('display_name, first_name')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data: profile }) => {
+            if (profile) {
+              setDisplayName(profile.display_name || profile.first_name || undefined);
+            }
+          });
+      } else {
+        navigate('/auth');
+      }
+    });
+
     return () => subscription.unsubscribe();
   }, [navigate]);
 
