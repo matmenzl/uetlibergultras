@@ -20,16 +20,16 @@ import { toast } from "sonner";
 import { Lightbulb, Send } from "lucide-react";
 
 const formSchema = z.object({
-  title: z.string().min(3, "Titel muss mindestens 3 Zeichen haben").max(50, "Titel darf maximal 50 Zeichen haben"),
+  title: z.string().min(3, "Titel muss mindestens 3 Zeichen haben").max(100, "Titel darf maximal 100 Zeichen haben"),
   description: z
     .string()
     .min(10, "Beschreibung muss mindestens 10 Zeichen haben")
-    .max(200, "Beschreibung darf maximal 200 Zeichen haben"),
+    .max(500, "Beschreibung darf maximal 500 Zeichen haben"),
   howToEarn: z
     .string()
     .min(20, "Erklärung muss mindestens 20 Zeichen haben")
-    .max(500, "Erklärung darf maximal 500 Zeichen haben"),
-  email: z.string().trim().min(1, "E-Mail ist erforderlich").email("Bitte gib eine gültige E-Mail-Adresse ein"),
+    .max(1000, "Erklärung darf maximal 1000 Zeichen haben"),
+  email: z.string().trim().min(1, "E-Mail ist erforderlich").max(255, "E-Mail darf maximal 255 Zeichen haben").email("Bitte gib eine gültige E-Mail-Adresse ein"),
   wantsUpdates: z.boolean().default(false),
 });
 
