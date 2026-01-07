@@ -33,6 +33,77 @@
     <meta name="twitter:title" content="Uetliberg Ultras – Trail Running Community Zürich" />
     <meta name="twitter:description" content="Die Trail Running Community am Uetliberg. Verbinde Strava, sammle Stempel und verdiene Achievements." />
     <meta name="twitter:image" content="https://uetlibergultras.ch/og-image.png" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://uetlibergultras.ch/#organization",
+          "name": "Uetliberg Ultras",
+          "url": "https://uetlibergultras.ch",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://uetlibergultras.ch/favicon.png",
+            "width": 512,
+            "height": 512
+          },
+          "description": "Die Trail Running Community am Uetliberg in Zürich.",
+          "areaServed": {
+            "@type": "City",
+            "name": "Zürich",
+            "containedInPlace": {
+              "@type": "Country",
+              "name": "Schweiz"
+            }
+          },
+          "sameAs": []
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://uetlibergultras.ch/#website",
+          "url": "https://uetlibergultras.ch",
+          "name": "Uetliberg Ultras",
+          "description": "Die Trail Running Community am Uetliberg. Verbinde Strava, sammle Stempel auf deinem digitalen Stempelbuch und verdiene Achievements.",
+          "publisher": {
+            "@id": "https://uetlibergultras.ch/#organization"
+          },
+          "inLanguage": "de-CH"
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://uetlibergultras.ch/#webpage",
+          "url": "https://uetlibergultras.ch",
+          "name": "Uetliberg Ultras – Trail Running Community Zürich",
+          "isPartOf": {
+            "@id": "https://uetlibergultras.ch/#website"
+          },
+          "about": {
+            "@id": "https://uetlibergultras.ch/#organization"
+          },
+          "description": "Die Trail Running Community am Uetliberg. Verbinde Strava, sammle Stempel auf deinem digitalen Stempelbuch und verdiene Achievements. Kostenlos mitmachen!",
+          "inLanguage": "de-CH"
+        },
+        {
+          "@type": "SportsActivityLocation",
+          "name": "Uetliberg",
+          "description": "Hausberg von Zürich mit zahlreichen Trail Running Strecken",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Zürich",
+            "addressCountry": "CH"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 47.3494,
+            "longitude": 8.4920
+          }
+        }
+      ]
+    }
+    </script>
   </head>
 
   <body>
