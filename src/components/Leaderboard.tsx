@@ -2,13 +2,11 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Medal, Award, Mountain, User, Sparkles, Calendar } from 'lucide-react';
+import { Trophy, Medal, Award, Mountain, User, Calendar } from 'lucide-react';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { useNavigate } from 'react-router-dom';
-import { FoundingMemberBadge } from './FoundingMemberBadge';
 import { differenceInDays } from 'date-fns';
 
 const getDaysRemaining = () => {
@@ -24,8 +22,6 @@ interface LeaderboardEntry {
   total_runs: number;
   unique_segments: number;
   achievement_count: number;
-  is_founding_member?: boolean;
-  user_number?: number;
 }
 
 const getRankIcon = (rank: number) => {
@@ -67,28 +63,14 @@ export function Leaderboard() {
   const { data: leaderboard, isLoading } = useQuery({
     queryKey: ['leaderboard'],
     queryFn: async () => {
-      // Fetch leaderboard stats
-      const { data: stats, error } = await supabase
+      const { data, error } = await supabase
         .from('leaderboard_stats')
         .select('*')
         .order('total_runs', { ascending: false })
         .limit(10);
       
       if (error) throw error;
-      
-      // Fetch founding member status for each user
-      const userIds = stats?.map(s => s.user_id).filter(Boolean) || [];
-      const { data: profiles } = await supabase
-        .from('public_profiles')
-        .select('id, is_founding_member, user_number')
-        .in('id', userIds);
-      
-      // Merge the data
-      return (stats || []).map(entry => ({
-        ...entry,
-        is_founding_member: profiles?.find(p => p.id === entry.user_id)?.is_founding_member,
-        user_number: profiles?.find(p => p.id === entry.user_id)?.user_number,
-      })) as LeaderboardEntry[];
+      return data as LeaderboardEntry[];
     },
   });
 
@@ -188,14 +170,9 @@ export function Leaderboard() {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="font-medium truncate text-sm">
-                  {entry.display_name}
-                </p>
-                {entry.is_founding_member && (
-                  <Sparkles className="w-3 h-3 text-amber-500 flex-shrink-0" />
-                )}
-              </div>
+              <p className="font-medium truncate text-sm">
+                {entry.display_name}
+              </p>
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
