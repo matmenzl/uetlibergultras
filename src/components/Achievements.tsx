@@ -363,18 +363,21 @@ export function Achievements({ userId }: AchievementsProps) {
   const earnedSet = new Set(earnedAchievements?.map(a => a.achievement) || []);
   const earnedMap = new Map(earnedAchievements?.map(a => [a.achievement, a.earned_at]) || []);
   
-  // Calculate stats
-  const totalRuns = checkIns?.length || 0;
+  // Calculate stats - count UNIQUE activities (runs), not segments
+  const uniqueActivities = new Set(checkIns?.map(c => c.activity_id) || []);
+  const totalRuns = uniqueActivities.size;
   const uniqueSegments = new Set(checkIns?.map(c => c.segment_id) || []).size;
   const currentStreak = calculateStreak(checkIns || []);
   
-  // Calculate coiffeur runs (segments 4185072 or 10683811 in current year)
+  // Calculate coiffeur runs (unique activities on segments 4185072 or 10683811 in current year)
   const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
   const currentYear = new Date().getFullYear();
-  const coiffeurRuns = checkIns?.filter(c => {
-    const checkInYear = new Date(c.checked_in_at).getFullYear();
-    return checkInYear === currentYear && COIFFEUR_SEGMENT_IDS.includes(c.segment_id);
-  })?.length || 0;
+  const coiffeurRuns = new Set(
+    checkIns?.filter(c => {
+      const checkInYear = new Date(c.checked_in_at).getFullYear();
+      return checkInYear === currentYear && COIFFEUR_SEGMENT_IDS.includes(c.segment_id);
+    }).map(c => c.activity_id) || []
+  ).size;
   
   // Calculate weather-based runs
   const snowRuns = new Set(
