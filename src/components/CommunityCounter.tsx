@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Users, Mountain } from "lucide-react";
@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 export const CommunityCounter = () => {
   const [displayCount, setDisplayCount] = useState(0);
+  const queryClient = useQueryClient();
 
   const { data: stats } = useQuery({
     queryKey: ["community-stats"],
@@ -25,6 +26,28 @@ export const CommunityCounter = () => {
       };
     },
   });
+
+  // Realtime subscription for live updates
+  useEffect(() => {
+    const channel = supabase
+      .channel("community-counter")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "check_ins",
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["community-stats"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   // Animated counter effect
   useEffect(() => {
