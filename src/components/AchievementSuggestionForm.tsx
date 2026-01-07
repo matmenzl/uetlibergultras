@@ -93,16 +93,16 @@ export function AchievementSuggestionForm({ userId }: AchievementSuggestionFormP
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Lightbulb className="h-4 w-4" />
-          Achievement vorschlagen
+          Stempel vorschlagen
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lightbulb className="h-5 w-5 text-primary" />
-            Achievement vorschlagen
+            Stempel vorschlagen
           </DialogTitle>
-          <DialogDescription>Hast du eine Idee für ein neues Achievement?</DialogDescription>
+          <DialogDescription>Hast du eine Idee für einen neuen Stempel?</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
