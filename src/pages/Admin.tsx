@@ -34,7 +34,7 @@ export default function Admin() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [isTogglingCron, setIsTogglingCron] = useState(false);
   const [isResyncing, setIsResyncing] = useState(false);
-  const [resyncSegmentId, setResyncSegmentId] = useState<string>('');
+  const [resyncSegmentId, setResyncSegmentId] = useState<string>('all');
 
   // Fetch webcam cron status
   const { data: cronStatus, refetch: refetchCronStatus } = useQuery({
@@ -463,7 +463,7 @@ export default function Admin() {
     try {
       const { data, error } = await supabase.functions.invoke('admin-resync-segment', {
         headers: { Authorization: `Bearer ${session.access_token}` },
-        body: { segment_id: resyncSegmentId || null },
+        body: { segment_id: resyncSegmentId === 'all' ? null : resyncSegmentId },
       });
       
       if (error) throw error;
@@ -899,7 +899,7 @@ export default function Admin() {
                   <SelectValue placeholder="Alle Segmente" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle Segmente</SelectItem>
+                  <SelectItem value="all">Alle Segmente</SelectItem>
                   {allSegments?.map((segment) => (
                     <SelectItem key={segment.segment_id} value={segment.segment_id.toString()}>
                       {segment.name || `Segment ${segment.segment_id}`}
