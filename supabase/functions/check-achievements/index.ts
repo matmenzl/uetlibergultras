@@ -23,7 +23,8 @@ type AchievementType =
   | 'denzlerweg_king'
   | 'coiffeur'
   | 'snow_bunny'
-  | 'frosty';
+  | 'frosty'
+  | 'alternativliga';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
@@ -81,10 +82,10 @@ serve(async (req) => {
     
     const existingSet = new Set(existingAchievements?.map(a => a.achievement) || []);
 
-    // Get check-in stats (including weather data)
+    // Get check-in stats (including weather data and manual flag)
     const { data: checkIns } = await supabaseAdmin
       .from('check_ins')
-      .select('activity_id, segment_id, checked_in_at, weather_code, temperature')
+      .select('activity_id, segment_id, checked_in_at, weather_code, temperature, is_manual')
       .eq('user_id', userId);
 
     if (!checkIns || checkIns.length === 0) {
@@ -274,6 +275,12 @@ serve(async (req) => {
     const uniqueFrostActivities = new Set(frostRuns.map(c => c.activity_id));
     if (uniqueFrostActivities.size >= 5 && !existingSet.has('frosty')) {
       newAchievements.push('frosty');
+    }
+
+    // Check Alternativliga achievement - at least one manual check-in
+    const manualRuns = checkIns.filter(c => c.is_manual === true);
+    if (manualRuns.length >= 1 && !existingSet.has('alternativliga')) {
+      newAchievements.push('alternativliga');
     }
 
     // Insert new achievements

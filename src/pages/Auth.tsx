@@ -1,13 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Award } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Award, Mail, Loader2, CheckCircle } from 'lucide-react';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
+import { toast } from 'sonner';
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   useEffect(() => {
     // Check if already logged in
@@ -18,8 +24,27 @@ export default function Auth() {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
+        // Check if profile exists, if not create one
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!existingProfile) {
+          // Extract display name from email (before @)
+          const emailPrefix = session.user.email?.split('@')[0] || 'User';
+          const displayName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+
+          await supabase.from('profiles').insert({
+            id: session.user.id,
+            display_name: displayName,
+            initial_sync_completed: true, // Manual users don't need sync
+          });
+        }
+
         navigate('/');
       }
     });
@@ -38,6 +63,33 @@ export default function Auth() {
     window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&approval_prompt=force&scope=${scope}`;
   };
 
+  const handleMagicLink = async () => {
+    if (!email || !email.includes('@')) {
+      toast.error('Bitte gib eine gültige E-Mail-Adresse ein');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+
+      if (error) throw error;
+
+      setMagicLinkSent(true);
+      toast.success('Magic Link gesendet! Schau in dein E-Mail-Postfach.');
+    } catch (error) {
+      console.error('Magic link error:', error);
+      toast.error('Fehler beim Senden des Magic Links');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-background p-4">
       <Card className="w-full max-w-md p-8">
@@ -51,26 +103,86 @@ export default function Auth() {
           </p>
         </div>
 
-        <div className="space-y-4">
-          <button 
-            onClick={handleStravaLogin}
-            className="w-full flex justify-center hover:opacity-90 transition-opacity"
-          >
-            <img 
-              src={stravaConnectButton} 
-              alt="Connect with Strava" 
-              className="h-12 pointer-events-none select-none"
-            />
-          </button>
+        <Tabs defaultValue="strava" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="strava">Mit Strava</TabsTrigger>
+            <TabsTrigger value="alternativliga">Alternativliga</TabsTrigger>
+          </TabsList>
 
-          <div className="text-center text-sm text-muted-foreground">
-            <p>
-              Melde dich mit deinem Strava-Account an,
-              <br />
-              um deine Segmente zu synchronisieren
-            </p>
-          </div>
-        </div>
+          <TabsContent value="strava" className="space-y-4">
+            <button 
+              onClick={handleStravaLogin}
+              className="w-full flex justify-center hover:opacity-90 transition-opacity"
+            >
+              <img 
+                src={stravaConnectButton} 
+                alt="Connect with Strava" 
+                className="h-12 pointer-events-none select-none"
+              />
+            </button>
+
+            <div className="text-center text-sm text-muted-foreground">
+              <p>
+                Melde dich mit deinem Strava-Account an,
+                <br />
+                um deine Segmente automatisch zu synchronisieren
+              </p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="alternativliga" className="space-y-4">
+            {magicLinkSent ? (
+              <div className="text-center py-6">
+                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                <p className="font-medium mb-2">E-Mail gesendet!</p>
+                <p className="text-sm text-muted-foreground">
+                  Klicke auf den Link in deiner E-Mail, um dich anzumelden.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="text-center text-sm text-muted-foreground mb-4">
+                  <p>
+                    Kein GPS? Kein Problem!
+                    <br />
+                    Erfasse deine Runs manuell.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="email"
+                      placeholder="deine@email.ch"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleMagicLink()}
+                      className="pl-10"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleMagicLink}
+                    disabled={isLoading}
+                    className="w-full gap-2"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Mail className="h-4 w-4" />
+                    )}
+                    Magic Link senden
+                  </Button>
+                </div>
+
+                <p className="text-xs text-center text-muted-foreground mt-4">
+                  Du erhältst einen Link per E-Mail, um dich ohne Passwort anzumelden.
+                </p>
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
 
         <div className="mt-8 text-center">
           <Button

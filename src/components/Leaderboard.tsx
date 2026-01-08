@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Medal, Award, Mountain, User, Calendar } from 'lucide-react';
+import { Trophy, Medal, Award, Mountain, User, Calendar, Timer } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { useNavigate } from 'react-router-dom';
 import { differenceInDays } from 'date-fns';
@@ -73,6 +74,23 @@ export function Leaderboard() {
       return data as LeaderboardEntry[];
     },
     enabled: !!user,
+  });
+
+  // Fetch alternativliga achievements for all leaderboard users
+  const { data: alternativligaUsers } = useQuery({
+    queryKey: ['alternativliga-achievements', leaderboard?.map(e => e.user_id)],
+    queryFn: async () => {
+      if (!leaderboard) return [];
+      const { data, error } = await supabase
+        .from('user_achievements')
+        .select('user_id')
+        .eq('achievement', 'alternativliga')
+        .in('user_id', leaderboard.map(e => e.user_id));
+      
+      if (error) throw error;
+      return data.map(a => a.user_id);
+    },
+    enabled: !!leaderboard && leaderboard.length > 0,
   });
 
   if (isLoading) {
@@ -177,10 +195,22 @@ export function Leaderboard() {
                     <User className="w-4 h-4" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex items-center gap-1.5">
                   <p className="font-medium truncate text-sm">
                     {entry.display_name}
                   </p>
+                  {alternativligaUsers?.includes(entry.user_id) && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Timer className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>GPS-nein-Danke! Hier wird von Hand gestoppt</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">

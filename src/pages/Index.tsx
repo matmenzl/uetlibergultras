@@ -31,6 +31,7 @@ import { PassPreview } from "@/components/pass/PassPreview";
 import { StreakCounter } from "@/components/StreakCounter";
 import { CommunityCounter } from "@/components/CommunityCounter";
 import { TodaysRunners } from "@/components/TodaysRunners";
+import { ManualCheckInButton } from "@/components/ManualCheckInButton";
 import { WebcamBackground } from "@/components/WebcamBackground";
 import { SyncProgress } from "@/components/SyncProgress";
 import { triggerFirstCheckInConfetti, triggerConfetti } from "@/lib/confetti";
@@ -137,6 +138,22 @@ export default function Index() {
         .order("checked_in_at", { ascending: false });
       if (error) throw error;
       return data as CheckIn[];
+    },
+    enabled: !!user,
+  });
+
+  // Check if user has Strava credentials (to determine manual vs Strava check-in)
+  const { data: hasStravaCredentials } = useQuery({
+    queryKey: ["strava-credentials-check", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return false;
+      const { data, error } = await supabase
+        .from("strava_credentials")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (error) return false;
+      return !!data;
     },
     enabled: !!user,
   });
@@ -448,7 +465,7 @@ export default function Index() {
                     Los geht's mit Strava
                   </Button>
                 </>
-              ) : (
+              ) : hasStravaCredentials ? (
                 <>
                   <p className="text-white/90 mb-8 text-lg [text-shadow:_0_1px_6px_rgb(0_0_0_/_35%)]">
                     Bereit für deinen nächsten Uetli Run?
@@ -471,6 +488,15 @@ export default function Index() {
                       </>
                     )}
                   </Button>
+                </>
+              ) : (
+                <>
+                  <p className="text-white/90 mb-8 text-lg [text-shadow:_0_1px_6px_rgb(0_0_0_/_35%)]">
+                    Bereit für deinen nächsten Uetli Run?
+                  </p>
+                  <div className="bg-black/30 backdrop-blur-sm rounded-lg p-4 inline-block">
+                    <ManualCheckInButton userId={user.id} onSuccess={() => refetchCheckIns()} />
+                  </div>
                 </>
               )}
             </div>
