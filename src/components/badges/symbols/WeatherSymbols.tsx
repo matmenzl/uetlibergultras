@@ -5,142 +5,145 @@ interface SymbolProps extends SVGProps<SVGSVGElement> {
   secondaryColor?: string;
 }
 
-// Sunrise for early_bird
+// Early bird - mountain horizon at dawn with sun behind ridge
 export function SunriseSymbol({ primaryColor = 'currentColor', secondaryColor = 'hsl(199 89% 48%)', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
-      {/* Mountain silhouette */}
+      {/* Dawn sky gradient (simplified as bands) */}
+      <rect x="0" y="0" width="60" height="20" fill={secondaryColor} opacity="0.3" />
+      <rect x="0" y="20" width="60" height="10" fill={primaryColor} opacity="0.4" />
+      {/* Sun rising behind ridge */}
+      <circle cx="30" cy="26" r="10" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="2" />
+      {/* Mountain ridge silhouette */}
       <path
-        d="M0 42L20 24L30 32L45 18L60 42H0Z"
-        fill="hsl(0 0% 25%)"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="1.5"
+        d="M0 46 L12 32 L22 38 L30 28 L38 34 L48 30 L60 46 Z"
+        fill="hsl(0 0% 20%)"
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
       />
-      {/* Sun */}
-      <circle
-        cx="30"
-        cy="20"
-        r="10"
-        fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="2"
-      />
-      {/* Sun rays */}
-      <line x1="30" y1="4" x2="30" y2="8" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="44" y1="20" x2="48" y2="20" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="16" y1="20" x2="12" y2="20" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="40" y1="10" x2="43" y2="7" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="20" y1="10" x2="17" y2="7" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" />
+      {/* Horizon line */}
+      <line x1="0" y1="46" x2="60" y2="46" stroke="hsl(0 0% 15%)" strokeWidth="2" />
     </svg>
   );
 }
 
-// Moon for night_owl
+// Night owl - mountain under night sky
 export function MoonSymbol({ primaryColor = 'currentColor', secondaryColor = 'hsl(45 93% 70%)', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Night sky */}
+      <rect x="0" y="0" width="60" height="50" fill={primaryColor} rx="4" />
       {/* Mountain silhouette */}
       <path
-        d="M0 46L18 28L28 36L42 22L60 46H0Z"
-        fill="hsl(230 25% 20%)"
-        stroke="hsl(0 0% 15%)"
-        strokeWidth="1.5"
+        d="M0 46 L16 30 L26 36 L36 26 L46 32 L60 46 Z"
+        fill="hsl(230 30% 15%)"
+        stroke="hsl(0 0% 10%)"
+        strokeWidth="2"
+        strokeLinejoin="round"
       />
       {/* Moon crescent */}
       <path
-        d="M38 8C38 16.837 30.837 24 22 24C18.5 24 15.3 22.9 12.6 21C15.4 25.8 20.8 29 27 29C36.389 29 44 21.389 44 12C44 8.2 42.7 4.7 40.5 2C39.5 3.8 38.5 5.8 38 8Z"
+        d="M42 18 C42 10 36 4 28 4 C32 8 34 14 34 20 C34 22 33 24 32 26 C40 26 46 22 42 18 Z"
         fill={secondaryColor}
-        stroke="hsl(0 0% 20%)"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2"
       />
-      {/* Stars */}
-      <circle cx="50" cy="12" r="1.5" fill={secondaryColor} />
-      <circle cx="14" cy="8" r="1" fill={secondaryColor} />
-      <circle cx="8" cy="18" r="1.5" fill={secondaryColor} />
+      {/* Stars as simple dots */}
+      <circle cx="12" cy="12" r="1.5" fill={secondaryColor} />
+      <circle cx="52" cy="8" r="1" fill={secondaryColor} />
+      <circle cx="20" cy="20" r="1" fill={secondaryColor} />
     </svg>
   );
 }
 
-// Snowflake for snow_bunny
+// Snow bunny - mountain with snow layer
 export function SnowflakeSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
-      {/* Main axes */}
-      <line x1="30" y1="5" x2="30" y2="45" stroke={primaryColor} strokeWidth="3" strokeLinecap="round" />
-      <line x1="10" y1="25" x2="50" y2="25" stroke={primaryColor} strokeWidth="3" strokeLinecap="round" />
-      <line x1="15" y1="10" x2="45" y2="40" stroke={primaryColor} strokeWidth="3" strokeLinecap="round" />
-      <line x1="45" y1="10" x2="15" y2="40" stroke={primaryColor} strokeWidth="3" strokeLinecap="round" />
-      
-      {/* Branch details */}
-      <line x1="30" y1="12" x2="25" y2="8" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" />
-      <line x1="30" y1="12" x2="35" y2="8" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" />
-      <line x1="30" y1="38" x2="25" y2="42" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" />
-      <line x1="30" y1="38" x2="35" y2="42" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" />
-      
-      <line x1="17" y1="25" x2="14" y2="20" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" />
-      <line x1="17" y1="25" x2="14" y2="30" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" />
-      <line x1="43" y1="25" x2="46" y2="20" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" />
-      <line x1="43" y1="25" x2="46" y2="30" stroke={primaryColor} strokeWidth="2" strokeLinecap="round" />
-      
-      {/* Center */}
-      <circle cx="30" cy="25" r="4" fill={primaryColor} stroke="hsl(0 0% 20%)" strokeWidth="1.5" />
+      {/* Mountain base */}
+      <path
+        d="M4 46 L20 28 L30 34 L40 26 L56 46 Z"
+        fill="hsl(0 0% 70%)"
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+      />
+      {/* Snow cap */}
+      <path
+        d="M20 28 L24 32 L28 30 L30 34 L32 30 L36 32 L40 26 L38 24 L32 28 L30 26 L28 28 L22 24 Z"
+        fill="hsl(0 0% 98%)"
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      {/* Snow particles */}
+      <circle cx="14" cy="14" r="2" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="1.5" />
+      <circle cx="30" cy="10" r="2.5" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="1.5" />
+      <circle cx="46" cy="16" r="2" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="1.5" />
+      <circle cx="22" cy="20" r="1.5" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="1" />
+      <circle cx="42" cy="12" r="1.5" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="1" />
     </svg>
   );
 }
 
-// Frost/icicle for frosty
+// Frosty - mountain with ice formations
 export function FrostSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
-      {/* Icicles */}
+      {/* Frozen mountain */}
       <path
-        d="M10 8L10 28L14 8L14 32L18 8L18 26L22 8L22 34L26 8L26 28L30 8L30 38L34 8L34 28L38 8L38 34L42 8L42 26L46 8L46 32L50 8L50 28"
-        stroke={primaryColor}
+        d="M6 46 L22 28 L30 34 L38 26 L54 46 Z"
+        fill={primaryColor}
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+      />
+      {/* Ice crystal patterns on mountain */}
+      <path d="M22 28 L26 36" stroke="hsl(0 0% 95%)" strokeWidth="2" strokeLinecap="round" />
+      <path d="M38 26 L34 36" stroke="hsl(0 0% 95%)" strokeWidth="2" strokeLinecap="round" />
+      <path d="M30 34 L30 42" stroke="hsl(0 0% 95%)" strokeWidth="2" strokeLinecap="round" />
+      {/* Icicle formations at top */}
+      <path
+        d="M16 16 L18 8 L20 16 L22 6 L24 16 L26 10 L28 16"
+        fill="none"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        fill="none"
       />
-      {/* Ice bar at top */}
-      <rect x="6" y="4" width="48" height="6" rx="2" fill={primaryColor} stroke="hsl(0 0% 20%)" strokeWidth="1.5" />
-      {/* Snowflakes */}
-      <circle cx="15" cy="42" r="2" fill={primaryColor} />
-      <circle cx="30" cy="44" r="2.5" fill={primaryColor} />
-      <circle cx="45" cy="42" r="2" fill={primaryColor} />
+      <path
+        d="M32 16 L34 10 L36 16 L38 6 L40 16 L42 8 L44 16"
+        fill="none"
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-// Rain drops for wasserratte
+// Rain runner - mountain with rain streaks
 export function RainSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
-      {/* Cloud */}
+      {/* Mountain in mist */}
       <path
-        d="M14 22C14 18 17 14 22 14C22 10 26 6 32 6C38 6 42 10 42 14H44C48 14 52 18 52 22C52 26 48 28 44 28H16C12 28 10 25 10 22C10 19 12 16 14 16"
-        fill="hsl(0 0% 85%)"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="2"
+        d="M4 46 L18 32 L28 38 L38 28 L48 34 L56 46 Z"
+        fill="hsl(0 0% 75%)"
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
       />
-      {/* Rain drops */}
-      <path
-        d="M18 34L16 42C16 44 18 46 20 44L22 36"
-        fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M30 32L28 44C28 46 30 48 32 46L34 34"
-        fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M42 34L40 42C40 44 42 46 44 44L46 36"
-        fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="1.5"
-      />
+      {/* Rain streaks */}
+      <line x1="12" y1="6" x2="10" y2="20" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="22" y1="4" x2="20" y2="18" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="32" y1="6" x2="30" y2="20" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="42" y1="4" x2="40" y2="18" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="52" y1="6" x2="50" y2="20" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" />
+      {/* Puddle/water at base */}
+      <ellipse cx="30" cy="46" rx="20" ry="3" fill={primaryColor} opacity="0.5" />
     </svg>
   );
 }

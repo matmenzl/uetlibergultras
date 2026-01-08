@@ -5,238 +5,200 @@ interface SymbolProps extends SVGProps<SVGSVGElement> {
   secondaryColor?: string;
 }
 
-// Single mountain peak - first_run
+// First ascent - single summit silhouette with path
 export function MountainSingle({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Uetliberg silhouette */}
       <path
-        d="M30 8L52 42H8L30 8Z"
+        d="M4 44 L18 28 L24 32 L30 20 L36 28 L42 24 L56 44 Z"
         fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2.5"
         strokeLinejoin="round"
       />
-      {/* Snow cap */}
+      {/* Summit marker */}
+      <line x1="30" y1="20" x2="30" y2="12" stroke="hsl(0 0% 15%)" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="30" cy="10" r="3" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="2" />
+      {/* Ascent path */}
       <path
-        d="M30 8L38 20H22L30 8Z"
-        fill="white"
-        stroke="hsl(0 0% 20%)"
+        d="M12 44 Q20 36 30 24"
+        fill="none"
+        stroke="hsl(0 0% 95%)"
         strokeWidth="2"
-        strokeLinejoin="round"
+        strokeLinecap="round"
+        strokeDasharray="4 3"
       />
     </svg>
   );
 }
 
-// Mountain with "5" badge
+// 5 runs - ridge with 5 summit marks
 export function MountainFive({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Mountain ridge */}
       <path
-        d="M30 12L48 42H12L30 12Z"
+        d="M2 44 L10 32 L18 36 L26 28 L34 32 L42 26 L50 30 L58 44 Z"
         fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2.5"
         strokeLinejoin="round"
       />
-      <text
-        x="30"
-        y="36"
-        textAnchor="middle"
-        fill="white"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="0.5"
-        fontSize="14"
-        fontWeight="bold"
-        fontFamily="system-ui, sans-serif"
-      >
-        5
-      </text>
+      {/* 5 summit markers */}
+      <circle cx="10" cy="30" r="2" fill="hsl(0 0% 95%)" stroke="hsl(0 0% 15%)" strokeWidth="1.5" />
+      <circle cx="20" cy="34" r="2" fill="hsl(0 0% 95%)" stroke="hsl(0 0% 15%)" strokeWidth="1.5" />
+      <circle cx="30" cy="26" r="2" fill="hsl(0 0% 95%)" stroke="hsl(0 0% 15%)" strokeWidth="1.5" />
+      <circle cx="40" cy="30" r="2" fill="hsl(0 0% 95%)" stroke="hsl(0 0% 15%)" strokeWidth="1.5" />
+      <circle cx="50" cy="28" r="2" fill="hsl(0 0% 95%)" stroke="hsl(0 0% 15%)" strokeWidth="1.5" />
+      {/* Number */}
+      <text x="30" y="18" textAnchor="middle" fill="hsl(0 0% 15%)" fontSize="10" fontWeight="bold" fontFamily="system-ui">5</text>
     </svg>
   );
 }
 
-// Mountain with "10" badge
+// 10 runs - double ridge with elevation profile
 export function MountainTen({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Back ridge */}
       <path
-        d="M30 10L50 42H10L30 10Z"
+        d="M8 44 L20 30 L32 36 L44 28 L56 44 Z"
+        fill="hsl(45 60% 35%)"
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      {/* Front ridge */}
+      <path
+        d="M2 44 L14 34 L26 38 L38 30 L52 44 Z"
         fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2.5"
         strokeLinejoin="round"
       />
-      <text
-        x="30"
-        y="36"
-        textAnchor="middle"
-        fill="white"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="0.5"
-        fontSize="12"
-        fontWeight="bold"
-        fontFamily="system-ui, sans-serif"
-      >
-        10
-      </text>
+      {/* Elevation profile line */}
+      <path
+        d="M6 22 L14 16 L22 20 L30 12 L38 18 L46 14 L54 20"
+        fill="none"
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Number badge */}
+      <circle cx="30" cy="12" r="6" fill="hsl(0 0% 95%)" stroke="hsl(0 0% 15%)" strokeWidth="2" />
+      <text x="30" y="15" textAnchor="middle" fill="hsl(0 0% 15%)" fontSize="7" fontWeight="bold" fontFamily="system-ui">10</text>
     </svg>
   );
 }
 
-// Double peak with "25"
+// 25 runs - mountain range panorama
 export function MountainTwentyFive({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
-      {/* Back mountain */}
+      {/* Far range */}
       <path
-        d="M40 14L54 42H26L40 14Z"
-        fill="hsl(45 70% 40%)"
-        stroke="hsl(0 0% 20%)"
+        d="M0 44 L8 32 L16 36 L24 28 L32 32 L40 26 L48 30 L56 24 L60 44 Z"
+        fill="hsl(45 50% 30%)"
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      {/* Mid range */}
+      <path
+        d="M0 44 L12 34 L22 38 L30 30 L38 34 L48 28 L60 44 Z"
+        fill="hsl(45 60% 40%)"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2"
         strokeLinejoin="round"
       />
-      {/* Front mountain */}
+      {/* Front range - Uetliberg prominent */}
       <path
-        d="M24 18L42 42H6L24 18Z"
+        d="M4 44 L18 36 L28 40 L36 32 L46 38 L56 44 Z"
         fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2.5"
         strokeLinejoin="round"
       />
-      <text
-        x="28"
-        y="36"
-        textAnchor="middle"
-        fill="white"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="0.5"
-        fontSize="11"
-        fontWeight="bold"
-        fontFamily="system-ui, sans-serif"
-      >
-        25
-      </text>
+      {/* Number */}
+      <text x="30" y="18" textAnchor="middle" fill="hsl(0 0% 15%)" fontSize="12" fontWeight="bold" fontFamily="system-ui">25</text>
     </svg>
   );
 }
 
-// Mountain range with "50"
+// 50 runs - epic panorama with tower silhouette
 export function MountainFifty({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
-      {/* Far mountain */}
-      <path
-        d="M48 18L58 42H38L48 18Z"
-        fill="hsl(45 60% 35%)"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      {/* Mid mountain */}
-      <path
-        d="M38 14L52 42H24L38 14Z"
-        fill="hsl(45 70% 42%)"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      {/* Main mountain */}
-      <path
-        d="M22 12L40 42H4L22 12Z"
-        fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
-      />
-      <text
-        x="24"
-        y="36"
-        textAnchor="middle"
-        fill="white"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="0.5"
-        fontSize="11"
-        fontWeight="bold"
-        fontFamily="system-ui, sans-serif"
-      >
-        50
-      </text>
+      {/* Layered ranges */}
+      <path d="M0 46 L10 34 L20 38 L30 28 L40 34 L50 30 L60 46 Z" fill="hsl(45 40% 25%)" stroke="hsl(0 0% 15%)" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M0 46 L15 36 L25 40 L35 32 L45 36 L55 34 L60 46 Z" fill="hsl(45 50% 35%)" stroke="hsl(0 0% 15%)" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M2 46 L16 38 L26 42 L34 36 L44 40 L54 46 Z" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="2.5" strokeLinejoin="round" />
+      {/* Uetliberg tower */}
+      <rect x="32" y="20" width="4" height="16" fill="hsl(0 0% 15%)" />
+      <rect x="30" y="16" width="8" height="4" fill="hsl(0 0% 15%)" />
+      <line x1="34" y1="16" x2="34" y2="10" stroke="hsl(0 0% 15%)" strokeWidth="2" />
+      {/* Number */}
+      <text x="16" y="18" textAnchor="middle" fill="hsl(0 0% 15%)" fontSize="12" fontWeight="bold" fontFamily="system-ui">50</text>
     </svg>
   );
 }
 
-// Epic mountain with star and "100"
+// 100 runs - ultimate Uetliberg emblem
 export function MountainHundred({ primaryColor = 'currentColor', secondaryColor = 'hsl(280 68% 60%)', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 55" fill="none" {...props}>
-      {/* Star above peak */}
+      {/* Decorative border arc */}
       <path
-        d="M30 4L32 10L38 10L33 14L35 20L30 16L25 20L27 14L22 10L28 10L30 4Z"
-        fill={secondaryColor}
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
+        d="M8 48 Q30 52 52 48"
+        fill="none"
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="2"
       />
-      {/* Mountain */}
+      {/* Mountain with tower */}
       <path
-        d="M30 18L52 48H8L30 18Z"
+        d="M6 46 L20 32 L28 36 L36 28 L44 32 L54 46 Z"
         fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2.5"
         strokeLinejoin="round"
       />
-      <text
-        x="30"
-        y="42"
-        textAnchor="middle"
-        fill="white"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="0.5"
-        fontSize="10"
-        fontWeight="bold"
-        fontFamily="system-ui, sans-serif"
-      >
-        100
-      </text>
+      {/* Tower */}
+      <rect x="34" y="16" width="4" height="12" fill="hsl(0 0% 15%)" />
+      <rect x="32" y="12" width="8" height="4" fill={secondaryColor} stroke="hsl(0 0% 15%)" strokeWidth="1.5" />
+      {/* 100 banner */}
+      <path
+        d="M10 10 L50 10 L48 18 L50 26 L10 26 L12 18 Z"
+        fill="hsl(0 0% 95%)"
+        stroke="hsl(0 0% 15%)"
+        strokeWidth="2"
+      />
+      <text x="30" y="21" textAnchor="middle" fill="hsl(0 0% 15%)" fontSize="10" fontWeight="bold" fontFamily="system-ui">100</text>
     </svg>
   );
 }
 
-// Paths/network symbol for all_segments
+// All segments - trail network on mountain
 export function PathsSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
-      {/* Mountain outline */}
+      {/* Mountain base */}
       <path
-        d="M30 8L52 42H8L30 8Z"
-        fill="hsl(0 0% 95%)"
-        stroke="hsl(0 0% 20%)"
+        d="M4 44 L20 28 L30 34 L40 26 L56 44 Z"
+        fill="hsl(0 0% 90%)"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2.5"
         strokeLinejoin="round"
       />
-      {/* Path lines */}
-      <path
-        d="M30 8L30 42"
-        stroke={primaryColor}
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M30 20L18 42"
-        stroke={primaryColor}
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M30 20L42 42"
-        stroke={primaryColor}
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      {/* Junction points */}
-      <circle cx="30" cy="20" r="3" fill={primaryColor} stroke="hsl(0 0% 20%)" strokeWidth="1.5" />
-      <circle cx="30" cy="8" r="2.5" fill={primaryColor} stroke="hsl(0 0% 20%)" strokeWidth="1.5" />
+      {/* Trail network */}
+      <path d="M12 44 L20 36 L30 34" fill="none" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M30 34 L40 30 L48 44" fill="none" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M22 44 L30 34 L30 44" fill="none" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M30 34 L38 44" fill="none" stroke={primaryColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Summit marker */}
+      <circle cx="30" cy="20" r="4" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="2" />
+      <line x1="30" y1="24" x2="30" y2="34" stroke={primaryColor} strokeWidth="2.5" />
     </svg>
   );
 }

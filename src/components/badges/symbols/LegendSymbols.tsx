@@ -5,77 +5,85 @@ interface SymbolProps extends SVGProps<SVGSVGElement> {
   secondaryColor?: string;
 }
 
-// Crown for kings/legends
+// Denzlerweg/Coiffeur King - steep ridge with record marker
 export function CrownSymbol({ primaryColor = 'currentColor', secondaryColor = 'hsl(45 93% 47%)', ...props }: SymbolProps) {
   return (
-    <svg viewBox="0 0 60 50" fill="none" {...props}>
-      {/* Crown body */}
+    <svg viewBox="0 0 60 55" fill="none" {...props}>
+      {/* Steep ridge profile */}
       <path
-        d="M8 38L12 18L22 28L30 12L38 28L48 18L52 38H8Z"
+        d="M4 50 L4 46 L20 46 L44 14 L56 46 L56 50 Z"
         fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2.5"
         strokeLinejoin="round"
       />
-      {/* Crown base */}
-      <rect x="8" y="38" width="44" height="8" rx="2" fill={primaryColor} stroke="hsl(0 0% 20%)" strokeWidth="2" />
-      {/* Jewels */}
-      <circle cx="30" cy="28" r="4" fill={secondaryColor} stroke="hsl(0 0% 20%)" strokeWidth="1.5" />
-      <circle cx="18" cy="32" r="2.5" fill={secondaryColor} stroke="hsl(0 0% 20%)" strokeWidth="1" />
-      <circle cx="42" cy="32" r="2.5" fill={secondaryColor} stroke="hsl(0 0% 20%)" strokeWidth="1" />
-      {/* Peak gems */}
-      <circle cx="12" cy="18" r="2" fill={secondaryColor} stroke="hsl(0 0% 20%)" strokeWidth="1" />
-      <circle cx="30" cy="12" r="2.5" fill={secondaryColor} stroke="hsl(0 0% 20%)" strokeWidth="1" />
-      <circle cx="48" cy="18" r="2" fill={secondaryColor} stroke="hsl(0 0% 20%)" strokeWidth="1" />
+      {/* Elevation grade lines */}
+      <line x1="28" y1="38" x2="36" y2="30" stroke="hsl(0 0% 15%)" strokeWidth="1.5" strokeDasharray="3 2" />
+      <line x1="32" y1="42" x2="40" y2="34" stroke="hsl(0 0% 15%)" strokeWidth="1.5" strokeDasharray="3 2" />
+      <line x1="36" y1="46" x2="44" y2="38" stroke="hsl(0 0% 15%)" strokeWidth="1.5" strokeDasharray="3 2" />
+      {/* Record emblem at peak */}
+      <circle cx="44" cy="12" r="8" fill={secondaryColor} stroke="hsl(0 0% 15%)" strokeWidth="2.5" />
+      <text x="44" y="15" textAnchor="middle" fill="hsl(0 0% 15%)" fontSize="8" fontWeight="bold" fontFamily="system-ui">1</text>
+      {/* Ridge crest */}
+      <path d="M20 46 L44 14" stroke="hsl(0 0% 95%)" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
 
-// Compass for alternativliga
+// Alternativliga - branching trails on mountain
 export function CompassSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
-      {/* Outer ring */}
-      <circle
-        cx="30"
-        cy="25"
-        r="20"
-        fill="hsl(0 0% 95%)"
-        stroke="hsl(0 0% 20%)"
+      {/* Mountain */}
+      <path
+        d="M4 46 L30 18 L56 46 Z"
+        fill="hsl(0 0% 88%)"
+        stroke="hsl(0 0% 15%)"
         strokeWidth="2.5"
+        strokeLinejoin="round"
       />
-      {/* Inner ring */}
-      <circle
-        cx="30"
-        cy="25"
-        r="14"
+      {/* Main trail */}
+      <path
+        d="M30 46 L30 26"
         fill="none"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="1.5"
+        stroke="hsl(0 0% 50%)"
+        strokeWidth="2.5"
+        strokeLinecap="round"
       />
-      {/* North pointer */}
+      {/* Alternative branching trails */}
       <path
-        d="M30 11L34 25L30 29L26 25L30 11Z"
-        fill={primaryColor}
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
+        d="M30 36 L18 46"
+        fill="none"
+        stroke={primaryColor}
+        strokeWidth="3"
+        strokeLinecap="round"
       />
-      {/* South pointer */}
       <path
-        d="M30 39L34 25L30 21L26 25L30 39Z"
-        fill="hsl(0 0% 80%)"
-        stroke="hsl(0 0% 20%)"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
+        d="M30 36 L42 46"
+        fill="none"
+        stroke={primaryColor}
+        strokeWidth="3"
+        strokeLinecap="round"
       />
-      {/* Center dot */}
-      <circle cx="30" cy="25" r="3" fill="hsl(0 0% 20%)" />
-      {/* Direction markers */}
-      <text x="30" y="9" textAnchor="middle" fill="hsl(0 0% 20%)" fontSize="6" fontWeight="bold">N</text>
-      <text x="30" y="47" textAnchor="middle" fill="hsl(0 0% 20%)" fontSize="6" fontWeight="bold">S</text>
-      <text x="8" y="27" textAnchor="middle" fill="hsl(0 0% 20%)" fontSize="6" fontWeight="bold">W</text>
-      <text x="52" y="27" textAnchor="middle" fill="hsl(0 0% 20%)" fontSize="6" fontWeight="bold">E</text>
+      <path
+        d="M30 30 L14 42"
+        fill="none"
+        stroke={primaryColor}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <path
+        d="M30 30 L46 42"
+        fill="none"
+        stroke={primaryColor}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      {/* Junction markers */}
+      <circle cx="30" cy="36" r="3" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="2" />
+      <circle cx="30" cy="30" r="3" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="2" />
+      {/* Summit */}
+      <circle cx="30" cy="18" r="4" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="2.5" />
     </svg>
   );
 }
