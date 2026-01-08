@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Users, Mountain, RefreshCw, Calendar, TrendingUp, Timer } from "lucide-react";
+import { Users, Mountain, RefreshCw, Calendar, TrendingUp, Timer, Hand } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,6 +20,7 @@ interface Runner {
   total_segments: number;
   total_elevation: number;
   total_distance: number;
+  has_manual_checkins: boolean;
 }
 
 const getDateRange = (range: string): { start: Date; end: Date } => {
@@ -82,7 +83,7 @@ export const TodaysRunners = () => {
       // Get check-ins within the date range
       const { data: checkIns, error: checkInsError } = await supabase
         .from("check_ins")
-        .select("user_id, segment_id, elapsed_time, checked_in_at")
+        .select("user_id, segment_id, elapsed_time, checked_in_at, is_manual")
         .gte("checked_in_at", start.toISOString())
         .lte("checked_in_at", end.toISOString());
 
@@ -119,17 +120,25 @@ export const TodaysRunners = () => {
         segments: Set<number>; 
         totalElevation: number;
         totalDistance: number;
+        hasManualCheckins: boolean;
       }>();
 
       for (const checkIn of checkIns) {
         const existing = userStats.get(checkIn.user_id) || { 
           segments: new Set(), 
           totalElevation: 0,
-          totalDistance: 0
+          totalDistance: 0,
+          hasManualCheckins: false
         };
         
+        // Track if user has any manual check-ins
+        if (checkIn.is_manual) {
+          existing.hasManualCheckins = true;
+        }
+        
         // Only add elevation/distance if this is a new segment for the user
-        if (!existing.segments.has(checkIn.segment_id)) {
+        // Skip segment_id = 0 (manual check-ins without segment)
+        if (!existing.segments.has(checkIn.segment_id) && checkIn.segment_id !== 0) {
           const segment = segmentMap.get(checkIn.segment_id);
           if (segment) {
             const elevation = (segment.elevation_high || 0) - (segment.elevation_low || 0);
@@ -147,13 +156,18 @@ export const TodaysRunners = () => {
         const profile = profiles?.find((p) => p.id === userId);
         const stats = userStats.get(userId)!;
         
+        // Count activities: manual check-ins count as 1 each, segments count individually
+        const manualCount = stats.segments.has(0) ? 1 : 0;
+        const segmentCount = stats.segments.size - manualCount;
+        
         return {
           user_id: userId,
           display_name: profile?.display_name || "Unbekannt",
           profile_picture: profile?.profile_picture || null,
-          total_segments: stats.segments.size,
+          total_segments: segmentCount + manualCount, // Total activities
           total_elevation: Math.round(stats.totalElevation),
           total_distance: Math.round(stats.totalDistance),
+          has_manual_checkins: stats.hasManualCheckins,
         };
       });
 
@@ -293,8 +307,26 @@ export const TodaysRunners = () => {
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                   <span className="flex items-center gap-1">
-                    <Mountain className="w-3 h-3" />
-                    {runner.total_segments} {runner.total_segments === 1 ? "Segment" : "Segmente"}
+                    {runner.has_manual_checkins ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex items-center gap-1">
+                              <Hand className="w-3 h-3 text-emerald-500" />
+                              {runner.total_segments} {runner.total_segments === 1 ? "Aktivität" : "Aktivitäten"}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Manuell erfasst</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <>
+                        <Mountain className="w-3 h-3" />
+                        {runner.total_segments} {runner.total_segments === 1 ? "Segment" : "Segmente"}
+                      </>
+                    )}
                   </span>
                   {runner.total_elevation > 0 && (
                     <span className="flex items-center gap-1">
