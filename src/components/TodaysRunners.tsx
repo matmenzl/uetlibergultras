@@ -328,7 +328,7 @@ export const TodaysRunners = () => {
                       </>
                     )}
                   </span>
-                  {runner.total_elevation > 0 && (
+                  {!runner.has_manual_checkins && runner.total_elevation > 0 && (
                     <span className="flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" />
                       {runner.total_elevation}m
