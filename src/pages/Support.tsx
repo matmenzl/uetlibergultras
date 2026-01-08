@@ -26,7 +26,7 @@ const faqs = [
     questions: [
       {
         q: 'Was ist Uetliberg Ultras?',
-        a: 'Uetliberg Ultras ist eine Community für alle, die gerne auf den Uetliberg laufen. Wir tracken deine Läufe über Strava-Segmente und belohnen dich mit Stempeln in deinem persönlichen Stempelbuch.'
+        a: 'Uetliberg Ultras ist eine Community für alle, die gerne auf den Uetliberg laufen. Wir tracken deine Läufe über Strava-Segmente und belohnen dich mit Badges in deiner persönlichen Sammlung.'
       },
       {
         q: 'Wie verbinde ich mein Strava-Konto?',
@@ -57,16 +57,16 @@ const faqs = [
     ]
   },
   {
-    category: 'Stempelbuch',
+    category: 'Badges',
     icon: <Stamp className="w-5 h-5" />,
     questions: [
       {
-        q: 'Was ist das Stempelbuch?',
-        a: 'Das Stempelbuch ist deine persönliche Sammlung von Stempeln, die du durch deine Läufe verdienst. Es ist in vier Kategorien unterteilt: Meilensteine, Ausdauer, Spezial und Lokal-Legenden.'
+        q: 'Was sind die Badges?',
+        a: 'Badges sind Auszeichnungen, die du durch deine Läufe verdienst. Sie sind in vier Kategorien unterteilt: Meilensteine, Ausdauer, Spezial und Lokal-Legenden.'
       },
       {
-        q: 'Welche Stempel gibt es?',
-        a: `Es gibt 17 Stempel in vier Kategorien:
+        q: 'Welche Badges gibt es?',
+        a: `Es gibt 17 Badges in vier Kategorien:
 
 Meilensteine (Anzahl Runs):
 • Erstbesteigung ⭐ – Erster Uetli Run
@@ -99,7 +99,7 @@ Lokal-Legenden:
       },
       {
         q: 'Wie sehe ich meinen Fortschritt?',
-        a: 'Im Stempelbuch siehst du bei jedem Stempel einen Fortschrittsbalken, der anzeigt, wie weit du vom Ziel entfernt bist. Verdiente Stempel werden farbig und mit Datum angezeigt.'
+        a: 'Bei den Badges siehst du bei jedem Badge einen Fortschrittsbalken, der anzeigt, wie weit du vom Ziel entfernt bist. Verdiente Badges werden farbig und mit Datum angezeigt.'
       }
     ]
   },

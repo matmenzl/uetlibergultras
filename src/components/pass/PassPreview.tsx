@@ -108,7 +108,7 @@ export function PassPreview({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <img src={logo} alt="" className="h-6 w-auto opacity-80" />
-          <h3 className="font-bold text-sm">Uetliberg Stempelbuch</h3>
+          <h3 className="font-bold text-sm">Uetliberg Badges</h3>
         </div>
         <div className="px-2 py-0.5 bg-primary/10 rounded-full">
           <span className="text-xs font-medium text-primary">
@@ -133,7 +133,7 @@ export function PassPreview({
       e.stopPropagation();
       navigate('/pass');
     }}>
-        Stempelbuch öffnen
+        Badges öffnen
         <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
       </Button>
     </Card>;

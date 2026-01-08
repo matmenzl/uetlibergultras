@@ -20,7 +20,7 @@ export function PassHeader({ displayName, earnedCount, totalCount }: PassHeaderP
       {/* Title */}
       <h2 className="text-xl font-bold text-foreground tracking-tight flex items-center gap-2">
         <Mountain className="w-5 h-5 text-primary" />
-        Uetliberg Pass
+        Uetliberg Badges
       </h2>
       
       {/* User name */}
@@ -33,7 +33,7 @@ export function PassHeader({ displayName, earnedCount, totalCount }: PassHeaderP
       {/* Progress */}
       <div className="mt-3 px-4 py-1.5 bg-primary/10 rounded-full">
         <p className="text-sm font-medium text-primary">
-          {earnedCount} von {totalCount} Stempel
+          {earnedCount} von {totalCount} Badges
         </p>
       </div>
     </div>
