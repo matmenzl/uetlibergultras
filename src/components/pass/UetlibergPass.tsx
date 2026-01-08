@@ -135,11 +135,11 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, StampConfig & { target?: numbe
     category: 'special',
   },
   night_owl: {
-    icon: <Moon className="w-6 h-6" />,
-    title: 'Nachteule',
+    icon: <span className="text-2xl">🌅</span>,
+    title: 'Sundowner',
     description: 'Run nach 20 Uhr',
     howToEarn: 'Starte einen Run nach 20 Uhr abends.',
-    color: 'text-slate-400',
+    color: 'text-orange-400',
     category: 'special',
   },
   pioneer_10: {
