@@ -89,6 +89,12 @@ const getGreeting = (weatherEmoji?: string): string => {
     return "PowPow am Uetliberg ❄️";
   }
   
+  // Fog weather override
+  const fogEmojis = ['🌫️'];
+  if (weatherEmoji && fogEmojis.includes(weatherEmoji)) {
+    return 'Nebelmeer ahoi 🌫️ Oben hell? Klick auf "Aktualisieren"';
+  }
+  
   // Rain/storm weather override
   const rainEmojis = ['🌧️', '🌦️', '⛈️'];
   if (weatherEmoji && rainEmojis.includes(weatherEmoji)) {
