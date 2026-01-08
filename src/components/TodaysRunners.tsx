@@ -169,12 +169,12 @@ export const TodaysRunners = () => {
         };
       });
 
-      // Sort by total segments (descending), then by best time
+      // Sort by total segments (descending), then by elevation (descending)
       runnerList.sort((a, b) => {
         if (b.total_segments !== a.total_segments) {
           return b.total_segments - a.total_segments;
         }
-        return a.best_time - b.best_time;
+        return b.total_elevation - a.total_elevation;
       });
 
       return runnerList;
@@ -281,12 +281,6 @@ export const TodaysRunners = () => {
                     <span className="flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" />
                       {runner.total_elevation}m
-                    </span>
-                  )}
-                  {runner.best_time > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {formatTime(runner.best_time)}
                     </span>
                   )}
                 </div>
