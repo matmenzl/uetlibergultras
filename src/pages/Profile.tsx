@@ -6,8 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Camera, Loader2, Trash2, User } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Trash2, User, Mountain, CalendarIcon, Pencil, X, Check } from "lucide-react";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+
+interface ManualCheckIn {
+  id: string;
+  activity_name: string | null;
+  distance: number | null;
+  elevation_gain: number | null;
+  checked_in_at: string;
+}
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -29,6 +42,31 @@ const Profile = () => {
     last_name: null,
     profile_picture: null,
   });
+  
+  // Manual check-ins state
+  const [manualRuns, setManualRuns] = useState<ManualCheckIn[]>([]);
+  const [editingRun, setEditingRun] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{
+    activity_name: string;
+    distance: string;
+    elevation_gain: string;
+    checked_in_at: Date;
+  }>({ activity_name: "", distance: "", elevation_gain: "", checked_in_at: new Date() });
+  const [savingRun, setSavingRun] = useState(false);
+  const [deletingRun, setDeletingRun] = useState<string | null>(null);
+
+  const fetchManualRuns = async (userId: string) => {
+    const { data } = await supabase
+      .from("check_ins")
+      .select("id, activity_name, distance, elevation_gain, checked_in_at")
+      .eq("user_id", userId)
+      .eq("is_manual", true)
+      .order("checked_in_at", { ascending: false });
+    
+    if (data) {
+      setManualRuns(data);
+    }
+  };
 
   useEffect(() => {
     const getProfile = async () => {
@@ -50,6 +88,8 @@ const Profile = () => {
       if (profileData) {
         setProfile(profileData);
       }
+      
+      await fetchManualRuns(user.id);
       
       setLoading(false);
     };
@@ -217,6 +257,71 @@ const Profile = () => {
     return "U";
   };
 
+  const startEditRun = (run: ManualCheckIn) => {
+    setEditingRun(run.id);
+    setEditForm({
+      activity_name: run.activity_name || "",
+      distance: run.distance ? (run.distance / 1000).toString() : "",
+      elevation_gain: run.elevation_gain?.toString() || "",
+      checked_in_at: new Date(run.checked_in_at),
+    });
+  };
+
+  const cancelEditRun = () => {
+    setEditingRun(null);
+    setEditForm({ activity_name: "", distance: "", elevation_gain: "", checked_in_at: new Date() });
+  };
+
+  const handleSaveRun = async (runId: string) => {
+    if (!editForm.activity_name.trim()) {
+      toast({ title: "Fehler", description: "Bitte gib einen Titel ein.", variant: "destructive" });
+      return;
+    }
+
+    setSavingRun(true);
+    
+    const distanceValue = editForm.distance ? parseFloat(editForm.distance) * 1000 : null;
+    const elevationValue = editForm.elevation_gain ? parseInt(editForm.elevation_gain, 10) : null;
+
+    const { error } = await supabase
+      .from("check_ins")
+      .update({
+        activity_name: editForm.activity_name.trim(),
+        distance: distanceValue,
+        elevation_gain: elevationValue,
+        checked_in_at: editForm.checked_in_at.toISOString(),
+      })
+      .eq("id", runId);
+
+    setSavingRun(false);
+
+    if (error) {
+      toast({ title: "Fehler", description: "Run konnte nicht gespeichert werden.", variant: "destructive" });
+    } else {
+      toast({ title: "Gespeichert", description: "Dein Run wurde aktualisiert." });
+      setEditingRun(null);
+      if (user) await fetchManualRuns(user.id);
+    }
+  };
+
+  const handleDeleteRun = async (runId: string) => {
+    setDeletingRun(runId);
+
+    const { error } = await supabase
+      .from("check_ins")
+      .delete()
+      .eq("id", runId);
+
+    setDeletingRun(null);
+
+    if (error) {
+      toast({ title: "Fehler", description: "Run konnte nicht gelöscht werden.", variant: "destructive" });
+    } else {
+      toast({ title: "Gelöscht", description: "Dein Run wurde entfernt." });
+      if (user) await fetchManualRuns(user.id);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -339,6 +444,145 @@ const Profile = () => {
                 "Speichern"
               )}
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Manual Runs Section */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mountain className="h-5 w-5" />
+              Meine manuellen Runs ({manualRuns.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {manualRuns.length === 0 ? (
+              <p className="text-muted-foreground text-sm text-center py-4">
+                Noch keine manuellen Runs erfasst.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {manualRuns.map((run) => (
+                  <div
+                    key={run.id}
+                    className="border rounded-lg p-3 space-y-3"
+                  >
+                    {editingRun === run.id ? (
+                      // Edit mode
+                      <div className="space-y-3">
+                        <div className="space-y-1.5">
+                          <Label>Titel</Label>
+                          <Input
+                            value={editForm.activity_name}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, activity_name: e.target.value }))}
+                            placeholder="Titel des Runs"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label>Distanz (km)</Label>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              min="0"
+                              value={editForm.distance}
+                              onChange={(e) => setEditForm(prev => ({ ...prev, distance: e.target.value }))}
+                              placeholder="z.B. 5.2"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label>Höhenmeter</Label>
+                            <Input
+                              type="number"
+                              step="1"
+                              min="0"
+                              value={editForm.elevation_gain}
+                              onChange={(e) => setEditForm(prev => ({ ...prev, elevation_gain: e.target.value }))}
+                              placeholder="z.B. 450"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Datum</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn("w-full justify-start text-left font-normal")}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {format(editForm.checked_in_at, "dd. MMMM yyyy", { locale: de })}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={editForm.checked_in_at}
+                                onSelect={(date) => date && setEditForm(prev => ({ ...prev, checked_in_at: date }))}
+                                disabled={(date) => date > new Date()}
+                                locale={de}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="flex gap-2 justify-end">
+                          <Button variant="ghost" size="sm" onClick={cancelEditRun} disabled={savingRun}>
+                            <X className="h-4 w-4 mr-1" />
+                            Abbrechen
+                          </Button>
+                          <Button size="sm" onClick={() => handleSaveRun(run.id)} disabled={savingRun}>
+                            {savingRun ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Check className="h-4 w-4 mr-1" />}
+                            Speichern
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      // View mode
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-medium">{run.activity_name || "Unbenannter Run"}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {format(new Date(run.checked_in_at), "dd. MMMM yyyy", { locale: de })}
+                          </p>
+                          <div className="flex gap-3 text-sm text-muted-foreground mt-1">
+                            {run.distance && (
+                              <span>{(run.distance / 1000).toFixed(1)} km</span>
+                            )}
+                            {run.elevation_gain && (
+                              <span>{run.elevation_gain} hm</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => startEditRun(run)}
+                            className="h-8 w-8"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteRun(run.id)}
+                            disabled={deletingRun === run.id}
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                          >
+                            {deletingRun === run.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
