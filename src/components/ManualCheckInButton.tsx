@@ -100,9 +100,9 @@ export function ManualCheckInButton({ userId, onSuccess }: ManualCheckInButtonPr
   };
 
   return (
-    <div className="space-y-4 p-4 border rounded-lg bg-card">
-      <h3 className="font-semibold flex items-center gap-2">
-        <Mountain className="h-4 w-4" />
+    <div className="space-y-4">
+      <h3 className="font-semibold flex items-center gap-2 text-lg">
+        <Mountain className="h-5 w-5" />
         Uetliberg-Run manuell erfassen
       </h3>
       

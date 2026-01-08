@@ -101,6 +101,7 @@ export default function Index() {
   } | null>(null);
   const [isRefreshingSegments, setIsRefreshingSegments] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showManualCheckInModal, setShowManualCheckInModal] = useState(false);
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1; // 1-12
   const { toast } = useToast();
@@ -494,9 +495,28 @@ export default function Index() {
                   <p className="text-white/90 mb-8 text-lg [text-shadow:_0_1px_6px_rgb(0_0_0_/_35%)]">
                     Bereit für deinen nächsten Uetli Run?
                   </p>
-                  <div className="bg-black/30 backdrop-blur-sm rounded-lg p-4 inline-block">
-                    <ManualCheckInButton userId={user.id} onSuccess={() => refetchCheckIns()} />
-                  </div>
+                  <Button
+                    onClick={() => setShowManualCheckInModal(true)}
+                    size="lg"
+                    className="text-base sm:text-lg px-8 sm:px-10 py-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105"
+                  >
+                    <Flame className="w-5 h-5 mr-2" />
+                    Run erfassen
+                  </Button>
+                  
+                  {/* Manual Check-In Modal */}
+                  <Dialog open={showManualCheckInModal} onOpenChange={setShowManualCheckInModal}>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogTitle className="sr-only">Uetliberg-Run manuell erfassen</DialogTitle>
+                      <ManualCheckInButton 
+                        userId={user.id} 
+                        onSuccess={() => {
+                          refetchCheckIns();
+                          setShowManualCheckInModal(false);
+                        }} 
+                      />
+                    </DialogContent>
+                  </Dialog>
                 </>
               )}
             </div>
