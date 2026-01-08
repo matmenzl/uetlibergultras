@@ -17,7 +17,7 @@ interface PassPageProps {
 
 export function PassPage({ title, icon: Icon, achievements, category }: PassPageProps) {
   return (
-    <div className="flex flex-wrap gap-6 justify-center py-2">
+    <div className="flex flex-wrap gap-6 justify-center py-4">
       {achievements.map((achievement) => (
         <StampCard
           key={achievement.type}
