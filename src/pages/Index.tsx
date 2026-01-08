@@ -21,7 +21,8 @@ import {
   Flame,
   HelpCircle,
   X,
-  MapPinned,
+  Mountain,
+  Waypoints,
 } from "lucide-react";
 import logo from "@/assets/uu_logo.svg";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -566,14 +567,14 @@ export default function Index() {
 
               {/* Persönliche Stats */}
               <Card className="p-5 text-center">
-                <Trophy className="w-6 h-6 text-primary mx-auto mb-2" />
+                <Mountain className="w-6 h-6 text-primary mx-auto mb-2" />
                 <p className="text-3xl font-bold text-primary">
                   {user ? Object.keys(currentYearActivitiesMap).length : 0}
                 </p>
                 <p className="text-sm text-muted-foreground">Deine Uetli Runs {currentYear}</p>
               </Card>
               <Card className="p-5 text-center">
-                <MapPinned className="w-6 h-6 text-primary mx-auto mb-2" />
+                <Waypoints className="w-6 h-6 text-primary mx-auto mb-2" />
                 <p className="text-3xl font-bold text-primary">
                   {user ? new Set(currentYearCheckIns.map((c) => c.segment_id)).size : 0}
                 </p>
@@ -682,7 +683,7 @@ export default function Index() {
                   {/* CTA for missing segments */}
                   <Card className="p-4 mt-3 bg-muted/30 border-dashed">
                     <div className="flex items-start gap-3">
-                      <MapPinned className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <Waypoints className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <p className="text-sm text-muted-foreground">
                           <span className="font-medium text-foreground">Segment fehlt?</span> Schlage Uetliberg-Segmente vor, die getrackt werden sollen.
@@ -700,7 +701,7 @@ export default function Index() {
                 </div>
               ) : (
                 <Card className="p-8 text-center animate-fade-in">
-                  <MapPinned className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-bold mb-2">Noch keine Runs in {currentYear}! 🏔️</h3>
                   <p className="text-muted-foreground mb-4">Zeit für deinen ersten Run dieses Jahr.</p>
                   <p className="text-sm text-muted-foreground">Klick auf "Run einchecken" um loszulegen!</p>
