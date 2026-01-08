@@ -174,7 +174,11 @@ export default function Index() {
   });
 
   // Helper to check if a segment has a valid (non-placeholder) name
+  // segment_id = 0 is reserved for manual check-ins and should always be valid
   const isValidSegment = (segmentId: number) => {
+    // Manual check-ins (segment_id = 0) are always valid
+    if (segmentId === 0) return true;
+    
     const segment = segments?.find(s => s.segment_id === segmentId);
     if (!segment) return false;
     // Placeholder names are like "Segment 12345"
@@ -301,6 +305,8 @@ export default function Index() {
     }
   };
   const getSegmentName = (segmentId: number) => {
+    // Manual check-ins don't have a segment
+    if (segmentId === 0) return "Manueller Run";
     const segment = segments?.find(s => s.segment_id === segmentId);
     return segment?.name || `Segment ${segmentId}`;
   };
