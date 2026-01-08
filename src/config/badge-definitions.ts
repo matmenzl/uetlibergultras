@@ -353,7 +353,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     category: 'legend',
     title: 'Alternativliga',
     description: 'Ohne GPS unterwegs',
-    howToEarn: 'Entdecke alternative Routen',
+    howToEarn: 'Nutze den manuellen Check-in',
     symbolId: 'compass',
     colors: {
       primary: '280 68% 60%',
