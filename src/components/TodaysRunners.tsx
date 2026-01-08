@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Users, Mountain, RefreshCw, Calendar, TrendingUp, Timer, Hand } from "lucide-react";
+import { Users, Mountain, RefreshCw, Calendar, TrendingUp, Timer, Hand, Route } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -83,7 +83,7 @@ export const TodaysRunners = () => {
       // Get check-ins within the date range
       const { data: checkIns, error: checkInsError } = await supabase
         .from("check_ins")
-        .select("user_id, segment_id, elapsed_time, checked_in_at, is_manual")
+        .select("user_id, segment_id, elapsed_time, checked_in_at, is_manual, distance, elevation_gain")
         .gte("checked_in_at", start.toISOString())
         .lte("checked_in_at", end.toISOString());
 
@@ -134,6 +134,13 @@ export const TodaysRunners = () => {
         // Track if user has any manual check-ins
         if (checkIn.is_manual) {
           existing.hasManualCheckins = true;
+          // Add manual check-in distance and elevation
+          if (checkIn.distance) {
+            existing.totalDistance += checkIn.distance;
+          }
+          if (checkIn.elevation_gain) {
+            existing.totalElevation += checkIn.elevation_gain;
+          }
         }
         
         // Only add elevation/distance if this is a new segment for the user
@@ -328,10 +335,16 @@ export const TodaysRunners = () => {
                       </>
                     )}
                   </span>
-                  {!runner.has_manual_checkins && runner.total_elevation > 0 && (
+                  {runner.total_elevation > 0 && (
                     <span className="flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" />
                       {runner.total_elevation}m
+                    </span>
+                  )}
+                  {runner.total_distance > 0 && (
+                    <span className="flex items-center gap-1">
+                      <Route className="w-3 h-3" />
+                      {(runner.total_distance / 1000).toFixed(1)}km
                     </span>
                   )}
                 </div>
