@@ -118,7 +118,7 @@ export function PassPreview({
       </div>
 
       {/* Stamp preview grid */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-3 gap-4 mb-4">
         {PREVIEW_ACHIEVEMENTS.map(({
         id,
         config
