@@ -70,6 +70,7 @@ export type Database = {
           distance: number | null
           elapsed_time: number | null
           id: string
+          is_manual: boolean | null
           segment_id: number
           temperature: number | null
           user_id: string
@@ -85,6 +86,7 @@ export type Database = {
           distance?: number | null
           elapsed_time?: number | null
           id?: string
+          is_manual?: boolean | null
           segment_id: number
           temperature?: number | null
           user_id: string
@@ -100,6 +102,7 @@ export type Database = {
           distance?: number | null
           elapsed_time?: number | null
           id?: string
+          is_manual?: boolean | null
           segment_id?: number
           temperature?: number | null
           user_id?: string
@@ -444,6 +447,7 @@ export type Database = {
         | "coiffeur"
         | "snow_bunny"
         | "frosty"
+        | "alternativliga"
       app_role: "admin" | "user"
       suggestion_status: "pending" | "approved" | "rejected"
     }
@@ -594,6 +598,7 @@ export const Constants = {
         "coiffeur",
         "snow_bunny",
         "frosty",
+        "alternativliga",
       ],
       app_role: ["admin", "user"],
       suggestion_status: ["pending", "approved", "rejected"],

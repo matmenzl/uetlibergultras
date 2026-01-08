@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Users, Mountain, RefreshCw, Calendar, TrendingUp } from "lucide-react";
+import { Users, Mountain, RefreshCw, Calendar, TrendingUp, Timer } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { User } from "@supabase/supabase-js";
@@ -170,6 +171,23 @@ export const TodaysRunners = () => {
     refetchOnWindowFocus: false,
   });
 
+  // Fetch alternativliga achievements for runners
+  const { data: alternativligaUsers } = useQuery({
+    queryKey: ['alternativliga-todays-runners', runners.map(r => r.user_id)],
+    queryFn: async () => {
+      if (!runners || runners.length === 0) return [];
+      const { data, error } = await supabase
+        .from('user_achievements')
+        .select('user_id')
+        .eq('achievement', 'alternativliga')
+        .in('user_id', runners.map(r => r.user_id));
+      
+      if (error) throw error;
+      return data.map(a => a.user_id);
+    },
+    enabled: runners.length > 0,
+  });
+
   return (
     <Card className="p-6 h-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -258,7 +276,21 @@ export const TodaysRunners = () => {
               </Avatar>
 
               <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{runner.display_name}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="font-medium truncate">{runner.display_name}</p>
+                  {alternativligaUsers?.includes(runner.user_id) && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Timer className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>GPS-nein-Danke! Hier wird von Hand gestoppt</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                   <span className="flex items-center gap-1">
                     <Mountain className="w-3 h-3" />
@@ -284,7 +316,7 @@ export const TodaysRunners = () => {
           {runners.length > 10 && (
             <p className="text-sm text-center text-muted-foreground pt-2">+{runners.length - 10} weitere Läufer</p>
           )}
-        </div>
+              </div>
       )}
     </Card>
   );

@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Progress } from '@/components/ui/progress';
-import { Award, Mountain, Flame, Sun, Moon, Star, Target, Zap, Trophy, Clock } from 'lucide-react';
+import { Award, Mountain, Flame, Sun, Moon, Star, Target, Zap, Trophy, Clock, Timer } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { AchievementSuggestionForm } from './AchievementSuggestionForm';
@@ -26,7 +26,8 @@ type AchievementType =
   | 'denzlerweg_king'
   | 'coiffeur'
   | 'snow_bunny'
-  | 'frosty';
+  | 'frosty'
+  | 'alternativliga';
 
 interface Achievement {
   id: string;
@@ -226,6 +227,13 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     target: 5,
     progressType: 'runs',
   },
+  alternativliga: {
+    icon: <Timer className="w-5 h-5" />,
+    title: 'Alternativliga',
+    description: 'GPS-nein-Danke!',
+    howToEarn: 'Erfasse mindestens einen Run manuell. Hier wird von Hand gestoppt!',
+    color: 'text-emerald-500',
+  },
 };
 
 // WMO weather codes for snow conditions
@@ -250,6 +258,7 @@ const REGULAR_ACHIEVEMENTS: AchievementType[] = [
   'coiffeur',
   'snow_bunny',
   'frosty',
+  'alternativliga',
 ];
 
 // Helper to calculate streak from check-ins
