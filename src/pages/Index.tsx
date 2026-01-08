@@ -81,8 +81,14 @@ interface ActivityGroup {
   activityElapsedTime: number | null;
 }
 
-// Get time-based greeting
-const getGreeting = (): string => {
+// Get time-based greeting (with optional weather override)
+const getGreeting = (weatherEmoji?: string): string => {
+  // Rain/storm weather override
+  const rainEmojis = ['🌧️', '🌦️', '⛈️'];
+  if (weatherEmoji && rainEmojis.includes(weatherEmoji)) {
+    return "Es gibt kein schlechtes Wetter, nur schlechte Kleidung 🌧️";
+  }
+  
   const hour = new Date().getHours();
   if (hour >= 5 && hour < 11) return "Der frühe Vogel und so... ☀️";
   if (hour >= 11 && hour < 14) return "Mittagessen braucht niemand, der Uetliberg wartet auf dich!";
@@ -451,7 +457,7 @@ export default function Index() {
                 className="h-32 sm:h-40 w-auto mx-auto mb-6 drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
               />
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 tracking-tight text-white [text-shadow:_0_1px_8px_rgb(0_0_0_/_40%)]">
-                {getGreeting()}
+                {getGreeting(weatherData?.weather)}
               </h2>
               {!user ? (
                 <>
