@@ -110,76 +110,32 @@ export default function Admin() {
   };
 
   const handleApprove = async (suggestion: { id: string; strava_segment_url: string }) => {
-    const segmentIdFromUrl = extractSegmentId(suggestion.strava_segment_url);
-    if (!segmentIdFromUrl) {
-      toast({
-        title: 'Ungültige URL',
-        description: 'Konnte keine Segment-ID aus der URL extrahieren.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     setProcessingId(suggestion.id);
     try {
-      // Check if segment already exists
-      const { data: existing } = await supabase
-        .from('uetliberg_segments')
-        .select('segment_id')
-        .eq('segment_id', parseInt(segmentIdFromUrl))
-        .maybeSingle();
-
-      if (existing) {
-        toast({
-          title: 'Segment existiert bereits',
-          description: `Segment ${segmentIdFromUrl} ist bereits in der Datenbank.`,
-          variant: 'destructive',
-        });
-        // Still mark as approved
-        await supabase
-          .from('segment_suggestions')
-          .update({ 
-            status: 'approved', 
-            reviewed_at: new Date().toISOString(),
-            reviewed_by: user?.id,
-            admin_notes: 'Segment existierte bereits'
-          })
-          .eq('id', suggestion.id);
-      } else {
-        // Add the segment
-        const { error: insertError } = await supabase
-          .from('uetliberg_segments')
-          .insert({
-            segment_id: parseInt(segmentIdFromUrl),
-            name: `Segment ${segmentIdFromUrl}`,
-            distance: 0,
-            avg_grade: 0,
-            climb_category: 0,
-            start_latlng: '(0,0)',
-            end_latlng: '(0,0)',
-            polyline: '',
-            priority: 'medium',
-          });
-
-        if (insertError) throw insertError;
-
-        // Mark suggestion as approved
-        await supabase
-          .from('segment_suggestions')
-          .update({ 
-            status: 'approved', 
-            reviewed_at: new Date().toISOString(),
-            reviewed_by: user?.id 
-          })
-          .eq('id', suggestion.id);
-
-        toast({
-          title: 'Segment hinzugefügt',
-          description: `Segment ${segmentIdFromUrl} wurde hinzugefügt und der Vorschlag genehmigt.`,
-        });
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('Keine aktive Sitzung gefunden');
       }
 
+      const { data, error } = await supabase.functions.invoke('approve-segment-suggestion', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: { suggestion_id: suggestion.id },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Segment hinzugefügt',
+        description: data.segment 
+          ? `"${data.segment.name}" wurde hinzugefügt (${data.segment.priority === 'high' ? 'Hohe' : 'Mittlere'} Priorität)`
+          : data.message || 'Vorschlag genehmigt',
+      });
+
       queryClient.invalidateQueries({ queryKey: ['segment-suggestions'] });
+      queryClient.invalidateQueries({ queryKey: ['all-segments'] });
     } catch (error) {
       console.error('Error approving suggestion:', error);
       toast({
