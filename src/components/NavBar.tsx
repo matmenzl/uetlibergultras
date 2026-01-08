@@ -116,6 +116,20 @@ export default function NavBar() {
               {inSheet && "Profil"}
             </button>
           )}
+          {isStravaUser && (
+            <div className={cn("flex items-center gap-1.5", inSheet ? "py-2" : "px-3 py-1.5")}>
+              <Avatar className="h-5 w-5">
+                <AvatarImage src={profilePicture || undefined} alt="Profil" />
+                <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+              <svg className="h-4 w-4 text-[#FC4C02]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+              </svg>
+              {inSheet && <span className="text-muted-foreground text-sm">via Strava</span>}
+            </div>
+          )}
           <button onClick={() => {
             handleSignOut();
             onNavigate?.();
