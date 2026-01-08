@@ -518,7 +518,7 @@ export default function Index() {
           {user && <>
               {/* Check-in History */}
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Activity className="w-5 h-5 text-primary" />
+                <Mountain className="w-5 h-5 text-primary" />
                 Deine Runs in {currentYear}
               </h2>
 
@@ -538,7 +538,7 @@ export default function Index() {
                             <Card className="overflow-hidden hover:shadow-md transition-shadow">
                               <CollapsibleTrigger className="w-full">
                                 <div className="p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors">
-                                  <Activity className="w-5 h-5 text-primary flex-shrink-0" />
+                                  <Mountain className="w-5 h-5 text-primary flex-shrink-0" />
                                   <div className="flex-1 min-w-0 text-left">
                                     <p className="font-medium truncate">{activity.activity_name}</p>
                                     <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
