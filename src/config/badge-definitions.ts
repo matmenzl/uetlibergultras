@@ -15,7 +15,7 @@ export interface BadgeDefinition {
     background: string; // Shield fill
   };
   target?: number;
-  progressType?: 'runs' | 'streak' | 'segments';
+  progressType?: 'runs' | 'streak' | 'segments' | 'snow_runs' | 'frost_runs' | 'rain_runs' | 'coiffeur_runs';
 }
 
 // Category styling configuration
@@ -230,36 +230,42 @@ export const badgeDefinitions: BadgeDefinition[] = [
     category: 'weather',
     title: 'Schneehase',
     description: 'Laufen bei Schneefall',
-    howToEarn: 'Laufe bei Schnee auf den Uetliberg',
+    howToEarn: 'Laufe 3 mal bei Schnee auf den Uetliberg',
     symbolId: 'snowflake',
     colors: {
       primary: '199 89% 70%',
       background: '199 30% 95%'
-    }
+    },
+    target: 3,
+    progressType: 'snow_runs'
   },
   {
     id: 'frosty',
     category: 'weather',
     title: 'Eiskalt',
     description: 'Unter null Grad unterwegs',
-    howToEarn: 'Laufe bei Temperaturen unter 0°C',
+    howToEarn: 'Laufe 5 mal bei Temperaturen unter 0°C',
     symbolId: 'frost',
     colors: {
       primary: '199 89% 48%',
       background: '199 30% 95%'
-    }
+    },
+    target: 5,
+    progressType: 'frost_runs'
   },
   {
     id: 'wasserratte',
     category: 'weather',
     title: 'Wasserratte',
     description: 'Regen kann dich nicht stoppen',
-    howToEarn: 'Laufe bei Regen auf den Uetliberg',
+    howToEarn: 'Laufe 5 mal bei Regen auf den Uetliberg',
     symbolId: 'rain',
     colors: {
       primary: '199 89% 48%',
       background: '40 20% 95%'
-    }
+    },
+    target: 5,
+    progressType: 'rain_runs'
   },
 
   // === COMMUNITY BADGES ===
@@ -331,14 +337,16 @@ export const badgeDefinitions: BadgeDefinition[] = [
     id: 'coiffeur',
     category: 'legend',
     title: 'Coiffeur',
-    description: 'Meister des Coiffeur-Segments',
-    howToEarn: 'Halte den Rekord auf dem Coiffeur-Segment',
+    description: 'Stammgast beim Coiffeur',
+    howToEarn: 'Laufe 10 mal im Jahr über ein Coiffeur-Segment',
     symbolId: 'crown',
     colors: {
       primary: '280 68% 60%',
       secondary: '45 93% 47%',
       background: '280 30% 15%'
-    }
+    },
+    target: 10,
+    progressType: 'coiffeur_runs'
   },
   {
     id: 'alternativliga',

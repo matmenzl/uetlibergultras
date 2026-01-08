@@ -171,15 +171,19 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
     
     switch (progressType) {
       case 'runs':
-        if (badgeId === 'coiffeur') return { current: Math.min(coiffeurRuns, target), target };
-        if (badgeId === 'snow_bunny') return { current: Math.min(snowRuns, target), target };
-        if (badgeId === 'frosty') return { current: Math.min(frostRuns, target), target };
-        if (badgeId === 'wasserratte') return { current: Math.min(rainRuns, target), target };
         return { current: Math.min(totalRuns, target), target };
       case 'streak':
         return { current: Math.min(currentStreak, target), target };
       case 'segments':
         return { current: uniqueSegments, target: totalSegments || 0 };
+      case 'snow_runs':
+        return { current: Math.min(snowRuns, target), target };
+      case 'frost_runs':
+        return { current: Math.min(frostRuns, target), target };
+      case 'rain_runs':
+        return { current: Math.min(rainRuns, target), target };
+      case 'coiffeur_runs':
+        return { current: Math.min(coiffeurRuns, target), target };
       default:
         return null;
     }
