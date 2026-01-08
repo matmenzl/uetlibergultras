@@ -13,6 +13,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Pass from "./pages/Pass";
 import Profile from "./pages/Profile";
+import BadgeDemo from "./pages/BadgeDemo";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/strava-callback" element={<AuthStravaCallback />} />
+          <Route path="/badge-demo" element={<BadgeDemo />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
