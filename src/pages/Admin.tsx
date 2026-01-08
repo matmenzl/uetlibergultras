@@ -12,7 +12,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { AdminEmailContacts } from '@/components/AdminEmailContacts';
-import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award, RotateCcw } from 'lucide-react';
+import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award, RotateCcw, Bell, BellOff } from 'lucide-react';
 import { z } from 'zod';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -558,6 +558,15 @@ export default function Admin() {
                           {suggestion.email && (
                             <span className="ml-2 text-primary">
                               📧 {suggestion.email}
+                            </span>
+                          )}
+                          {suggestion.wants_updates ? (
+                            <span className="ml-2 text-green-600 dark:text-green-400" title="Möchte benachrichtigt werden">
+                              <Bell className="w-3 h-3 inline" />
+                            </span>
+                          ) : (
+                            <span className="ml-2 text-muted-foreground" title="Keine Benachrichtigung gewünscht">
+                              <BellOff className="w-3 h-3 inline" />
                             </span>
                           )}
                         </p>
