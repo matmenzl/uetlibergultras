@@ -1,4 +1,5 @@
 import { SVGProps } from 'react';
+import { UetlibergHorizon } from './UetlibergBase';
 
 interface SymbolProps extends SVGProps<SVGSVGElement> {
   primaryColor?: string;
@@ -9,6 +10,8 @@ interface SymbolProps extends SVGProps<SVGSVGElement> {
 export function SunriseSymbol({ primaryColor = 'currentColor', secondaryColor = 'hsl(199 89% 48%)', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.08} />
       {/* Dawn sky gradient (simplified as bands) */}
       <rect x="0" y="0" width="60" height="20" fill={secondaryColor} opacity="0.3" />
       <rect x="0" y="20" width="60" height="10" fill={primaryColor} opacity="0.4" />
@@ -34,6 +37,8 @@ export function MoonSymbol({ primaryColor = 'currentColor', secondaryColor = 'hs
     <svg viewBox="0 0 60 50" fill="none" {...props}>
       {/* Night sky */}
       <rect x="0" y="0" width="60" height="50" fill={primaryColor} rx="4" />
+      {/* Consistent Uetliberg horizon base - visible through night */}
+      <UetlibergHorizon opacity={0.15} />
       {/* Mountain silhouette */}
       <path
         d="M0 46 L16 30 L26 36 L36 26 L46 32 L60 46 Z"
@@ -61,6 +66,8 @@ export function MoonSymbol({ primaryColor = 'currentColor', secondaryColor = 'hs
 export function SnowflakeSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.08} />
       {/* Mountain base */}
       <path
         d="M4 46 L20 28 L30 34 L40 26 L56 46 Z"
@@ -91,6 +98,8 @@ export function SnowflakeSymbol({ primaryColor = 'currentColor', ...props }: Sym
 export function FrostSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.08} />
       {/* Frozen mountain */}
       <path
         d="M6 46 L22 28 L30 34 L38 26 L54 46 Z"
@@ -128,6 +137,8 @@ export function FrostSymbol({ primaryColor = 'currentColor', ...props }: SymbolP
 export function RainSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.08} />
       {/* Mountain in mist */}
       <path
         d="M4 46 L18 32 L28 38 L38 28 L48 34 L56 46 Z"

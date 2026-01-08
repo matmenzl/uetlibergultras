@@ -1,4 +1,5 @@
 import { SVGProps } from 'react';
+import { UetlibergHorizon } from './UetlibergBase';
 
 interface SymbolProps extends SVGProps<SVGSVGElement> {
   primaryColor?: string;
@@ -9,6 +10,10 @@ interface SymbolProps extends SVGProps<SVGSVGElement> {
 export function CrownSymbol({ primaryColor = 'currentColor', secondaryColor = 'hsl(45 93% 47%)', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 55" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <g transform="translate(0, 5)">
+        <UetlibergHorizon opacity={0.08} />
+      </g>
       {/* Steep ridge profile */}
       <path
         d="M4 50 L4 46 L20 46 L44 14 L56 46 L56 50 Z"
@@ -34,6 +39,8 @@ export function CrownSymbol({ primaryColor = 'currentColor', secondaryColor = 'h
 export function CompassSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.1} />
       {/* Mountain */}
       <path
         d="M4 46 L30 18 L56 46 Z"

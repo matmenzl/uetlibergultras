@@ -1,4 +1,5 @@
 import { SVGProps } from 'react';
+import { UetlibergHorizon } from './UetlibergBase';
 
 interface SymbolProps extends SVGProps<SVGSVGElement> {
   primaryColor?: string;
@@ -9,6 +10,10 @@ interface SymbolProps extends SVGProps<SVGSVGElement> {
 export function StarFoundingSymbol({ primaryColor = 'currentColor', secondaryColor = 'hsl(45 93% 47%)', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 55" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <g transform="translate(0, 5)">
+        <UetlibergHorizon opacity={0.08} />
+      </g>
       {/* Banner ribbon */}
       <path
         d="M6 8 L54 8 L52 14 L54 20 L6 20 L8 14 Z"
@@ -36,6 +41,8 @@ export function StarFoundingSymbol({ primaryColor = 'currentColor', secondaryCol
 export function TrophyTenSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.1} />
       {/* Mountain */}
       <path
         d="M4 46 L24 26 L34 32 L44 24 L56 46 Z"
@@ -63,6 +70,8 @@ export function TrophyTenSymbol({ primaryColor = 'currentColor', ...props }: Sym
 export function TrophyTwentyFiveSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.08} />
       {/* Double mountain */}
       <path
         d="M0 46 L16 32 L26 38 L36 28 L46 34 L60 46 Z"
@@ -96,6 +105,8 @@ export function TrophyTwentyFiveSymbol({ primaryColor = 'currentColor', ...props
 export function TrophyFiftySymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.06} />
       {/* Triple layered mountains */}
       <path d="M0 48 L14 34 L24 40 L34 30 L44 36 L60 48 Z" fill="hsl(142 40% 28%)" stroke="hsl(0 0% 15%)" strokeWidth="1.5" strokeLinejoin="round" />
       <path d="M4 48 L18 32 L28 38 L38 28 L50 48 Z" fill="hsl(142 50% 36%)" stroke="hsl(0 0% 15%)" strokeWidth="2" strokeLinejoin="round" />

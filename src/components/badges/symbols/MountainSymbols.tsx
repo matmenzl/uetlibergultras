@@ -1,4 +1,5 @@
 import { SVGProps } from 'react';
+import { UetlibergHorizon } from './UetlibergBase';
 
 interface SymbolProps extends SVGProps<SVGSVGElement> {
   primaryColor?: string;
@@ -9,6 +10,8 @@ interface SymbolProps extends SVGProps<SVGSVGElement> {
 export function MountainSingle({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.1} />
       {/* Uetliberg silhouette */}
       <path
         d="M4 44 L18 28 L24 32 L30 20 L36 28 L42 24 L56 44 Z"
@@ -37,6 +40,8 @@ export function MountainSingle({ primaryColor = 'currentColor', ...props }: Symb
 export function MountainFive({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.1} />
       {/* Mountain ridge */}
       <path
         d="M2 44 L10 32 L18 36 L26 28 L34 32 L42 26 L50 30 L58 44 Z"
@@ -61,6 +66,8 @@ export function MountainFive({ primaryColor = 'currentColor', ...props }: Symbol
 export function MountainTen({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.08} />
       {/* Back ridge */}
       <path
         d="M8 44 L20 30 L32 36 L44 28 L56 44 Z"
@@ -97,6 +104,8 @@ export function MountainTen({ primaryColor = 'currentColor', ...props }: SymbolP
 export function MountainTwentyFive({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.06} />
       {/* Far range */}
       <path
         d="M0 44 L8 32 L16 36 L24 28 L32 32 L40 26 L48 30 L56 24 L60 44 Z"
@@ -131,6 +140,8 @@ export function MountainTwentyFive({ primaryColor = 'currentColor', ...props }: 
 export function MountainFifty({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.05} />
       {/* Layered ranges */}
       <path d="M0 46 L10 34 L20 38 L30 28 L40 34 L50 30 L60 46 Z" fill="hsl(45 40% 25%)" stroke="hsl(0 0% 15%)" strokeWidth="1.5" strokeLinejoin="round" />
       <path d="M0 46 L15 36 L25 40 L35 32 L45 36 L55 34 L60 46 Z" fill="hsl(45 50% 35%)" stroke="hsl(0 0% 15%)" strokeWidth="2" strokeLinejoin="round" />
@@ -149,6 +160,10 @@ export function MountainFifty({ primaryColor = 'currentColor', ...props }: Symbo
 export function MountainHundred({ primaryColor = 'currentColor', secondaryColor = 'hsl(280 68% 60%)', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 55" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <g transform="translate(0, 5)">
+        <UetlibergHorizon opacity={0.06} />
+      </g>
       {/* Decorative border arc */}
       <path
         d="M8 48 Q30 52 52 48"
@@ -183,6 +198,8 @@ export function MountainHundred({ primaryColor = 'currentColor', secondaryColor 
 export function PathsSymbol({ primaryColor = 'currentColor', ...props }: SymbolProps) {
   return (
     <svg viewBox="0 0 60 50" fill="none" {...props}>
+      {/* Consistent Uetliberg horizon base */}
+      <UetlibergHorizon opacity={0.1} />
       {/* Mountain base */}
       <path
         d="M4 44 L20 28 L30 34 L40 26 L56 44 Z"
