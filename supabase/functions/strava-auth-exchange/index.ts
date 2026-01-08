@@ -90,13 +90,11 @@ serve(async (req) => {
 
     // Create unique email for Strava user
     const stravaEmail = `strava_${athlete.id}@strava.user`;
-    
-    // SECURITY: Generate cryptographically secure random password (32 bytes = 256 bits)
-    const randomBytes = crypto.getRandomValues(new Uint8Array(32));
-    const stravaPassword = base64Encode(randomBytes.buffer);
 
     // Check if user exists by looking up Strava ID in profiles
     let userId: string;
+    let stravaPassword: string;
+    
     const { data: existingProfile } = await supabase
       .from('profiles')
       .select('id')
@@ -104,15 +102,43 @@ serve(async (req) => {
       .single();
 
     if (existingProfile) {
-      // User exists - update their password and metadata
+      // User exists - try to reuse existing password
       userId = existingProfile.id;
       console.log(`Existing user found: ${userId}`);
       
-      // SECURITY: Update to new random password
-      const { error: updateError } = await supabase.auth.admin.updateUserById(
+      // Get stored password from credentials
+      const { data: credentials } = await supabase
+        .from('strava_credentials')
+        .select('auth_password_hash')
+        .eq('user_id', userId)
+        .single();
+      
+      if (credentials?.auth_password_hash) {
+        // Reuse existing password - no invalidation of other sessions!
+        stravaPassword = credentials.auth_password_hash;
+        console.log('Reusing existing password for multi-browser session support');
+      } else {
+        // Fallback for existing users without stored password (migration case)
+        console.log('No stored password found, generating new one (migration)');
+        const randomBytes = crypto.getRandomValues(new Uint8Array(32));
+        stravaPassword = base64Encode(randomBytes.buffer);
+        
+        // Update user password
+        const { error: updateError } = await supabase.auth.admin.updateUserById(
+          userId,
+          { password: stravaPassword }
+        );
+        
+        if (updateError) {
+          console.error('User password update error:', updateError);
+          throw new Error('Failed to update user password');
+        }
+      }
+      
+      // Update metadata only (no password change)
+      const { error: metadataError } = await supabase.auth.admin.updateUserById(
         userId,
         { 
-          password: stravaPassword,
           user_metadata: {
             strava_id: athlete.id,
             first_name: athlete.firstname,
@@ -121,15 +147,20 @@ serve(async (req) => {
         }
       );
       
-      if (updateError) {
-        console.error('User update error:', updateError);
-        throw new Error('Failed to update user account');
+      if (metadataError) {
+        console.error('User metadata update error:', metadataError);
+        // Non-fatal, continue
       }
       
-      console.log(`User credentials updated: ${userId}`);
+      console.log(`User metadata updated: ${userId}`);
     } else {
-      // User doesn't exist, create new user
+      // User doesn't exist, create new user with new password
       console.log('Creating new user account...');
+      
+      // SECURITY: Generate cryptographically secure random password (32 bytes = 256 bits)
+      const randomBytes = crypto.getRandomValues(new Uint8Array(32));
+      stravaPassword = base64Encode(randomBytes.buffer);
+      
       const { data: signUpData, error: signUpError } = await supabase.auth.admin.createUser({
         email: stravaEmail,
         password: stravaPassword,
@@ -150,12 +181,13 @@ serve(async (req) => {
       console.log(`New user created: ${userId}`);
     }
 
-    // Store Strava tokens securely (server-side only)
+    // Store Strava tokens and password securely (server-side only)
     const { error: credentialsError } = await supabase.rpc('upsert_strava_credentials', {
       _user_id: userId,
       _access_token: tokenData.access_token,
       _refresh_token: tokenData.refresh_token,
       _expires_at: new Date(tokenData.expires_at * 1000).toISOString(),
+      _auth_password_hash: stravaPassword,
     });
 
     if (credentialsError) {
