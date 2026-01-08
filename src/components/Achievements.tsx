@@ -236,7 +236,7 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     color: 'text-emerald-500',
   },
   wasserratte: {
-    icon: <span className="text-lg">🐸</span>,
+    icon: <span className="text-lg">🌧️</span>,
     title: 'Wasserratte',
     description: '5 Runs bei Regen',
     howToEarn: 'Absolviere 5 Runs bei Regenwetter. Das Wetter wird automatisch erfasst.',
