@@ -69,6 +69,7 @@ export type Database = {
           created_at: string
           distance: number | null
           elapsed_time: number | null
+          elevation_gain: number | null
           id: string
           is_manual: boolean | null
           segment_id: number
@@ -85,6 +86,7 @@ export type Database = {
           created_at?: string
           distance?: number | null
           elapsed_time?: number | null
+          elevation_gain?: number | null
           id?: string
           is_manual?: boolean | null
           segment_id: number
@@ -101,6 +103,7 @@ export type Database = {
           created_at?: string
           distance?: number | null
           elapsed_time?: number | null
+          elevation_gain?: number | null
           id?: string
           is_manual?: boolean | null
           segment_id?: number
