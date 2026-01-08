@@ -16,7 +16,7 @@ type AchievementType =
   | 'first_run' | 'runs_5' | 'runs_10' | 'runs_25' | 'runs_50' | 'runs_100'
   | 'all_segments' | 'streak_2' | 'streak_4' | 'streak_8'
   | 'early_bird' | 'night_owl' | 'pioneer_10'
-  | 'denzlerweg_king' | 'coiffeur' | 'snow_bunny' | 'frosty';
+  | 'denzlerweg_king' | 'coiffeur' | 'snow_bunny' | 'frosty' | 'wasserratte';
 
 interface Achievement {
   id: string;
@@ -170,6 +170,16 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, StampConfig & { target?: numbe
     target: 5,
     progressType: 'runs',
   },
+  wasserratte: {
+    icon: <span className="text-2xl">🐸</span>,
+    title: 'Wasserratte',
+    description: '5 Runs bei Regen',
+    howToEarn: 'Absolviere 5 Runs bei Regenwetter.',
+    color: 'text-blue-500',
+    category: 'special',
+    target: 5,
+    progressType: 'runs',
+  },
   denzlerweg_king: {
     icon: <span className="text-2xl">🍞</span>,
     title: "S'Brot isch no warm",
@@ -193,10 +203,11 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, StampConfig & { target?: numbe
 // Category groupings
 const MILESTONE_ACHIEVEMENTS: AchievementType[] = ['first_run', 'runs_5', 'runs_10', 'runs_25', 'runs_50', 'runs_100'];
 const ENDURANCE_ACHIEVEMENTS: AchievementType[] = ['streak_2', 'streak_4', 'streak_8', 'all_segments'];
-const SPECIAL_ACHIEVEMENTS: AchievementType[] = ['early_bird', 'night_owl', 'pioneer_10', 'snow_bunny', 'frosty'];
+const SPECIAL_ACHIEVEMENTS: AchievementType[] = ['early_bird', 'night_owl', 'pioneer_10', 'snow_bunny', 'frosty', 'wasserratte'];
 const LEGEND_ACHIEVEMENTS: AchievementType[] = ['denzlerweg_king', 'coiffeur'];
 
 const SNOW_CODES = [71, 73, 75, 77, 85, 86];
+const RAIN_CODES = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
 
 // Streak calculation helpers
 function getWeekNumber(date: Date): string {
@@ -335,6 +346,11 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
     checkIns?.filter(c => c.temperature !== null && c.temperature < 0)
       .map(c => c.activity_id) || []
   ).size;
+  
+  const rainRuns = new Set(
+    checkIns?.filter(c => c.weather_code !== null && RAIN_CODES.includes(c.weather_code))
+      .map(c => c.activity_id) || []
+  ).size;
 
   // Get progress for an achievement
   const getProgress = (type: AchievementType): { current: number; target: number } | null => {
@@ -346,6 +362,7 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
         if (type === 'coiffeur') return { current: Math.min(coiffeurRuns, config.target || 0), target: config.target || 0 };
         if (type === 'snow_bunny') return { current: Math.min(snowRuns, config.target || 0), target: config.target || 0 };
         if (type === 'frosty') return { current: Math.min(frostRuns, config.target || 0), target: config.target || 0 };
+        if (type === 'wasserratte') return { current: Math.min(rainRuns, config.target || 0), target: config.target || 0 };
         return { current: Math.min(totalRuns, config.target || 0), target: config.target || 0 };
       case 'streak':
         return { current: Math.min(currentStreak, config.target || 0), target: config.target || 0 };

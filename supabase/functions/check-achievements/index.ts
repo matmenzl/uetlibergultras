@@ -24,13 +24,17 @@ type AchievementType =
   | 'coiffeur'
   | 'snow_bunny'
   | 'frosty'
-  | 'alternativliga';
+  | 'alternativliga'
+  | 'wasserratte';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
 
 // WMO weather codes for snow conditions
 const SNOW_CODES = [71, 73, 75, 77, 85, 86];
+
+// WMO weather codes for rain conditions
+const RAIN_CODES = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -281,6 +285,15 @@ serve(async (req) => {
     const manualRuns = checkIns.filter(c => c.is_manual === true);
     if (manualRuns.length >= 1 && !existingSet.has('alternativliga')) {
       newAchievements.push('alternativliga');
+    }
+
+    // Wasserratte: 5 runs in rain conditions
+    const rainRuns = checkIns.filter(c => 
+      c.weather_code !== null && RAIN_CODES.includes(c.weather_code)
+    );
+    const uniqueRainActivities = new Set(rainRuns.map(c => c.activity_id));
+    if (uniqueRainActivities.size >= 5 && !existingSet.has('wasserratte')) {
+      newAchievements.push('wasserratte');
     }
 
     // Insert new achievements

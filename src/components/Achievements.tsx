@@ -27,7 +27,8 @@ type AchievementType =
   | 'coiffeur'
   | 'snow_bunny'
   | 'frosty'
-  | 'alternativliga';
+  | 'alternativliga'
+  | 'wasserratte';
 
 interface Achievement {
   id: string;
@@ -234,10 +235,22 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     howToEarn: 'Erfasse mindestens einen Run manuell. Hier wird von Hand gestoppt!',
     color: 'text-emerald-500',
   },
+  wasserratte: {
+    icon: <span className="text-lg">🐸</span>,
+    title: 'Wasserratte',
+    description: '5 Runs bei Regen',
+    howToEarn: 'Absolviere 5 Runs bei Regenwetter. Das Wetter wird automatisch erfasst.',
+    color: 'text-blue-500',
+    target: 5,
+    progressType: 'runs',
+  },
 };
 
 // WMO weather codes for snow conditions
 const SNOW_CODES = [71, 73, 75, 77, 85, 86];
+
+// WMO weather codes for rain conditions
+const RAIN_CODES = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
 
 // All achievements (always visible)
 const REGULAR_ACHIEVEMENTS: AchievementType[] = [
@@ -259,6 +272,7 @@ const REGULAR_ACHIEVEMENTS: AchievementType[] = [
   'snow_bunny',
   'frosty',
   'alternativliga',
+  'wasserratte',
 ];
 
 // Helper to calculate streak from check-ins
@@ -399,6 +413,12 @@ export function Achievements({ userId }: AchievementsProps) {
       .map(c => c.activity_id) || []
   ).size;
   
+  // Calculate rain runs
+  const rainRuns = new Set(
+    checkIns?.filter(c => c.weather_code !== null && RAIN_CODES.includes(c.weather_code))
+      .map(c => c.activity_id) || []
+  ).size;
+  
   const totalAchievementsCount = REGULAR_ACHIEVEMENTS.length;
   const earnedCount = REGULAR_ACHIEVEMENTS.filter(a => earnedSet.has(a)).length;
 
@@ -423,6 +443,9 @@ export function Achievements({ userId }: AchievementsProps) {
         }
         if (achievementType === 'frosty') {
           return { current: Math.min(frostRuns, config.target || 0), target: config.target || 0 };
+        }
+        if (achievementType === 'wasserratte') {
+          return { current: Math.min(rainRuns, config.target || 0), target: config.target || 0 };
         }
         return { current: Math.min(totalRuns, config.target || 0), target: config.target || 0 };
       case 'streak':

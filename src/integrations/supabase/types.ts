@@ -451,6 +451,7 @@ export type Database = {
         | "snow_bunny"
         | "frosty"
         | "alternativliga"
+        | "wasserratte"
       app_role: "admin" | "user"
       suggestion_status: "pending" | "approved" | "rejected"
     }
@@ -602,6 +603,7 @@ export const Constants = {
         "snow_bunny",
         "frosty",
         "alternativliga",
+        "wasserratte",
       ],
       app_role: ["admin", "user"],
       suggestion_status: ["pending", "approved", "rejected"],
