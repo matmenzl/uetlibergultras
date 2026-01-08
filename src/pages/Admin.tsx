@@ -716,6 +716,15 @@ export default function Admin() {
                             📧 {suggestion.email}
                           </span>
                         )}
+                        {suggestion.wants_updates ? (
+                          <span className="ml-2 text-green-600 dark:text-green-400" title="Möchte benachrichtigt werden">
+                            <Bell className="w-3 h-3 inline" />
+                          </span>
+                        ) : (
+                          <span className="ml-2 text-muted-foreground" title="Keine Benachrichtigung gewünscht">
+                            <BellOff className="w-3 h-3 inline" />
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
