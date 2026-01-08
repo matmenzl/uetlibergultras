@@ -10,9 +10,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { triggerConfetti } from '@/lib/confetti';
 
-// Default segment: Triemli bis Spilpi
-const DEFAULT_SEGMENT_ID = 4072914;
-const DEFAULT_SEGMENT_DISTANCE = 1475.5;
+// Manual check-ins use segment_id = 0 to indicate "general Uetliberg activity"
+const MANUAL_CHECKIN_SEGMENT_ID = 0;
 
 interface ManualCheckInButtonProps {
   userId: string;
@@ -32,12 +31,11 @@ export function ManualCheckInButton({ userId, onSuccess }: ManualCheckInButtonPr
       
       const { error } = await supabase.from('check_ins').insert({
         user_id: userId,
-        segment_id: DEFAULT_SEGMENT_ID,
+        segment_id: MANUAL_CHECKIN_SEGMENT_ID,
         activity_id: activityId,
         checked_in_at: date.toISOString(),
-        distance: DEFAULT_SEGMENT_DISTANCE,
         is_manual: true,
-        activity_name: 'Manueller Uetliberg-Run',
+        activity_name: 'Uetliberg-Aktivität',
       });
 
       if (error) throw error;
