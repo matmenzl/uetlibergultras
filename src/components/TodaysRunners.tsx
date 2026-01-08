@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Users, Clock, Mountain, RefreshCw, Calendar, TrendingUp } from "lucide-react";
+import { Users, Mountain, RefreshCw, Calendar, TrendingUp } from "lucide-react";
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { User } from "@supabase/supabase-js";
@@ -17,16 +17,9 @@ interface Runner {
   display_name: string;
   profile_picture: string | null;
   total_segments: number;
-  best_time: number;
   total_elevation: number;
   total_distance: number;
 }
-
-const formatTime = (seconds: number) => {
-  const minutes = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${minutes}:${secs.toString().padStart(2, "0")}`;
-};
 
 const getDateRange = (range: string): { start: Date; end: Date } => {
   const now = new Date();
@@ -123,7 +116,6 @@ export const TodaysRunners = () => {
       // Aggregate stats per user
       const userStats = new Map<string, { 
         segments: Set<number>; 
-        bestTime: number; 
         totalElevation: number;
         totalDistance: number;
       }>();
@@ -131,7 +123,6 @@ export const TodaysRunners = () => {
       for (const checkIn of checkIns) {
         const existing = userStats.get(checkIn.user_id) || { 
           segments: new Set(), 
-          bestTime: Infinity,
           totalElevation: 0,
           totalDistance: 0
         };
@@ -147,9 +138,6 @@ export const TodaysRunners = () => {
         }
         
         existing.segments.add(checkIn.segment_id);
-        if (checkIn.elapsed_time && checkIn.elapsed_time < existing.bestTime) {
-          existing.bestTime = checkIn.elapsed_time;
-        }
         userStats.set(checkIn.user_id, existing);
       }
 
@@ -163,7 +151,6 @@ export const TodaysRunners = () => {
           display_name: profile?.display_name || "Unbekannt",
           profile_picture: profile?.profile_picture || null,
           total_segments: stats.segments.size,
-          best_time: stats.bestTime === Infinity ? 0 : stats.bestTime,
           total_elevation: Math.round(stats.totalElevation),
           total_distance: Math.round(stats.totalDistance),
         };
