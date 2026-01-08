@@ -323,7 +323,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'denzlerweg_king',
     category: 'legend',
-    title: 'Denzlerweg König',
+    title: 'Bäckermeister',
     description: 'Meister des steilsten Weges',
     howToEarn: 'Halte den Rekord auf dem Denzlerweg-Segment',
     symbolId: 'crown',
