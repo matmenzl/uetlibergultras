@@ -1,34 +1,20 @@
-import { StampCard, StampConfig } from './StampCard';
-import { LucideIcon } from 'lucide-react';
+import { BadgeGrid, EarnedBadge } from '@/components/badges';
+import { BadgeDefinition } from '@/config/badge-definitions';
 
 interface PassPageProps {
-  title: string;
-  icon: LucideIcon;
-  achievements: {
-    type: string;
-    config: StampConfig;
-    isEarned: boolean;
-    earnedAt?: string;
-    progress?: { current: number; target: number } | null;
-    isNewlyEarned?: boolean;
-  }[];
-  category: 'milestone' | 'endurance' | 'special' | 'legend';
+  badges: BadgeDefinition[];
+  earnedBadges: EarnedBadge[];
+  category: 'milestone' | 'endurance' | 'weather' | 'community' | 'legend';
 }
 
-export function PassPage({ title, icon: Icon, achievements, category }: PassPageProps) {
+export function PassPage({ badges, earnedBadges, category }: PassPageProps) {
   return (
-    <div className="flex flex-wrap gap-6 justify-center py-4">
-      {achievements.map((achievement) => (
-        <StampCard
-          key={achievement.type}
-          config={achievement.config}
-          isEarned={achievement.isEarned}
-          earnedAt={achievement.earnedAt}
-          progress={achievement.progress}
-          size="md"
-          isNewlyEarned={achievement.isNewlyEarned}
-        />
-      ))}
+    <div className="py-4">
+      <BadgeGrid 
+        badges={badges} 
+        earnedBadges={earnedBadges} 
+        size="md"
+      />
     </div>
   );
 }

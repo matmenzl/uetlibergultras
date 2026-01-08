@@ -5,206 +5,19 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PassHeader } from './PassHeader';
 import { PassPage } from './PassPage';
-import { StampConfig } from './StampCard';
 import { AchievementSuggestionForm } from '@/components/AchievementSuggestionForm';
-import { Star, Mountain, Flame, Sun, Moon, Zap, Trophy, Clock, Target, Award } from 'lucide-react';
+import { badgeDefinitions, getBadgesByCategory, BadgeCategory } from '@/config/badge-definitions';
+import { EarnedBadge } from '@/components/badges';
 
 // Time window for "newly earned" animation (30 seconds)
 const NEW_ACHIEVEMENT_WINDOW_MS = 30000;
 
-type AchievementType = 
-  | 'first_run' | 'runs_5' | 'runs_10' | 'runs_25' | 'runs_50' | 'runs_100'
-  | 'all_segments' | 'streak_2' | 'streak_4' | 'streak_8'
-  | 'early_bird' | 'night_owl' | 'pioneer_10'
-  | 'denzlerweg_king' | 'coiffeur' | 'snow_bunny' | 'frosty' | 'wasserratte';
-
 interface Achievement {
   id: string;
   user_id: string;
-  achievement: AchievementType;
+  achievement: string;
   earned_at: string;
 }
-
-// Achievement configurations with categories
-const ACHIEVEMENT_CONFIG: Record<AchievementType, StampConfig & { target?: number; progressType?: string }> = {
-  first_run: {
-    icon: <Star className="w-6 h-6" />,
-    title: 'Erstbesteigung',
-    description: 'Erster Uetli Run',
-    howToEarn: 'Absolviere deinen ersten Run auf einem Uetliberg-Segment.',
-    color: 'text-yellow-500',
-    category: 'milestone',
-    target: 1,
-    progressType: 'runs',
-  },
-  runs_5: {
-    icon: <Mountain className="w-6 h-6" />,
-    title: 'Bergfreund',
-    description: '5 Uetli Runs',
-    howToEarn: 'Absolviere insgesamt 5 Runs.',
-    color: 'text-green-500',
-    category: 'milestone',
-    target: 5,
-    progressType: 'runs',
-  },
-  runs_10: {
-    icon: <Flame className="w-6 h-6" />,
-    title: 'Bergläufer',
-    description: '10 Uetli Runs',
-    howToEarn: 'Absolviere insgesamt 10 Runs.',
-    color: 'text-orange-500',
-    category: 'milestone',
-    target: 10,
-    progressType: 'runs',
-  },
-  runs_25: {
-    icon: <Zap className="w-6 h-6" />,
-    title: 'Uetli-Veteran',
-    description: '25 Uetli Runs',
-    howToEarn: 'Absolviere insgesamt 25 Runs.',
-    color: 'text-blue-500',
-    category: 'milestone',
-    target: 25,
-    progressType: 'runs',
-  },
-  runs_50: {
-    icon: <Trophy className="w-6 h-6" />,
-    title: 'Gipfelstürmer',
-    description: '50 Uetli Runs',
-    howToEarn: 'Absolviere insgesamt 50 Runs.',
-    color: 'text-purple-500',
-    category: 'milestone',
-    target: 50,
-    progressType: 'runs',
-  },
-  runs_100: {
-    icon: <Award className="w-6 h-6" />,
-    title: 'Uetli-Legende',
-    description: '100 Uetli Runs',
-    howToEarn: 'Absolviere insgesamt 100 Runs. Legendär!',
-    color: 'text-primary',
-    category: 'milestone',
-    target: 100,
-    progressType: 'runs',
-  },
-  streak_2: {
-    icon: <Clock className="w-6 h-6" />,
-    title: 'Dranbleiber',
-    description: '2 Wochen Streak',
-    howToEarn: 'Halte 2 aufeinanderfolgende Wochen mit je einem Run.',
-    color: 'text-indigo-500',
-    category: 'endurance',
-    target: 2,
-    progressType: 'streak',
-  },
-  streak_4: {
-    icon: <Flame className="w-6 h-6" />,
-    title: 'Durchhalter',
-    description: '4 Wochen Streak',
-    howToEarn: 'Halte 4 aufeinanderfolgende Wochen mit je einem Run.',
-    color: 'text-red-500',
-    category: 'endurance',
-    target: 4,
-    progressType: 'streak',
-  },
-  streak_8: {
-    icon: <Flame className="w-6 h-6" />,
-    title: 'Unaufhaltsam',
-    description: '8 Wochen Streak',
-    howToEarn: 'Halte 8 aufeinanderfolgende Wochen mit je einem Run.',
-    color: 'text-rose-600',
-    category: 'endurance',
-    target: 8,
-    progressType: 'streak',
-  },
-  all_segments: {
-    icon: <Target className="w-6 h-6" />,
-    title: 'Segmentjäger',
-    description: 'Alle Segmente',
-    howToEarn: 'Laufe auf jedem verfügbaren Uetliberg-Segment.',
-    color: 'text-teal-500',
-    category: 'endurance',
-    progressType: 'segments',
-  },
-  early_bird: {
-    icon: <Sun className="w-6 h-6" />,
-    title: 'Frühaufsteher',
-    description: 'Run vor 7 Uhr',
-    howToEarn: 'Starte einen Run vor 7 Uhr morgens.',
-    color: 'text-amber-500',
-    category: 'special',
-  },
-  night_owl: {
-    icon: <span className="text-2xl">🌅</span>,
-    title: 'Sundowner',
-    description: 'Run nach 20 Uhr',
-    howToEarn: 'Starte einen Run nach 20 Uhr abends.',
-    color: 'text-orange-400',
-    category: 'special',
-  },
-  pioneer_10: {
-    icon: <Trophy className="w-6 h-6" />,
-    title: 'Leaderboard Top 10',
-    description: 'Platz in Top 10',
-    howToEarn: 'Erreiche einen Platz in den Top 10 der Rangliste.',
-    color: 'text-amber-400',
-    category: 'special',
-  },
-  snow_bunny: {
-    icon: <span className="text-2xl">🐰❄️</span>,
-    title: 'Snow-Bunny',
-    description: '3 Runs bei Schnee',
-    howToEarn: 'Absolviere 3 Runs bei Schneefall.',
-    color: 'text-sky-300',
-    category: 'special',
-    target: 3,
-    progressType: 'runs',
-  },
-  frosty: {
-    icon: <span className="text-2xl">🥶</span>,
-    title: 'Frosty',
-    description: '5 Runs unter 0°C',
-    howToEarn: 'Absolviere 5 Runs bei Temperaturen unter dem Gefrierpunkt.',
-    color: 'text-blue-400',
-    category: 'special',
-    target: 5,
-    progressType: 'runs',
-  },
-  wasserratte: {
-    icon: <span className="text-2xl">🌧️</span>,
-    title: 'Wasserratte',
-    description: '5 Runs bei Regen',
-    howToEarn: 'Absolviere 5 Runs bei Regenwetter.',
-    color: 'text-blue-500',
-    category: 'special',
-    target: 5,
-    progressType: 'runs',
-  },
-  denzlerweg_king: {
-    icon: <span className="text-2xl">🍞</span>,
-    title: "S'Brot isch no warm",
-    description: 'Denzlerweg König',
-    howToEarn: 'Sei der Läufer mit den meisten Runs auf dem Denzlerweg-Segment.',
-    color: 'text-amber-600',
-    category: 'legend',
-  },
-  coiffeur: {
-    icon: <span className="text-2xl">💇</span>,
-    title: 'Zum Coiffeur',
-    description: '10x Coiffeurweg/Jahr',
-    howToEarn: 'Absolviere 10 Runs pro Jahr auf dem Coiffeurweg.',
-    color: 'text-pink-500',
-    category: 'legend',
-    target: 10,
-    progressType: 'runs',
-  },
-};
-
-// Category groupings
-const MILESTONE_ACHIEVEMENTS: AchievementType[] = ['first_run', 'runs_5', 'runs_10', 'runs_25', 'runs_50', 'runs_100'];
-const ENDURANCE_ACHIEVEMENTS: AchievementType[] = ['streak_2', 'streak_4', 'streak_8', 'all_segments'];
-const SPECIAL_ACHIEVEMENTS: AchievementType[] = ['early_bird', 'night_owl', 'pioneer_10', 'snow_bunny', 'frosty', 'wasserratte'];
-const LEGEND_ACHIEVEMENTS: AchievementType[] = ['denzlerweg_king', 'coiffeur'];
 
 const SNOW_CODES = [71, 73, 75, 77, 85, 86];
 const RAIN_CODES = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
@@ -353,19 +166,18 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
   ).size;
 
   // Get progress for an achievement
-  const getProgress = (type: AchievementType): { current: number; target: number } | null => {
-    const config = ACHIEVEMENT_CONFIG[type];
-    if (!config.progressType) return null;
+  const getProgress = (badgeId: string, target?: number, progressType?: string): { current: number; target: number } | null => {
+    if (!progressType || !target) return null;
     
-    switch (config.progressType) {
+    switch (progressType) {
       case 'runs':
-        if (type === 'coiffeur') return { current: Math.min(coiffeurRuns, config.target || 0), target: config.target || 0 };
-        if (type === 'snow_bunny') return { current: Math.min(snowRuns, config.target || 0), target: config.target || 0 };
-        if (type === 'frosty') return { current: Math.min(frostRuns, config.target || 0), target: config.target || 0 };
-        if (type === 'wasserratte') return { current: Math.min(rainRuns, config.target || 0), target: config.target || 0 };
-        return { current: Math.min(totalRuns, config.target || 0), target: config.target || 0 };
+        if (badgeId === 'coiffeur') return { current: Math.min(coiffeurRuns, target), target };
+        if (badgeId === 'snow_bunny') return { current: Math.min(snowRuns, target), target };
+        if (badgeId === 'frosty') return { current: Math.min(frostRuns, target), target };
+        if (badgeId === 'wasserratte') return { current: Math.min(rainRuns, target), target };
+        return { current: Math.min(totalRuns, target), target };
       case 'streak':
-        return { current: Math.min(currentStreak, config.target || 0), target: config.target || 0 };
+        return { current: Math.min(currentStreak, target), target };
       case 'segments':
         return { current: uniqueSegments, target: totalSegments || 0 };
       default:
@@ -405,19 +217,18 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
     }
   }, [earnedAchievements]);
 
-  // Build achievement data for each category
-  const buildAchievementData = (types: AchievementType[]) => 
-    types.map(type => ({
-      type,
-      config: ACHIEVEMENT_CONFIG[type],
-      isEarned: earnedSet.has(type),
-      earnedAt: earnedMap.get(type),
-      progress: getProgress(type),
-      isNewlyEarned: newlyEarnedAchievements.has(type),
+  // Build earned badges data for a category
+  const buildEarnedBadges = (category: BadgeCategory): EarnedBadge[] => {
+    const badges = getBadgesByCategory(category);
+    return badges.map(badge => ({
+      id: badge.id,
+      earnedAt: earnedMap.get(badge.id),
+      progress: getProgress(badge.id, badge.target, badge.progressType),
+      isNewlyEarned: newlyEarnedAchievements.has(badge.id),
     }));
+  };
 
-  const allAchievements = [...MILESTONE_ACHIEVEMENTS, ...ENDURANCE_ACHIEVEMENTS, ...SPECIAL_ACHIEVEMENTS, ...LEGEND_ACHIEVEMENTS];
-  const earnedCount = allAchievements.filter(a => earnedSet.has(a)).length;
+  const earnedCount = badgeDefinitions.filter(b => earnedSet.has(b.id)).length;
 
   return (
     <Card className="bg-pass-paper dark:bg-card border-0 shadow-md overflow-hidden">
@@ -428,17 +239,16 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
         <PassHeader 
           displayName={displayName}
           earnedCount={earnedCount}
-          totalCount={allAchievements.length}
+          totalCount={badgeDefinitions.length}
         />
 
         {compact ? (
-          // Compact view: horizontal scroll of recent/next stamps
+          // Compact view: horizontal scroll of recent/next badges
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2">
-            {allAchievements.slice(0, 8).map(type => {
-              const config = ACHIEVEMENT_CONFIG[type];
-              const isEarned = earnedSet.has(type);
+            {badgeDefinitions.slice(0, 8).map(badge => {
+              const isEarned = earnedSet.has(badge.id);
               return (
-                <div key={type} className="flex-shrink-0">
+                <div key={badge.id} className="flex-shrink-0">
                   <div 
                     className={`w-14 h-14 rounded-full border-2 flex items-center justify-center ${
                       isEarned 
@@ -446,8 +256,8 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
                         : 'border-dashed border-muted-foreground/30 opacity-50'
                     }`}
                   >
-                    <span className={isEarned ? config.color : 'text-muted-foreground/50'}>
-                      {config.icon}
+                    <span className={isEarned ? 'text-primary' : 'text-muted-foreground/50'}>
+                      {badge.title.charAt(0)}
                     </span>
                   </div>
                 </div>
@@ -457,15 +267,18 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
         ) : (
           // Full view with tabs
           <Tabs defaultValue="milestone" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-transparent">
+            <TabsList className="grid w-full grid-cols-5 bg-transparent">
               <TabsTrigger value="milestone" className="text-xs sm:text-sm data-[state=active]:bg-stamp-milestone/20 data-[state=active]:text-stamp-milestone">
                 Meilensteine
               </TabsTrigger>
               <TabsTrigger value="endurance" className="text-xs sm:text-sm data-[state=active]:bg-stamp-endurance/20 data-[state=active]:text-stamp-endurance">
                 Ausdauer
               </TabsTrigger>
-              <TabsTrigger value="special" className="text-xs sm:text-sm data-[state=active]:bg-stamp-special/20 data-[state=active]:text-stamp-special">
-                Spezial
+              <TabsTrigger value="weather" className="text-xs sm:text-sm data-[state=active]:bg-stamp-special/20 data-[state=active]:text-stamp-special">
+                Wetter
+              </TabsTrigger>
+              <TabsTrigger value="community" className="text-xs sm:text-sm data-[state=active]:bg-green-500/20 data-[state=active]:text-green-500">
+                Community
               </TabsTrigger>
               <TabsTrigger value="legend" className="text-xs sm:text-sm data-[state=active]:bg-stamp-legend/20 data-[state=active]:text-stamp-legend">
                 Legenden
@@ -474,36 +287,40 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
 
             <TabsContent value="milestone" className="mt-4">
               <PassPage 
-                title="Meilensteine"
-                icon={Mountain}
-                achievements={buildAchievementData(MILESTONE_ACHIEVEMENTS)}
+                badges={getBadgesByCategory('milestone')}
+                earnedBadges={buildEarnedBadges('milestone')}
                 category="milestone"
               />
             </TabsContent>
 
             <TabsContent value="endurance" className="mt-4">
               <PassPage 
-                title="Ausdauer"
-                icon={Flame}
-                achievements={buildAchievementData(ENDURANCE_ACHIEVEMENTS)}
+                badges={getBadgesByCategory('endurance')}
+                earnedBadges={buildEarnedBadges('endurance')}
                 category="endurance"
               />
             </TabsContent>
 
-            <TabsContent value="special" className="mt-4">
+            <TabsContent value="weather" className="mt-4">
               <PassPage 
-                title="Spezial"
-                icon={Star}
-                achievements={buildAchievementData(SPECIAL_ACHIEVEMENTS)}
-                category="special"
+                badges={getBadgesByCategory('weather')}
+                earnedBadges={buildEarnedBadges('weather')}
+                category="weather"
+              />
+            </TabsContent>
+
+            <TabsContent value="community" className="mt-4">
+              <PassPage 
+                badges={getBadgesByCategory('community')}
+                earnedBadges={buildEarnedBadges('community')}
+                category="community"
               />
             </TabsContent>
 
             <TabsContent value="legend" className="mt-4">
               <PassPage 
-                title="Lokal-Legenden"
-                icon={Trophy}
-                achievements={buildAchievementData(LEGEND_ACHIEVEMENTS)}
+                badges={getBadgesByCategory('legend')}
+                earnedBadges={buildEarnedBadges('legend')}
                 category="legend"
               />
             </TabsContent>

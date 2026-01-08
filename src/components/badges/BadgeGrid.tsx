@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { BadgeCard } from './BadgeCard';
 import { BadgeDefinition, BadgeCategory, categoryStyles } from '@/config/badge-definitions';
 
-interface EarnedBadge {
+export interface EarnedBadge {
   id: string;
   earnedAt?: string;
   progress?: { current: number; target: number } | null;
