@@ -48,16 +48,17 @@ export function BadgeGrid({
       
       <div className="flex flex-wrap gap-4 justify-start">
         {badges.map((badge) => {
-          const earned = earnedMap.get(badge.id);
+          const earnedData = earnedMap.get(badge.id);
+          const isEarned = !!earnedData?.earnedAt; // Only earned if has earnedAt date
           return (
             <BadgeCard
               key={badge.id}
               badge={badge}
-              isEarned={!!earned}
-              earnedAt={earned?.earnedAt}
-              progress={earned?.progress ?? null}
+              isEarned={isEarned}
+              earnedAt={earnedData?.earnedAt}
+              progress={earnedData?.progress ?? null}
               size={size}
-              isNewlyEarned={earned?.isNewlyEarned}
+              isNewlyEarned={earnedData?.isNewlyEarned}
             />
           );
         })}
