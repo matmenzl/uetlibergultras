@@ -62,10 +62,11 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
   }, [isNewlyEarned, hasAnimated]);
 
   // Responsive size classes - smaller on mobile, larger on desktop
+  // Added extra padding bottom (pb) for shield point
   const sizeClasses = {
-    sm: 'w-10 h-12 sm:w-12 sm:h-14 md:w-14 md:h-16',
-    md: 'w-12 h-14 sm:w-14 sm:h-16 md:w-16 md:h-[4.5rem] lg:w-18 lg:h-20',
-    lg: 'w-14 h-16 sm:w-16 sm:h-[4.5rem] md:w-18 md:h-20 lg:w-22 lg:h-24',
+    sm: 'w-10 h-14 sm:w-12 sm:h-16 md:w-14 md:h-[4.5rem]',
+    md: 'w-12 h-16 sm:w-14 sm:h-[4.5rem] md:w-16 md:h-20 lg:w-18 lg:h-[5.5rem]',
+    lg: 'w-14 h-[4.5rem] sm:w-16 sm:h-20 md:w-18 md:h-[5.5rem] lg:w-22 lg:h-[6.5rem]',
   };
 
   const iconSizes = {
