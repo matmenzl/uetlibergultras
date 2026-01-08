@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Users, Mountain, RefreshCw, Calendar, TrendingUp, Timer, Hand, Route } from "lucide-react";
+import { Users, Waypoints, RefreshCw, Calendar, TrendingUp, Timer, Hand, Route } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -256,7 +256,7 @@ export const TodaysRunners = () => {
         </div>
       ) : runners.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          <Mountain className="w-12 h-12 mx-auto mb-2 opacity-50" />
+          <Waypoints className="w-12 h-12 mx-auto mb-2 opacity-50" />
           {!user ? (
             <>
               <p className="font-medium mb-2">Verbinde dich mit Strava und schau wer heute schon am Uetliberg unterwegs war.</p>
@@ -330,7 +330,7 @@ export const TodaysRunners = () => {
                       </TooltipProvider>
                     ) : (
                       <>
-                        <Mountain className="w-3 h-3" />
+                        <Waypoints className="w-3 h-3" />
                         {runner.total_segments} {runner.total_segments === 1 ? "Segment" : "Segmente"}
                       </>
                     )}
