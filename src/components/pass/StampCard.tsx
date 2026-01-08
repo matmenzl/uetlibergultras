@@ -62,9 +62,9 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
   }, [isNewlyEarned, hasAnimated]);
 
   const sizeClasses = {
-    sm: 'w-16 h-16',
-    md: 'w-20 h-20',
-    lg: 'w-24 h-24',
+    sm: 'w-14 h-16',
+    md: 'w-18 h-20',
+    lg: 'w-22 h-24',
   };
 
   const iconSizes = {
@@ -73,38 +73,26 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
     lg: 'text-3xl',
   };
 
-  const borderWidth = {
-    sm: 'border',
-    md: 'border-2',
-    lg: 'border-2',
-  };
-
   const earnedDate = earnedAt ? format(new Date(earnedAt), 'd. MMM yyyy', { locale: de }) : null;
   const progressPercent = progress ? Math.min((progress.current / progress.target) * 100, 100) : 0;
 
   // Random rotation for authentic stamp feel
   const rotation = isEarned ? ((config.title.length % 7) - 3) : 0;
 
+  // Shield clip path
+  const shieldClipPath = 'polygon(50% 0%, 100% 0%, 100% 65%, 50% 100%, 0% 65%, 0% 0%)';
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <button
           className={cn(
-            'relative rounded-full flex flex-col items-center justify-center cursor-pointer group overflow-hidden',
+            'relative flex flex-col items-center justify-center cursor-pointer group overflow-visible',
             'transition-all duration-300 ease-out',
             sizeClasses[size],
-            borderWidth[size],
             isEarned
-              ? cn(
-                  categoryStyles[config.category].earned,
-                  'hover:scale-110'
-                )
-              : cn(
-                  categoryStyles[config.category].unearned,
-                  'bg-pass-paper/30 dark:bg-pass-paper-dark/30',
-                  'opacity-50 hover:opacity-70',
-                  'border-dashed'
-                ),
+              ? 'hover:scale-110'
+              : 'opacity-50 hover:opacity-70',
             showAnimation && 'animate-stamp-press',
             isHovered && isEarned && 'animate-wobble'
           )}
@@ -114,12 +102,27 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
+          {/* Shield shape background */}
+          <div 
+            className={cn(
+              'absolute inset-0 border-2 transition-all duration-300',
+              isEarned
+                ? categoryStyles[config.category].earned
+                : cn(
+                    categoryStyles[config.category].unearned,
+                    'bg-pass-paper/30 dark:bg-pass-paper-dark/30',
+                    'border-dashed'
+                  )
+            )}
+            style={{ clipPath: shieldClipPath }}
+          />
 
           {/* Subtle shimmer effect for earned stamps */}
           {isEarned && (
             <div 
-              className="absolute inset-0 rounded-full opacity-20 pointer-events-none animate-shimmer"
+              className="absolute inset-0 opacity-20 pointer-events-none animate-shimmer"
               style={{
+                clipPath: shieldClipPath,
                 background: `linear-gradient(90deg, transparent 0%, ${categoryStyles[config.category].glow} 50%, transparent 100%)`,
                 backgroundSize: '200% 100%',
               }}
@@ -128,22 +131,27 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
 
           {/* Ink splash effect during animation */}
           {showAnimation && (
-            <div className="absolute inset-0 rounded-full bg-current opacity-0 animate-stamp-ink pointer-events-none" />
+            <div 
+              className="absolute inset-0 bg-current opacity-0 animate-stamp-ink pointer-events-none" 
+              style={{ clipPath: shieldClipPath }}
+            />
           )}
 
           {/* Stamp texture overlay for earned - creates worn ink look */}
           {isEarned && (
             <>
               <div 
-                className="absolute inset-0 rounded-full opacity-15 pointer-events-none mix-blend-overlay"
+                className="absolute inset-0 opacity-15 pointer-events-none mix-blend-overlay"
                 style={{
+                  clipPath: shieldClipPath,
                   backgroundImage: `radial-gradient(circle at 30% 30%, transparent 0%, transparent 40%, currentColor 40%, currentColor 42%, transparent 42%)`,
                   backgroundSize: '8px 8px',
                 }}
               />
               <div 
-                className="absolute inset-0 rounded-full opacity-10 pointer-events-none"
+                className="absolute inset-0 opacity-10 pointer-events-none"
                 style={{
+                  clipPath: shieldClipPath,
                   backgroundImage: `radial-gradient(circle at 70% 60%, currentColor 0%, currentColor 1px, transparent 1px)`,
                   backgroundSize: '12px 12px',
                 }}
@@ -165,58 +173,24 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
           {/* Subtle inner glow for earned stamps */}
           {isEarned && (
             <div 
-              className="absolute inset-3 rounded-full opacity-10 blur-sm pointer-events-none"
-              style={{ backgroundColor: categoryStyles[config.category].glow }}
+              className="absolute inset-3 opacity-10 blur-sm pointer-events-none"
+              style={{ 
+                clipPath: shieldClipPath,
+                backgroundColor: categoryStyles[config.category].glow 
+              }}
             />
           )}
 
-          {/* Progress ring for unearned */}
+          {/* Progress bar for unearned */}
           {!isEarned && progress && progress.target > 0 && (
-            <svg
-              className="absolute inset-0 -rotate-90"
-              viewBox="0 0 100 100"
+            <div 
+              className="absolute bottom-1 left-1 right-1 h-1 bg-muted/30 rounded-full overflow-hidden"
             >
-              <circle
-                cx="50"
-                cy="50"
-                r="44"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeDasharray="4 4"
-                className="text-muted/20"
+              <div 
+                className="h-full bg-primary/60 transition-all duration-500 rounded-full"
+                style={{ width: `${progressPercent}%` }}
               />
-              <circle
-                cx="50"
-                cy="50"
-                r="44"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeDasharray={`${progressPercent * 2.76} 276`}
-                className="text-primary/60 transition-all duration-500"
-              />
-            </svg>
-          )}
-
-          {/* Dotted placeholder ring for unearned without progress */}
-          {!isEarned && (!progress || progress.target === 0) && (
-            <svg
-              className="absolute inset-0"
-              viewBox="0 0 100 100"
-            >
-              <circle
-                cx="50"
-                cy="50"
-                r="44"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="3 6"
-                className="text-muted-foreground/20"
-              />
-            </svg>
+            </div>
           )}
         </button>
       </PopoverTrigger>
