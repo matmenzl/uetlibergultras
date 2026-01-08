@@ -5,13 +5,15 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Mail, Loader2, CheckCircle } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Award, Mail, Loader2, CheckCircle, User } from 'lucide-react';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { toast } from 'sonner';
 
 export default function Auth() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [runnerName, setRunnerName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
@@ -34,9 +36,9 @@ export default function Auth() {
           .single();
 
         if (!existingProfile) {
-          // Extract display name from email (before @)
-          const emailPrefix = session.user.email?.split('@')[0] || 'User';
-          const displayName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+          // Get runner name from user metadata (stored during signup)
+          const displayName = session.user.user_metadata?.runner_name || 
+            session.user.email?.split('@')[0] || 'User';
 
           await supabase.from('profiles').insert({
             id: session.user.id,
@@ -64,6 +66,10 @@ export default function Auth() {
   };
 
   const handleMagicLink = async () => {
+    if (!runnerName.trim()) {
+      toast.error('Bitte gib einen Läufernamen ein');
+      return;
+    }
     if (!email || !email.includes('@')) {
       toast.error('Bitte gib eine gültige E-Mail-Adresse ein');
       return;
@@ -75,6 +81,9 @@ export default function Auth() {
         email,
         options: {
           emailRedirectTo: window.location.origin,
+          data: {
+            runner_name: runnerName.trim(),
+          },
         },
       });
 
@@ -150,21 +159,41 @@ export default function Auth() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="email"
-                      placeholder="deine@email.ch"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleMagicLink()}
-                      className="pl-10"
-                    />
+                  <div className="space-y-1.5">
+                    <Label htmlFor="runnerName">Läufername *</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="runnerName"
+                        type="text"
+                        placeholder="Dein Läufername"
+                        value={runnerName}
+                        onChange={(e) => setRunnerName(e.target.value)}
+                        className="pl-10"
+                        maxLength={50}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email">E-Mail *</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="deine@email.ch"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleMagicLink()}
+                        className="pl-10"
+                      />
+                    </div>
                   </div>
 
                   <Button
                     onClick={handleMagicLink}
-                    disabled={isLoading}
+                    disabled={isLoading || !runnerName.trim() || !email}
                     className="w-full gap-2"
                   >
                     {isLoading ? (
