@@ -18,6 +18,7 @@ export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [isStravaUser, setIsStravaUser] = useState(false);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -35,18 +36,20 @@ export default function NavBar() {
       if (!user) {
         setProfilePicture(null);
         setDisplayName(null);
+        setIsStravaUser(false);
         return;
       }
       
       const { data } = await supabase
         .from('profiles')
-        .select('profile_picture, display_name, first_name')
+        .select('profile_picture, display_name, first_name, strava_id')
         .eq('id', user.id)
         .single();
       
       if (data) {
         setProfilePicture(data.profile_picture);
         setDisplayName(data.display_name || data.first_name);
+        setIsStravaUser(data.strava_id !== null);
       }
     };
     
@@ -99,18 +102,20 @@ export default function NavBar() {
             Admin
           </button>}
         {user ? <>
-          <button onClick={() => {
-            navigate('/profile');
-            onNavigate?.();
-          }} className={cn(getLinkClass('/profile'), "flex items-center gap-1.5")}>
-            <Avatar className="h-5 w-5">
-              <AvatarImage src={profilePicture || undefined} alt="Profil" />
-              <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                {getInitials()}
-              </AvatarFallback>
-            </Avatar>
-            {inSheet && "Profil"}
-          </button>
+          {!isStravaUser && (
+            <button onClick={() => {
+              navigate('/profile');
+              onNavigate?.();
+            }} className={cn(getLinkClass('/profile'), "flex items-center gap-1.5")}>
+              <Avatar className="h-5 w-5">
+                <AvatarImage src={profilePicture || undefined} alt="Profil" />
+                <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+              {inSheet && "Profil"}
+            </button>
+          )}
           <button onClick={() => {
             handleSignOut();
             onNavigate?.();

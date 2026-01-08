@@ -81,9 +81,15 @@ const Profile = () => {
       
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("display_name, first_name, last_name, profile_picture")
+        .select("display_name, first_name, last_name, profile_picture, strava_id")
         .eq("id", user.id)
         .single();
+      
+      // Redirect Strava users to home page
+      if (profileData?.strava_id) {
+        navigate("/");
+        return;
+      }
       
       if (profileData) {
         setProfile(profileData);
