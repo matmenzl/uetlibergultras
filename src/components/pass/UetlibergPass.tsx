@@ -171,7 +171,7 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, StampConfig & { target?: numbe
     progressType: 'runs',
   },
   wasserratte: {
-    icon: <span className="text-2xl">🐸</span>,
+    icon: <span className="text-2xl">🌧️</span>,
     title: 'Wasserratte',
     description: '5 Runs bei Regen',
     howToEarn: 'Absolviere 5 Runs bei Regenwetter.',
