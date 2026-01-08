@@ -107,7 +107,7 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
           {/* Shield shape background */}
           <div 
             className={cn(
-              'absolute inset-0 border-2 transition-all duration-300',
+              'absolute inset-x-0 top-0 bottom-2 border-2 transition-all duration-300',
               isEarned
                 ? categoryStyles[config.category].earned
                 : cn(
@@ -122,7 +122,7 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
           {/* Subtle shimmer effect for earned stamps */}
           {isEarned && (
             <div 
-              className="absolute inset-0 opacity-20 pointer-events-none animate-shimmer"
+              className="absolute inset-x-0 top-0 bottom-2 opacity-20 pointer-events-none animate-shimmer"
               style={{
                 clipPath: shieldClipPath,
                 background: `linear-gradient(90deg, transparent 0%, ${categoryStyles[config.category].glow} 50%, transparent 100%)`,
@@ -134,7 +134,7 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
           {/* Ink splash effect during animation */}
           {showAnimation && (
             <div 
-              className="absolute inset-0 bg-current opacity-0 animate-stamp-ink pointer-events-none" 
+              className="absolute inset-x-0 top-0 bottom-2 bg-current opacity-0 animate-stamp-ink pointer-events-none" 
               style={{ clipPath: shieldClipPath }}
             />
           )}
@@ -143,7 +143,7 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
           {isEarned && (
             <>
               <div 
-                className="absolute inset-0 opacity-15 pointer-events-none mix-blend-overlay"
+                className="absolute inset-x-0 top-0 bottom-2 opacity-15 pointer-events-none mix-blend-overlay"
                 style={{
                   clipPath: shieldClipPath,
                   backgroundImage: `radial-gradient(circle at 30% 30%, transparent 0%, transparent 40%, currentColor 40%, currentColor 42%, transparent 42%)`,
@@ -151,7 +151,7 @@ export function StampCard({ config, isEarned, earnedAt, progress, size = 'md', i
                 }}
               />
               <div 
-                className="absolute inset-0 opacity-10 pointer-events-none"
+                className="absolute inset-x-0 top-0 bottom-2 opacity-10 pointer-events-none"
                 style={{
                   clipPath: shieldClipPath,
                   backgroundImage: `radial-gradient(circle at 70% 60%, currentColor 0%, currentColor 1px, transparent 1px)`,
