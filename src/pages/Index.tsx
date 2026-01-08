@@ -83,6 +83,12 @@ interface ActivityGroup {
 
 // Get time-based greeting (with optional weather override)
 const getGreeting = (weatherEmoji?: string): string => {
+  // Snow weather override
+  const snowEmojis = ['🌨️'];
+  if (weatherEmoji && snowEmojis.includes(weatherEmoji)) {
+    return "PowPow am Uetliberg ❄️";
+  }
+  
   // Rain/storm weather override
   const rainEmojis = ['🌧️', '🌦️', '⛈️'];
   if (weatherEmoji && rainEmojis.includes(weatherEmoji)) {
