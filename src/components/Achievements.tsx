@@ -145,11 +145,11 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, AchievementConfig> = {
     color: 'text-amber-500',
   },
   night_owl: {
-    icon: <Moon className="w-5 h-5" />,
-    title: 'Nachteule',
+    icon: <span className="text-lg">🌅</span>,
+    title: 'Sundowner',
     description: 'Run nach 20 Uhr',
     howToEarn: 'Starte einen Run nach 20 Uhr abends.',
-    color: 'text-slate-400',
+    color: 'text-orange-400',
   },
   denzlerweg_king: {
     icon: <span className="text-lg">🍞</span>,
