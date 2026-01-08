@@ -93,6 +93,7 @@ const getGreeting = (): string => {
 
 export default function Index() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanningMonth, setScanningMonth] = useState<{
@@ -512,6 +513,9 @@ export default function Index() {
                         userId={user.id} 
                         onSuccess={() => {
                           refetchCheckIns();
+                          // Invalidate leaderboard queries to refresh data
+                          queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+                          queryClient.invalidateQueries({ queryKey: ['todays-runners'] });
                           setShowManualCheckInModal(false);
                         }} 
                       />
