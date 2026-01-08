@@ -3,10 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Shield, Menu, User } from 'lucide-react';
+import { Shield, Menu, RefreshCw } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import logo from '@/assets/uu_logo.svg';
 export default function NavBar() {
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ export default function NavBar() {
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [isStravaUser, setIsStravaUser] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -60,6 +63,26 @@ export default function NavBar() {
     await supabase.auth.signOut();
     navigate('/auth');
   };
+
+  const handleStravaSync = async () => {
+    if (!user || isSyncing) return;
+    
+    setIsSyncing(true);
+    try {
+      const { error } = await supabase.functions.invoke('initial-sync', {
+        body: { user_id: user.id, force_refresh: true }
+      });
+      
+      if (error) throw error;
+      toast.success('Strava-Daten werden synchronisiert...');
+    } catch (error) {
+      console.error('Sync error:', error);
+      toast.error('Fehler bei der Synchronisierung');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const isActive = (path: string) => location.pathname === path;
   
   const getInitials = () => {
@@ -117,18 +140,46 @@ export default function NavBar() {
             </button>
           )}
           {isStravaUser && (
-            <div className={cn("flex items-center gap-1.5", inSheet ? "py-2" : "px-3 py-1.5")}>
-              <Avatar className="h-5 w-5">
-                <AvatarImage src={profilePicture || undefined} alt="Profil" />
-                <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <svg className="h-4 w-4 text-[#FC4C02]" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
-              </svg>
-              {inSheet && <span className="text-muted-foreground text-sm">via Strava</span>}
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className={cn("flex items-center gap-1.5 cursor-pointer", inSheet ? "py-2" : "px-3 py-1.5 hover:bg-muted/50 rounded-md transition-colors")}>
+                  <Avatar className="h-5 w-5">
+                    <AvatarImage src={profilePicture || undefined} alt="Profil" />
+                    <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <svg className="h-4 w-4 text-[#FC4C02]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                  </svg>
+                  {inSheet && <span className="text-muted-foreground text-sm">via Strava</span>}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-2" align="end">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={profilePicture || undefined} alt="Profil" />
+                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                        {getInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-foreground">{displayName || 'Strava User'}</span>
+                  </div>
+                  <div className="h-px bg-border my-1" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start gap-2 text-sm"
+                    onClick={handleStravaSync}
+                    disabled={isSyncing}
+                  >
+                    <RefreshCw className={cn("h-4 w-4", isSyncing && "animate-spin")} />
+                    {isSyncing ? 'Synchronisiere...' : 'Mit Strava synchronisieren'}
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           )}
           <button onClick={() => {
             handleSignOut();
