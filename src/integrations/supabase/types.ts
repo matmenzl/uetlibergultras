@@ -196,6 +196,7 @@ export type Database = {
       }
       strava_credentials: {
         Row: {
+          auth_password_hash: string | null
           created_at: string | null
           id: string
           strava_access_token: string
@@ -205,6 +206,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auth_password_hash?: string | null
           created_at?: string | null
           id?: string
           strava_access_token: string
@@ -214,6 +216,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auth_password_hash?: string | null
           created_at?: string | null
           id?: string
           strava_access_token?: string
@@ -385,15 +388,26 @@ export type Database = {
         }
         Returns: boolean
       }
-      upsert_strava_credentials: {
-        Args: {
-          _access_token: string
-          _expires_at: string
-          _refresh_token: string
-          _user_id: string
-        }
-        Returns: undefined
-      }
+      upsert_strava_credentials:
+        | {
+            Args: {
+              _access_token: string
+              _expires_at: string
+              _refresh_token: string
+              _user_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _access_token: string
+              _auth_password_hash?: string
+              _expires_at: string
+              _refresh_token: string
+              _user_id: string
+            }
+            Returns: undefined
+          }
       webcam_cron_set_enabled: {
         Args: { _enabled: boolean }
         Returns: undefined
