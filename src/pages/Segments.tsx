@@ -264,11 +264,11 @@ export default function Segments() {
                       <div className="flex flex-wrap gap-3 sm:gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Ruler className="w-4 h-4" />
-                          {formatDistance(segment.distance)}
+                          {formatDistance(segment.distance ?? 0)}
                         </span>
                         <span className="flex items-center gap-1">
                           <TrendingUp className="w-4 h-4" />
-                          {segment.avg_grade.toFixed(1)}%
+                          {(segment.avg_grade ?? 0).toFixed(1)}%
                         </span>
                         <span className="flex items-center gap-1">
                           <Mountain className="w-4 h-4" />
