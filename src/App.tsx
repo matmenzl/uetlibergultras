@@ -12,6 +12,7 @@ import Support from "./pages/Support";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Pass from "./pages/Pass";
+import Profile from "./pages/Profile";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -23,6 +24,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/pass" element={<Pass />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/segments" element={<Segments />} />
           <Route path="/support" element={<Support />} />
           <Route path="/privacy" element={<Privacy />} />

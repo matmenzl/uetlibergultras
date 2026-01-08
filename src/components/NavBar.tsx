@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Shield, Menu } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Shield, Menu, User } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,9 @@ export default function NavBar() {
     isAdmin
   } = useUserRole();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -24,11 +28,41 @@ export default function NavBar() {
     });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Fetch profile picture for logged in user
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) {
+        setProfilePicture(null);
+        setDisplayName(null);
+        return;
+      }
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('profile_picture, display_name, first_name')
+        .eq('id', user.id)
+        .single();
+      
+      if (data) {
+        setProfilePicture(data.profile_picture);
+        setDisplayName(data.display_name || data.first_name);
+      }
+    };
+    
+    fetchProfile();
+  }, [user]);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/auth');
   };
   const isActive = (path: string) => location.pathname === path;
+  
+  const getInitials = () => {
+    if (displayName) return displayName.substring(0, 1).toUpperCase();
+    return 'U';
+  };
   const NavItems = ({
     onNavigate,
     inSheet = false
@@ -64,12 +98,26 @@ export default function NavBar() {
             <Shield className="h-3.5 w-3.5" />
             Admin
           </button>}
-        {user ? <button onClick={() => {
-        handleSignOut();
-        onNavigate?.();
-      }} className={cn("text-sm font-medium transition-colors px-3 py-1.5", inSheet ? "text-muted-foreground hover:text-destructive py-2" : "text-muted-foreground hover:text-destructive")}>
+        {user ? <>
+          <button onClick={() => {
+            navigate('/profile');
+            onNavigate?.();
+          }} className={cn(getLinkClass('/profile'), "flex items-center gap-1.5")}>
+            <Avatar className="h-5 w-5">
+              <AvatarImage src={profilePicture || undefined} alt="Profil" />
+              <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+            {inSheet && "Profil"}
+          </button>
+          <button onClick={() => {
+            handleSignOut();
+            onNavigate?.();
+          }} className={cn("text-sm font-medium transition-colors px-3 py-1.5", inSheet ? "text-muted-foreground hover:text-destructive py-2" : "text-muted-foreground hover:text-destructive")}>
             Abmelden
-          </button> : <Button size="sm" onClick={() => {
+          </button>
+        </> : <Button size="sm" onClick={() => {
         navigate('/auth');
         onNavigate?.();
       }} className="ml-2 px-4">
