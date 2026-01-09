@@ -484,19 +484,15 @@ export default function Index() {
           <BadgeShowcase userId={user?.id} />
 
           {/* ===== BENTO GRID LAYOUT ===== */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 items-start">
-            {/* Leaderboard (365-Tage Challenge) - Span 2, zuerst auf Desktop */}
-            <div className="md:col-span-2 order-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {/* Left column - main content with consistent spacing */}
+            <div className="md:col-span-2 space-y-4 order-2 md:order-1">
               <Leaderboard />
-            </div>
-
-            {/* Today's Runners - Span 2, nach Leaderboard */}
-            <div className="md:col-span-2 order-2 md:order-3">
               <TodaysRunners />
             </div>
 
-            {/* Stats Sidebar - Span 1, spans 2 rows on desktop */}
-            <div className="space-y-4 order-3 md:order-2 md:row-span-2">
+            {/* Right column - Stats Sidebar */}
+            <div className="space-y-4 order-1 md:order-2">
               {/* Community Counter - für alle sichtbar */}
               <CommunityCounter />
 
@@ -517,7 +513,6 @@ export default function Index() {
               </Card>
               <StreakCounter userId={user?.id} />
             </div>
-
           </div>
 
           {/* ===== PRIVATE KOMPONENTEN (nur für eingeloggte User) ===== */}
