@@ -8,7 +8,7 @@ export const Footer = () => {
   const { isAdmin } = useUserRole();
 
   return (
-    <footer className="relative bg-background border-t border-border/40">
+    <footer className="relative mt-8 bg-background border-t border-border/40">
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-muted/30 to-transparent pointer-events-none" />
       
