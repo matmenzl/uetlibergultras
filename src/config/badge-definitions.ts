@@ -86,7 +86,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     id: 'runs_10',
     category: 'milestone',
     title: 'Bergfloh',
-    description: '10 Besteigungen - nicht schlecht,
+    description: '10 Besteigungen - nicht schlecht',
     howToEarn: 'Besteige den Uetliberg 10 Mal',
     symbolId: 'mountain-ten',
     colors: {
