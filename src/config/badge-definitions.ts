@@ -57,8 +57,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'first_run',
     category: 'milestone',
-    title: 'Erster Aufstieg',
-    description: 'Dein erster Schritt auf den Uetliberg',
+    title: 'Firstie',
+    description: 'Dein erster Lauf auf den Uetliberg',
     howToEarn: 'Absolviere deinen ersten Uetliberg-Lauf',
     symbolId: 'mountain-single',
     colors: {
@@ -71,9 +71,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'runs_5',
     category: 'milestone',
-    title: 'Bergfreund',
-    description: '5 Besteigungen geschafft',
-    howToEarn: 'Besteige den Uetliberg 5 mal',
+    title: '"I've got 5 on it"',
+    description: '5 runs und keinen zu viel',
+    howToEarn: 'Renne 5 Mal auf den Uetliberg',
     symbolId: 'mountain-five',
     colors: {
       primary: '45 93% 47%',
@@ -85,9 +85,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'runs_10',
     category: 'milestone',
-    title: 'Bergläufer',
-    description: '10 Besteigungen - du gehörst dazu',
-    howToEarn: 'Besteige den Uetliberg 10 mal',
+    title: 'Bergfloh',
+    description: '10 Mal rauf',
+    howToEarn: 'Besteige den Uetliberg 10 Mal',
     symbolId: 'mountain-ten',
     colors: {
       primary: '45 93% 47%',
@@ -99,9 +99,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'runs_25',
     category: 'milestone',
-    title: 'Gipfelstürmer',
-    description: '25 Besteigungen - beeindruckend!',
-    howToEarn: 'Besteige den Uetliberg 25 mal',
+    title: 'Bergziege',
+    description: '25 Runs - beeindruckend!',
+    howToEarn: 'Berenne den Uetliberg 25 Mal',
     symbolId: 'mountain-twentyfive',
     colors: {
       primary: '45 93% 47%',
@@ -113,9 +113,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'runs_50',
     category: 'milestone',
-    title: 'Bergmeister',
-    description: '50 Besteigungen - eine wahre Leistung',
-    howToEarn: 'Besteige den Uetliberg 50 mal',
+    title: 'Nifty Fifty',
+    description: '50 Runs - hast du auch ein anderes Hobby?',
+    howToEarn: 'Renne 50 Mal auf den Uetliberg',
     symbolId: 'mountain-fifty',
     colors: {
       primary: '45 93% 47%',
@@ -127,9 +127,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'runs_100',
     category: 'milestone',
-    title: 'Centurion',
+    title: 'Denzleresque',
     description: '100 Besteigungen - legendär!',
-    howToEarn: 'Besteige den Uetliberg 100 mal',
+    howToEarn: '100 Mal rauf - da wäre selbst Bäcker Denzler stolz',
     symbolId: 'mountain-hundred',
     colors: {
       primary: '45 93% 47%',
@@ -144,7 +144,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'streak_2',
     category: 'endurance',
-    title: 'Doppelschlag',
+    title: 'DoubleTrouble',
     description: '2 Wochen am Stück aktiv',
     howToEarn: 'Laufe 2 Wochen in Folge auf den Uetliberg',
     symbolId: 'flame-double',
@@ -158,7 +158,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'streak_4',
     category: 'endurance',
-    title: 'Monatskrieger',
+    title: '4 to the floor',
     description: '4 Wochen Durchhaltevermögen',
     howToEarn: 'Laufe 4 Wochen in Folge auf den Uetliberg',
     symbolId: 'flame-quad',
@@ -172,7 +172,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'streak_8',
     category: 'endurance',
-    title: 'Unaufhaltsam',
+    title: 'Achtsam',
     description: '8 Wochen - nichts hält dich auf',
     howToEarn: 'Laufe 8 Wochen in Folge auf den Uetliberg',
     symbolId: 'flame-eight',
@@ -202,7 +202,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'early_bird',
     category: 'weather',
-    title: 'Frühaufsteher',
+    title: 'Early Bird',
     description: 'Vor Sonnenaufgang unterwegs',
     howToEarn: 'Starte einen Lauf vor 6:00 Uhr',
     symbolId: 'sunrise',
@@ -215,7 +215,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'night_owl',
     category: 'weather',
-    title: 'Nachteule',
+    title: 'Fledermaus',
     description: 'Die Dunkelheit ist dein Freund',
     howToEarn: 'Starte einen Lauf nach 21:00 Uhr',
     symbolId: 'moon',
@@ -242,9 +242,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'frosty',
     category: 'weather',
-    title: 'Eiskalt',
+    title: 'Frostie',
     description: 'Unter null Grad unterwegs',
-    howToEarn: 'Laufe 5 mal bei Temperaturen unter 0°C',
+    howToEarn: 'Laufe 5 mal bei Temperaturen unter 0°C - es könnte eisig sein',
     symbolId: 'frost',
     colors: {
       primary: '199 89% 48%',
@@ -257,7 +257,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     id: 'wasserratte',
     category: 'weather',
     title: 'Wasserratte',
-    description: 'Regen kann dich nicht stoppen',
+    description: 'Auch Regen kann dich nicht stoppen',
     howToEarn: 'Laufe 5 mal bei Regen auf den Uetliberg',
     symbolId: 'rain',
     colors: {
