@@ -57,8 +57,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'first_run',
     category: 'milestone',
-    title: 'Ein Mal ist kein Mal',
-    description: 'Dein erster Run auf den Uetliberg',
+    title: 'Ein Mal ist keinmal',
+    description: 'Dein erster Schritt auf den Uetliberg',
     howToEarn: 'Absolviere deinen ersten Uetliberg-Lauf',
     symbolId: 'mountain-single',
     colors: {
@@ -71,9 +71,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'runs_5',
     category: 'milestone',
-    title: '«I"'"ve got 5 on it»,
+    title: 'I got 5 on It',
     description: '5 Besteigungen geschafft',
-    howToEarn: 'Besteige den Uetliberg 5 mal',
+    howToEarn: 'Besteige den Uetliberg 5 Mal',
     symbolId: 'mountain-five',
     colors: {
       primary: '45 93% 47%',
@@ -86,8 +86,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
     id: 'runs_10',
     category: 'milestone',
     title: 'Bergfloh',
-    description: '10 Läufe auf den Uetliberg',
-    howToEarn: 'Besteige den Uetliberg 10 mal',
+    description: '10 Besteigungen - nicht schlecht,
+    howToEarn: 'Besteige den Uetliberg 10 Mal',
     symbolId: 'mountain-ten',
     colors: {
       primary: '45 93% 47%',
@@ -101,7 +101,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     category: 'milestone',
     title: 'Bergziege',
     description: '25 Besteigungen - beeindruckend!',
-    howToEarn: 'Besteige den Uetliberg 25 mal',
+    howToEarn: 'Besteige den Uetliberg 25 Mal',
     symbolId: 'mountain-twentyfive',
     colors: {
       primary: '45 93% 47%',
@@ -115,7 +115,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     category: 'milestone',
     title: 'Nifty Fifty',
     description: '50 Besteigungen - eine wahre Leistung',
-    howToEarn: 'Besteige den Uetliberg 50 mal',
+    howToEarn: 'Besteige den Uetliberg 50 Mal',
     symbolId: 'mountain-fifty',
     colors: {
       primary: '45 93% 47%',
@@ -127,9 +127,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'runs_100',
     category: 'milestone',
-    title: 'Kilian Jornet wäre stolz',
-    description: '100 Besteigungen - legendär!',
-    howToEarn: 'Besteige den Uetliberg 100 mal',
+    title: 'Denzleresque',
+    description: '100 Besteigungen - Bäcker Denzler wäre stolz!',
+    howToEarn: 'Besteige den Uetliberg 100 Mal',
     symbolId: 'mountain-hundred',
     colors: {
       primary: '45 93% 47%',
@@ -158,7 +158,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'streak_4',
     category: 'endurance',
-    title: '4 To The Floor',
+    title: '4 to the floor',
     description: '4 Wochen Durchhaltevermögen',
     howToEarn: 'Laufe 4 Wochen in Folge auf den Uetliberg',
     symbolId: 'flame-quad',
@@ -256,7 +256,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'wasserratte',
     category: 'weather',
-    title: 'Waterworld',
+    title: 'Wasserratte',
     description: 'Regen kann dich nicht stoppen',
     howToEarn: 'Laufe 5 mal bei Regen auf den Uetliberg',
     symbolId: 'rain',
@@ -323,7 +323,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'denzlerweg_king',
     category: 'legend',
-    title: 'S''" Brot isch  no warm',
+    title: 'S Brot isch no warm',
     description: 'Meister des steilsten Weges',
     howToEarn: 'Halte den Rekord auf dem Denzlerweg-Segment',
     symbolId: 'crown',
@@ -336,8 +336,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'coiffeur',
     category: 'legend',
-    title: 'Coiffeur',
-    description: 'Stammgast beim Coiffeur',
+    title: 'Vokuhila',
+    description: 'Stammgast auf dem Coiffeur',
     howToEarn: 'Laufe 10 mal im Jahr über ein Coiffeur-Segment',
     symbolId: 'crown',
     colors: {
