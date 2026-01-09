@@ -485,14 +485,14 @@ export default function Index() {
 
           {/* ===== BENTO GRID LAYOUT ===== */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {/* Today's Runners - Span 2 (order-1 on mobile, order-1 on desktop) */}
+            {/* Leaderboard (365-Tage Challenge) - Span 2, zuerst auf Desktop */}
             <div className="md:col-span-2 order-1">
-              <TodaysRunners />
+              <Leaderboard />
             </div>
 
-            {/* Leaderboard - Span 2 (order-2 on mobile so it's right after TodaysRunners) */}
+            {/* Today's Runners - Span 2, nach Leaderboard */}
             <div className="md:col-span-2 order-2 md:order-3">
-              <Leaderboard />
+              <TodaysRunners />
             </div>
 
             {/* Stats Sidebar - Span 1 (order-3 on mobile = after community components) */}
