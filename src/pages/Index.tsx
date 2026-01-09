@@ -15,7 +15,6 @@ import logo from "@/assets/uu_logo.svg";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Leaderboard } from "@/components/Leaderboard";
 import { Achievements } from "@/components/Achievements";
-import { PassPreview } from "@/components/pass/PassPreview";
 import { BadgeShowcase } from "@/components/badges/BadgeShowcase";
 import { StreakCounter } from "@/components/StreakCounter";
 import { CommunityCounter } from "@/components/CommunityCounter";
@@ -519,10 +518,6 @@ export default function Index() {
               <StreakCounter userId={user?.id} />
             </div>
 
-            {/* Pass Preview (replaces old Achievements) - Span 1 (order-4 = last on mobile) */}
-            <div className="order-4">
-              <PassPreview userId={user?.id} />
-            </div>
           </div>
 
           {/* ===== PRIVATE KOMPONENTEN (nur für eingeloggte User) ===== */}
