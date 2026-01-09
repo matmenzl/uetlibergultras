@@ -66,9 +66,9 @@ const getGreeting = (weatherEmoji?: string): string => {
     return 'Nebelmeer ahoi 🌫️ Oben hell? Klick auf "Aktualisieren"';
   }
 
-  // Rain/storm weather override
-  const rainEmojis = ['🌧️', '🌦️', '⛈️'];
-  if (weatherEmoji && rainEmojis.includes(weatherEmoji)) {
+  // Heavy rain/storm weather override (exclude light rain like 🌦️)
+  const heavyRainEmojis = ['🌧️', '⛈️'];
+  if (weatherEmoji && heavyRainEmojis.includes(weatherEmoji)) {
     return "Es gibt kein schlechtes Wetter, nur schlechte Kleidung 🌧️";
   }
   const hour = new Date().getHours();
