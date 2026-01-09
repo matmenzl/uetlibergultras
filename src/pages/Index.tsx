@@ -495,8 +495,8 @@ export default function Index() {
               <TodaysRunners />
             </div>
 
-            {/* Stats Sidebar - Span 1 (order-3 on mobile = after community components) */}
-            <div className="space-y-4 order-3 md:order-2">
+            {/* Stats Sidebar - Span 1, spans 2 rows on desktop */}
+            <div className="space-y-4 order-3 md:order-2 md:row-span-2">
               {/* Community Counter - für alle sichtbar */}
               <CommunityCounter />
 
