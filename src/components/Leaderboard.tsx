@@ -96,10 +96,13 @@ export function Leaderboard() {
   if (isLoading) {
     return (
       <Card className="p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Trophy className="w-5 h-5 text-primary" />
-        <h3 className="font-bold text-lg">365-Tage Challenge {new Date().getFullYear()}</h3>
-      </div>
+        <div className="mb-4">
+          <p className="text-xs font-medium text-primary uppercase tracking-wide mb-1">365-Tage Challenge {new Date().getFullYear()}</p>
+          <h3 className="font-bold text-lg flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-primary" />
+            Uetliberg-Ultras unterwegs
+          </h3>
+        </div>
       <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center gap-3">
@@ -115,14 +118,17 @@ export function Leaderboard() {
   if (!leaderboard || leaderboard.length === 0) {
     return (
       <Card className="p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Trophy className="w-5 h-5 text-primary" />
-        <h3 className="font-bold text-lg">365-Tage Challenge {new Date().getFullYear()}</h3>
-      </div>
+        <div className="mb-4">
+          <p className="text-xs font-medium text-primary uppercase tracking-wide mb-1">365-Tage Challenge {new Date().getFullYear()}</p>
+          <h3 className="font-bold text-lg flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-primary" />
+            Uetliberg-Ultras unterwegs
+          </h3>
+        </div>
       <div className="text-center py-6">
         <Trophy className="w-12 h-12 text-primary/30 mx-auto mb-3" />
         <p className="text-muted-foreground text-sm mb-4">
-          Verbinde dich mit Strava und schau wer die 365-Tage Challenge {new Date().getFullYear()} anführt
+          Verbinde dich mit Strava und schau wer die Challenge anführt
         </p>
           {!user && (
             <button 
@@ -144,9 +150,12 @@ export function Leaderboard() {
   return (
     <Card className="p-6 h-full">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-primary" />
-          <h3 className="font-bold text-lg">365-Tage Challenge {new Date().getFullYear()}</h3>
+        <div>
+          <p className="text-xs font-medium text-primary uppercase tracking-wide mb-1">365-Tage Challenge {new Date().getFullYear()}</p>
+          <h3 className="font-bold text-lg flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-primary" />
+            Uetliberg-Ultras unterwegs
+          </h3>
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
           <Calendar className="w-3 h-3" />
