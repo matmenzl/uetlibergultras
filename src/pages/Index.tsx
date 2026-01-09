@@ -430,9 +430,10 @@ export default function Index() {
                   <p className="text-white/90 mb-8 text-lg max-w-md mx-auto [text-shadow:_0_1px_6px_rgb(0_0_0_/_35%)]">
                     Der Uetliberg wartet auf dich! Verbinde dich mit Strava und sammle deine Uetliberg Runs.
                   </p>
-                  <Button onClick={() => navigate("/auth")} size="lg" className="text-base px-8 py-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    Anmelden mit Strava oder E-Mail  
+                  <Button onClick={() => navigate("/auth")} size="lg" className="text-sm sm:text-base px-4 sm:px-8 py-4 sm:py-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105">
+                    <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="hidden sm:inline">Anmelden mit Strava oder E-Mail</span>
+                    <span className="sm:hidden">Anmelden</span>
                   </Button>
                 </> : hasStravaCredentials ? <>
                   <p className="text-white/90 mb-8 text-lg [text-shadow:_0_1px_6px_rgb(0_0_0_/_35%)]">
