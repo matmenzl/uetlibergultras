@@ -16,6 +16,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Leaderboard } from "@/components/Leaderboard";
 import { Achievements } from "@/components/Achievements";
 import { PassPreview } from "@/components/pass/PassPreview";
+import { BadgeShowcase } from "@/components/badges/BadgeShowcase";
 import { StreakCounter } from "@/components/StreakCounter";
 import { CommunityCounter } from "@/components/CommunityCounter";
 import { TodaysRunners } from "@/components/TodaysRunners";
@@ -478,6 +479,9 @@ export default function Index() {
 
           {/* Sync Progress - zeigt Fortschritt für neue User */}
           {user && <SyncProgress userId={user.id} />}
+
+          {/* Badge Showcase - prominente Badge-Leiste */}
+          <BadgeShowcase userId={user?.id} />
 
           {/* ===== BENTO GRID LAYOUT ===== */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
