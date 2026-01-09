@@ -484,7 +484,7 @@ export default function Index() {
           <BadgeShowcase userId={user?.id} />
 
           {/* ===== BENTO GRID LAYOUT ===== */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 items-start">
             {/* Leaderboard (365-Tage Challenge) - Span 2, zuerst auf Desktop */}
             <div className="md:col-span-2 order-1">
               <Leaderboard />
