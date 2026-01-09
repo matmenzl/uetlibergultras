@@ -485,8 +485,18 @@ export default function Index() {
 
           {/* ===== BENTO GRID LAYOUT ===== */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {/* Stats Sidebar - Span 1 (order-1 on mobile = 365-Tage Challenge zuerst) */}
-            <div className="space-y-4 order-1">
+            {/* Today's Runners - Span 2 (order-1 on mobile, order-1 on desktop) */}
+            <div className="md:col-span-2 order-1">
+              <TodaysRunners />
+            </div>
+
+            {/* Leaderboard - Span 2 (order-2 on mobile so it's right after TodaysRunners) */}
+            <div className="md:col-span-2 order-2 md:order-3">
+              <Leaderboard />
+            </div>
+
+            {/* Stats Sidebar - Span 1 (order-3 on mobile = after community components) */}
+            <div className="space-y-4 order-3 md:order-2">
               {/* Community Counter - für alle sichtbar */}
               <CommunityCounter />
 
@@ -506,16 +516,6 @@ export default function Index() {
                 <p className="text-sm text-muted-foreground">Deine Uetli Segmente {currentYear}</p>
               </Card>
               <StreakCounter userId={user?.id} />
-            </div>
-
-            {/* Today's Runners - Span 2 (order-2 on mobile) */}
-            <div className="md:col-span-2 order-2">
-              <TodaysRunners />
-            </div>
-
-            {/* Leaderboard - Span 2 (order-3 on mobile) */}
-            <div className="md:col-span-2 order-3">
-              <Leaderboard />
             </div>
 
           </div>
