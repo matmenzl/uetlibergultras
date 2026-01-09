@@ -20,6 +20,8 @@ type AchievementType =
   | 'early_bird'
   | 'night_owl'
   | 'pioneer_10'
+  | 'pioneer_25'
+  | 'pioneer_50'
   | 'denzlerweg_king'
   | 'coiffeur'
   | 'snow_bunny'
@@ -184,26 +186,52 @@ serve(async (req) => {
       newAchievements.push('all_segments');
     }
 
-    // Check Top 10 Leaderboard achievement
+    // Check Top 10/25/50 Leaderboard achievements (single query for all)
     const { data: leaderboardData } = await supabaseAdmin
       .from('leaderboard_stats')
       .select('user_id, total_runs')
       .order('total_runs', { ascending: false })
-      .limit(10);
+      .limit(50);
 
     if (leaderboardData) {
-      const top10UserIds = leaderboardData.map(entry => entry.user_id);
+      const top10UserIds = leaderboardData.slice(0, 10).map(entry => entry.user_id);
+      const top25UserIds = leaderboardData.slice(0, 25).map(entry => entry.user_id);
+      const top50UserIds = leaderboardData.map(entry => entry.user_id);
       
+      // Pioneer 10 (Top 10)
       if (top10UserIds.includes(userId) && !existingSet.has('pioneer_10')) {
         newAchievements.push('pioneer_10');
       } else if (!top10UserIds.includes(userId) && existingSet.has('pioneer_10')) {
-        // Remove achievement if user is no longer in Top 10
         await supabaseAdmin
           .from('user_achievements')
           .delete()
           .eq('user_id', userId)
           .eq('achievement', 'pioneer_10');
         console.log(`Top 10 achievement removed from user ${userId}`);
+      }
+
+      // Pioneer 25 (Top 25)
+      if (top25UserIds.includes(userId) && !existingSet.has('pioneer_25')) {
+        newAchievements.push('pioneer_25');
+      } else if (!top25UserIds.includes(userId) && existingSet.has('pioneer_25')) {
+        await supabaseAdmin
+          .from('user_achievements')
+          .delete()
+          .eq('user_id', userId)
+          .eq('achievement', 'pioneer_25');
+        console.log(`Top 25 achievement removed from user ${userId}`);
+      }
+
+      // Pioneer 50 (Top 50)
+      if (top50UserIds.includes(userId) && !existingSet.has('pioneer_50')) {
+        newAchievements.push('pioneer_50');
+      } else if (!top50UserIds.includes(userId) && existingSet.has('pioneer_50')) {
+        await supabaseAdmin
+          .from('user_achievements')
+          .delete()
+          .eq('user_id', userId)
+          .eq('achievement', 'pioneer_50');
+        console.log(`Top 50 achievement removed from user ${userId}`);
       }
     }
 
