@@ -268,7 +268,7 @@ export default function Segments() {
                         </span>
                         <span className="flex items-center gap-1">
                           <TrendingUp className="w-4 h-4" />
-                          {(segment.avg_grade ?? 0).toFixed(1)}%
+                          {(segment.avg_grade != null ? segment.avg_grade : 0).toFixed(1)}%
                         </span>
                         <span className="flex items-center gap-1">
                           <Mountain className="w-4 h-4" />
@@ -298,7 +298,7 @@ export default function Segments() {
                     </div>
                   </div>
                   
-                  {segment.distance_to_center !== null && <p className="text-xs text-muted-foreground mt-3">
+                  {segment.distance_to_center != null && <p className="text-xs text-muted-foreground mt-3">
                       {segment.distance_to_center.toFixed(2)} km vom Uetliberg-Zentrum
                     </p>}
                 </Card>)}
