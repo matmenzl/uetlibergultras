@@ -259,7 +259,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: "wasserratte",
     category: "weather",
-    title: "Wasserratte",
+    title: "Nicht aus Zucker",
     description: "Regen kann dich nicht stoppen",
     howToEarn: "Laufe 5 mal bei Regen auf den Uetliberg",
     symbolId: "rain",
@@ -326,7 +326,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: "denzlerweg_king",
     category: "legend",
-    title: "Bäckermeister",
+    title: "S Brot isch no warm",
     description: "Meister des steilsten Weges",
     howToEarn: "Halte den Rekord auf dem Denzlerweg-Segment",
     symbolId: "crown",
