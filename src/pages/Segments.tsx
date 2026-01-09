@@ -254,7 +254,15 @@ export default function Segments() {
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-base sm:text-lg">{segment.name}</h3>
+                        <a 
+                          href={`https://www.strava.com/segments/${segment.segment_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-base sm:text-lg hover:text-primary transition-colors inline-flex items-center gap-1.5 group"
+                        >
+                          {segment.name}
+                          <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </a>
                         {segment.ends_at_uetliberg && <Badge variant="secondary" className="flex-shrink-0">
                             <MapPin className="w-3 h-3 mr-1" />
                             Uetliberg
