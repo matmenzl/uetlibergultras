@@ -142,7 +142,7 @@ export function Leaderboard() {
   }
 
   return (
-    <Card className="p-6 h-full">
+    <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-primary" />
