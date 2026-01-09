@@ -57,8 +57,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'first_run',
     category: 'milestone',
-    title: 'Firstie',
-    description: 'Dein erster Lauf auf den Uetliberg',
+    title: 'Ein Mal ist kein Mal',
+    description: 'Dein erster Run auf den Uetliberg',
     howToEarn: 'Absolviere deinen ersten Uetliberg-Lauf',
     symbolId: 'mountain-single',
     colors: {
@@ -71,9 +71,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'runs_5',
     category: 'milestone',
-    title: '"I've got 5 on it"',
-    description: '5 runs und keinen zu viel',
-    howToEarn: 'Renne 5 Mal auf den Uetliberg',
+    title: '«I"'"ve got 5 on it»,
+    description: '5 Besteigungen geschafft',
+    howToEarn: 'Besteige den Uetliberg 5 mal',
     symbolId: 'mountain-five',
     colors: {
       primary: '45 93% 47%',
@@ -86,8 +86,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
     id: 'runs_10',
     category: 'milestone',
     title: 'Bergfloh',
-    description: '10 Mal rauf',
-    howToEarn: 'Besteige den Uetliberg 10 Mal',
+    description: '10 Läufe auf den Uetliberg',
+    howToEarn: 'Besteige den Uetliberg 10 mal',
     symbolId: 'mountain-ten',
     colors: {
       primary: '45 93% 47%',
@@ -100,8 +100,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
     id: 'runs_25',
     category: 'milestone',
     title: 'Bergziege',
-    description: '25 Runs - beeindruckend!',
-    howToEarn: 'Berenne den Uetliberg 25 Mal',
+    description: '25 Besteigungen - beeindruckend!',
+    howToEarn: 'Besteige den Uetliberg 25 mal',
     symbolId: 'mountain-twentyfive',
     colors: {
       primary: '45 93% 47%',
@@ -114,8 +114,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
     id: 'runs_50',
     category: 'milestone',
     title: 'Nifty Fifty',
-    description: '50 Runs - hast du auch ein anderes Hobby?',
-    howToEarn: 'Renne 50 Mal auf den Uetliberg',
+    description: '50 Besteigungen - eine wahre Leistung',
+    howToEarn: 'Besteige den Uetliberg 50 mal',
     symbolId: 'mountain-fifty',
     colors: {
       primary: '45 93% 47%',
@@ -127,9 +127,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'runs_100',
     category: 'milestone',
-    title: 'Denzleresque',
+    title: 'Kilian Jornet wäre stolz',
     description: '100 Besteigungen - legendär!',
-    howToEarn: '100 Mal rauf - da wäre selbst Bäcker Denzler stolz',
+    howToEarn: 'Besteige den Uetliberg 100 mal',
     symbolId: 'mountain-hundred',
     colors: {
       primary: '45 93% 47%',
@@ -144,7 +144,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'streak_2',
     category: 'endurance',
-    title: 'DoubleTrouble',
+    title: 'Doppio',
     description: '2 Wochen am Stück aktiv',
     howToEarn: 'Laufe 2 Wochen in Folge auf den Uetliberg',
     symbolId: 'flame-double',
@@ -158,7 +158,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'streak_4',
     category: 'endurance',
-    title: '4 to the floor',
+    title: '4 To The Floor',
     description: '4 Wochen Durchhaltevermögen',
     howToEarn: 'Laufe 4 Wochen in Folge auf den Uetliberg',
     symbolId: 'flame-quad',
@@ -242,9 +242,9 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'frosty',
     category: 'weather',
-    title: 'Frostie',
+    title: 'Ice Ice Baby',
     description: 'Unter null Grad unterwegs',
-    howToEarn: 'Laufe 5 mal bei Temperaturen unter 0°C - es könnte eisig sein',
+    howToEarn: 'Laufe 5 mal bei Temperaturen unter 0°C',
     symbolId: 'frost',
     colors: {
       primary: '199 89% 48%',
@@ -256,8 +256,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'wasserratte',
     category: 'weather',
-    title: 'Wasserratte',
-    description: 'Auch Regen kann dich nicht stoppen',
+    title: 'Waterworld',
+    description: 'Regen kann dich nicht stoppen',
     howToEarn: 'Laufe 5 mal bei Regen auf den Uetliberg',
     symbolId: 'rain',
     colors: {
@@ -323,7 +323,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
   {
     id: 'denzlerweg_king',
     category: 'legend',
-    title: 'Bäckermeister',
+    title: 'S''" Brot isch  no warm',
     description: 'Meister des steilsten Weges',
     howToEarn: 'Halte den Rekord auf dem Denzlerweg-Segment',
     symbolId: 'crown',
