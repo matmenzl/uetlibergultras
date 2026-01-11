@@ -14,6 +14,7 @@ import Terms from "./pages/Terms";
 import Pass from "./pages/Pass";
 import Profile from "./pages/Profile";
 import BadgeDemo from "./pages/BadgeDemo";
+import PublicProfile from "./pages/PublicProfile";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/strava-callback" element={<AuthStravaCallback />} />
           <Route path="/badge-demo" element={<BadgeDemo />} />
+          <Route path="/runner/:userId" element={<PublicProfile />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

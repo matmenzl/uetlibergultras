@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trophy, Medal, Award, Mountain, User, Calendar, Timer } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { differenceInDays } from 'date-fns';
 
 const getDaysRemaining = () => {
@@ -182,7 +182,8 @@ export function Leaderboard() {
             ) + 1;
             
             return (
-              <div
+              <Link
+                to={`/runner/${entry.user_id}`}
                 key={entry.user_id}
                 className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(rank)}`}
               >
@@ -222,7 +223,7 @@ export function Leaderboard() {
                     {entry.achievement_count}
                   </span>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
