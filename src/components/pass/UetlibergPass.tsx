@@ -134,7 +134,8 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
   const earnedMap = new Map(earnedAchievements?.map(a => [a.achievement, a.earned_at]) || []);
 
   // Calculate stats - count UNIQUE activities (runs), not segments
-  const uniqueActivities = new Set(checkIns?.map(c => c.activity_id) || []);
+  // Use String() for activity_id to avoid Set comparison issues with large numbers
+  const uniqueActivities = new Set(checkIns?.map(c => String(c.activity_id)) || []);
   const totalRuns = uniqueActivities.size;
   const uniqueSegments = new Set(checkIns?.map(c => c.segment_id) || []).size;
   const currentStreak = calculateStreak(checkIns || []);
@@ -146,23 +147,23 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
     checkIns?.filter(c => {
       const checkInYear = new Date(c.checked_in_at).getFullYear();
       return checkInYear === currentYear && COIFFEUR_SEGMENT_IDS.includes(c.segment_id);
-    }).map(c => c.activity_id) || []
+    }).map(c => String(c.activity_id)) || []
   ).size;
   
-  // Weather runs
+  // Weather runs - use String(activity_id) to avoid Set comparison issues with large numbers
   const snowRuns = new Set(
     checkIns?.filter(c => c.weather_code !== null && SNOW_CODES.includes(c.weather_code))
-      .map(c => c.activity_id) || []
+      .map(c => String(c.activity_id)) || []
   ).size;
   
   const frostRuns = new Set(
     checkIns?.filter(c => c.temperature !== null && c.temperature < 0)
-      .map(c => c.activity_id) || []
+      .map(c => String(c.activity_id)) || []
   ).size;
   
   const rainRuns = new Set(
     checkIns?.filter(c => c.weather_code !== null && RAIN_CODES.includes(c.weather_code))
-      .map(c => c.activity_id) || []
+      .map(c => String(c.activity_id)) || []
   ).size;
 
   // Get progress for an achievement
