@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -281,7 +281,8 @@ export const TodaysRunners = () => {
       ) : (
         <div className="space-y-3">
           {runners.slice(0, 10).map((runner, index) => (
-            <div
+            <Link
+              to={`/runner/${runner.user_id}`}
               key={runner.user_id}
               className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
             >
@@ -355,7 +356,7 @@ export const TodaysRunners = () => {
                   #{index + 1}
                 </Badge>
               )}
-            </div>
+            </Link>
           ))}
 
           {runners.length > 10 && (
