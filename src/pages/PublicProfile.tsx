@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Mountain, Award, Route, TrendingUp, Calendar, Snowflake, CloudRain, User, Clock } from 'lucide-react';
+import { ArrowLeft, Mountain, Award, Route, TrendingUp, Calendar, Snowflake, CloudRain, User, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { BadgeGrid, EarnedBadge } from '@/components/badges/BadgeGrid';
 import { badgeDefinitions, getBadgeById } from '@/config/badge-definitions';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface CheckIn {
   id: string;
@@ -38,6 +39,15 @@ interface Activity {
   checked_in_at: string;
   segment_count: number;
   is_manual: boolean;
+  segments: { segment_id: number; name: string; distance: number; elevation_gain: number }[];
+}
+
+interface Segment {
+  segment_id: number;
+  name: string;
+  distance: number;
+  elevation_high: number | null;
+  elevation_low: number | null;
 }
 
 interface UserAchievement {
@@ -113,6 +123,24 @@ export default function PublicProfile() {
     enabled: isAuthenticated === true && !!userId,
   });
 
+  // Fetch all segments for names
+  const { data: segments } = useQuery({
+    queryKey: ['public-profile-segments', checkIns?.map(c => c.segment_id)],
+    queryFn: async () => {
+      const segmentIds = [...new Set(checkIns?.filter(c => c.segment_id !== 0).map(c => c.segment_id) || [])];
+      if (segmentIds.length === 0) return [];
+      
+      const { data, error } = await supabase
+        .from('uetliberg_segments')
+        .select('segment_id, name, distance, elevation_high, elevation_low')
+        .in('segment_id', segmentIds);
+      
+      if (error) throw error;
+      return data as Segment[];
+    },
+    enabled: !!checkIns && checkIns.length > 0,
+  });
+
   // Fetch achievements
   const { data: achievements, isLoading: achievementsLoading } = useQuery({
     queryKey: ['public-profile-achievements', userId],
@@ -154,23 +182,44 @@ export default function PublicProfile() {
     earnedBadges.some(eb => eb.id === b.id)
   );
 
+  // Create segment lookup map
+  const segmentMap = new Map(segments?.map(s => [s.segment_id, s]) || []);
+
   // Group check-ins by activity for display
   const activityMap = new Map<number, Activity>();
   checkIns?.forEach(checkIn => {
     const existing = activityMap.get(checkIn.activity_id);
+    const segment = segmentMap.get(checkIn.segment_id);
+    
     if (existing) {
-      // Increment segment count for existing activity
-      existing.segment_count++;
+      // Add segment to existing activity
+      if (segment && !existing.segments.some(s => s.segment_id === segment.segment_id)) {
+        existing.segments.push({
+          segment_id: segment.segment_id,
+          name: segment.name,
+          distance: segment.distance,
+          elevation_gain: (segment.elevation_high || 0) - (segment.elevation_low || 0),
+        });
+        existing.segment_count = existing.segments.length;
+      }
     } else {
       // Create new activity entry
+      const segmentEntry = segment ? [{
+        segment_id: segment.segment_id,
+        name: segment.name,
+        distance: segment.distance,
+        elevation_gain: (segment.elevation_high || 0) - (segment.elevation_low || 0),
+      }] : [];
+      
       activityMap.set(checkIn.activity_id, {
         activity_id: checkIn.activity_id,
         activity_name: checkIn.activity_name,
         activity_distance: checkIn.activity_distance,
         activity_elapsed_time: checkIn.activity_elapsed_time,
         checked_in_at: checkIn.checked_in_at,
-        segment_count: 1,
+        segment_count: segmentEntry.length,
         is_manual: !!checkIn.is_manual,
+        segments: segmentEntry,
       });
     }
   });
@@ -325,32 +374,65 @@ export default function PublicProfile() {
                       {/* Activities for this date */}
                       <div className="space-y-2">
                         {dateActivities.map((activity) => (
-                          <div 
-                            key={activity.activity_id}
-                            className="p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <Mountain className="w-5 h-5 text-primary" />
-                                <div>
-                                  <p className="font-medium">
-                                    {activity.activity_name || (activity.is_manual ? 'Manueller Check-in' : 'Unbenannte Aktivität')}
-                                  </p>
-                                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                    {activity.activity_distance && (
-                                      <span>{(activity.activity_distance / 1000).toFixed(2)} km</span>
-                                    )}
-                                    {activity.activity_elapsed_time && (
-                                      <span>{formatTime(activity.activity_elapsed_time)}</span>
-                                    )}
+                          <Collapsible key={activity.activity_id}>
+                            <div className="rounded-lg border bg-card overflow-hidden">
+                              <CollapsibleTrigger className="w-full p-4 hover:bg-muted/30 transition-colors">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <Mountain className="w-5 h-5 text-primary" />
+                                    <div className="text-left">
+                                      <p className="font-medium">
+                                        {activity.activity_name || (activity.is_manual ? 'Manueller Check-in' : 'Unbenannte Aktivität')}
+                                      </p>
+                                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                        {activity.activity_distance && (
+                                          <span>{(activity.activity_distance / 1000).toFixed(2)} km</span>
+                                        )}
+                                        {activity.activity_elapsed_time && (
+                                          <span>{formatTime(activity.activity_elapsed_time)}</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="secondary" className="bg-primary/20 text-primary border-0">
+                                      {activity.segment_count} {activity.segment_count === 1 ? 'Segment' : 'Segmente'}
+                                    </Badge>
+                                    <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
                                   </div>
                                 </div>
-                              </div>
-                              <Badge variant="secondary" className="bg-primary/20 text-primary border-0">
-                                {activity.segment_count} {activity.segment_count === 1 ? 'Segment' : 'Segmente'}
-                              </Badge>
+                              </CollapsibleTrigger>
+                              
+                              <CollapsibleContent>
+                                <div className="border-t bg-muted/20 p-4 space-y-2">
+                                  {activity.segments.length > 0 ? (
+                                    activity.segments.map((segment) => (
+                                      <div 
+                                        key={segment.segment_id}
+                                        className="flex items-center justify-between p-2 rounded bg-background/50"
+                                      >
+                                        <span className="text-sm font-medium">{segment.name}</span>
+                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                          <span className="flex items-center gap-1">
+                                            <Route className="w-3 h-3" />
+                                            {(segment.distance / 1000).toFixed(2)} km
+                                          </span>
+                                          <span className="flex items-center gap-1">
+                                            <TrendingUp className="w-3 h-3" />
+                                            {Math.round(segment.elevation_gain)}m
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground text-center py-2">
+                                      Keine Segment-Details verfügbar
+                                    </p>
+                                  )}
+                                </div>
+                              </CollapsibleContent>
                             </div>
-                          </div>
+                          </Collapsible>
                         ))}
                       </div>
                     </div>
