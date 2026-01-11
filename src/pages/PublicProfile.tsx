@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Mountain, Award, Route, TrendingUp, Calendar, Snowflake, CloudRain, User } from 'lucide-react';
+import { ArrowLeft, Mountain, Award, Route, TrendingUp, Calendar, Snowflake, CloudRain, User, Clock } from 'lucide-react';
 import { BadgeGrid, EarnedBadge } from '@/components/badges/BadgeGrid';
 import { badgeDefinitions, getBadgeById } from '@/config/badge-definitions';
 import { format } from 'date-fns';
@@ -20,17 +20,24 @@ interface CheckIn {
   checked_in_at: string;
   segment_id: number;
   activity_id: number;
+  activity_name: string | null;
+  activity_distance: number | null;
+  activity_elapsed_time: number | null;
   distance: number | null;
   elevation_gain: number | null;
   weather_code: number | null;
   temperature: number | null;
   is_manual: boolean | null;
-  segment?: {
-    name: string;
-    distance: number;
-    elevation_high: number | null;
-    elevation_low: number | null;
-  };
+}
+
+interface Activity {
+  activity_id: number;
+  activity_name: string | null;
+  activity_distance: number | null;
+  activity_elapsed_time: number | null;
+  checked_in_at: string;
+  segment_count: number;
+  is_manual: boolean;
 }
 
 interface UserAchievement {
@@ -90,38 +97,18 @@ export default function PublicProfile() {
     enabled: isAuthenticated === true && !!userId,
   });
 
-  // Fetch check-ins with segment data
+  // Fetch check-ins with activity data
   const { data: checkIns, isLoading: checkInsLoading } = useQuery({
     queryKey: ['public-profile-checkins', userId],
     queryFn: async () => {
-      // First get check-ins
       const { data: checkInsData, error: checkInsError } = await supabase
         .from('check_ins')
-        .select('id, checked_in_at, segment_id, activity_id, distance, elevation_gain, weather_code, temperature, is_manual')
+        .select('id, checked_in_at, segment_id, activity_id, activity_name, activity_distance, activity_elapsed_time, distance, elevation_gain, weather_code, temperature, is_manual')
         .eq('user_id', userId!)
         .order('checked_in_at', { ascending: false });
       
       if (checkInsError) throw checkInsError;
-      if (!checkInsData || checkInsData.length === 0) return [];
-
-      // Get unique segment IDs (excluding manual check-ins with segment_id = 0)
-      const segmentIds = [...new Set(checkInsData.filter(c => c.segment_id !== 0).map(c => c.segment_id))];
-      
-      // Fetch segment data
-      const { data: segments, error: segmentsError } = await supabase
-        .from('uetliberg_segments')
-        .select('segment_id, name, distance, elevation_high, elevation_low')
-        .in('segment_id', segmentIds);
-      
-      if (segmentsError) throw segmentsError;
-
-      const segmentMap = new Map(segments?.map(s => [s.segment_id, s]) || []);
-
-      // Combine check-ins with segment data
-      return checkInsData.map(checkIn => ({
-        ...checkIn,
-        segment: segmentMap.get(checkIn.segment_id) || undefined,
-      })) as CheckIn[];
+      return checkInsData as CheckIn[] || [];
     },
     enabled: isAuthenticated === true && !!userId,
   });
@@ -167,15 +154,47 @@ export default function PublicProfile() {
     earnedBadges.some(eb => eb.id === b.id)
   );
 
-  // Group check-ins by activity for display (show unique activities)
-  const activityMap = new Map<string, CheckIn>();
+  // Group check-ins by activity for display
+  const activityMap = new Map<number, Activity>();
   checkIns?.forEach(checkIn => {
-    const activityKey = String(checkIn.activity_id);
-    if (!activityMap.has(activityKey)) {
-      activityMap.set(activityKey, checkIn);
+    const existing = activityMap.get(checkIn.activity_id);
+    if (existing) {
+      // Increment segment count for existing activity
+      existing.segment_count++;
+    } else {
+      // Create new activity entry
+      activityMap.set(checkIn.activity_id, {
+        activity_id: checkIn.activity_id,
+        activity_name: checkIn.activity_name,
+        activity_distance: checkIn.activity_distance,
+        activity_elapsed_time: checkIn.activity_elapsed_time,
+        checked_in_at: checkIn.checked_in_at,
+        segment_count: 1,
+        is_manual: !!checkIn.is_manual,
+      });
     }
   });
-  const uniqueActivities = Array.from(activityMap.values()).slice(0, 20);
+  
+  // Sort by date and take first 20
+  const activities = Array.from(activityMap.values())
+    .sort((a, b) => new Date(b.checked_in_at).getTime() - new Date(a.checked_in_at).getTime())
+    .slice(0, 20);
+
+  // Group activities by date for display
+  const activitiesByDate = new Map<string, Activity[]>();
+  activities.forEach(activity => {
+    const dateKey = format(new Date(activity.checked_in_at), 'd. MMMM yyyy', { locale: de });
+    const existing = activitiesByDate.get(dateKey) || [];
+    existing.push(activity);
+    activitiesByDate.set(dateKey, existing);
+  });
+
+  // Helper to format elapsed time
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -286,60 +305,53 @@ export default function PublicProfile() {
             <Card className="p-6">
               <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
                 <Mountain className="w-5 h-5 text-primary" />
-                Letzte Runs
+                Runs von {profile.display_name} {new Date().getFullYear()}
               </h2>
               
-              {uniqueActivities.length === 0 ? (
+              {activities.length === 0 ? (
                 <p className="text-center text-muted-foreground py-4">
                   Noch keine Runs vorhanden
                 </p>
               ) : (
-                <div className="space-y-3">
-                  {uniqueActivities.map((activity) => (
-                    <div 
-                      key={activity.id}
-                      className="p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-sm">
-                          {activity.segment?.name || (activity.is_manual ? 'Manueller Check-in' : 'Unbekanntes Segment')}
-                        </span>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {format(new Date(activity.checked_in_at), 'dd.MM.yyyy', { locale: de })}
-                        </span>
+                <div className="space-y-4">
+                  {Array.from(activitiesByDate.entries()).map(([dateLabel, dateActivities]) => (
+                    <div key={dateLabel}>
+                      {/* Date Header */}
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                        <Clock className="w-4 h-4" />
+                        {dateLabel}
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        {activity.segment && (
-                          <>
-                            <span className="flex items-center gap-1">
-                              <Route className="w-3 h-3" />
-                              {(activity.segment.distance / 1000).toFixed(1)}km
-                            </span>
-                            {activity.segment.elevation_high && activity.segment.elevation_low && (
-                              <span className="flex items-center gap-1">
-                                <TrendingUp className="w-3 h-3" />
-                                {Math.round(activity.segment.elevation_high - activity.segment.elevation_low)}m
-                              </span>
-                            )}
-                          </>
-                        )}
-                        {activity.is_manual && activity.distance && (
-                          <span className="flex items-center gap-1">
-                            <Route className="w-3 h-3" />
-                            {(activity.distance / 1000).toFixed(1)}km
-                          </span>
-                        )}
-                        {activity.is_manual && activity.elevation_gain && (
-                          <span className="flex items-center gap-1">
-                            <TrendingUp className="w-3 h-3" />
-                            {activity.elevation_gain}m
-                          </span>
-                        )}
-                        {getWeatherIcon(activity.weather_code, activity.temperature)}
-                        {activity.temperature !== null && (
-                          <span>{activity.temperature}°C</span>
-                        )}
+                      
+                      {/* Activities for this date */}
+                      <div className="space-y-2">
+                        {dateActivities.map((activity) => (
+                          <div 
+                            key={activity.activity_id}
+                            className="p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <Mountain className="w-5 h-5 text-primary" />
+                                <div>
+                                  <p className="font-medium">
+                                    {activity.activity_name || (activity.is_manual ? 'Manueller Check-in' : 'Unbenannte Aktivität')}
+                                  </p>
+                                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                    {activity.activity_distance && (
+                                      <span>{(activity.activity_distance / 1000).toFixed(2)} km</span>
+                                    )}
+                                    {activity.activity_elapsed_time && (
+                                      <span>{formatTime(activity.activity_elapsed_time)}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <Badge variant="secondary" className="bg-primary/20 text-primary border-0">
+                                {activity.segment_count} {activity.segment_count === 1 ? 'Segment' : 'Segmente'}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
