@@ -16,6 +16,7 @@ interface CheckIn {
   id: string;
   checked_in_at: string;
   segment_id: number;
+  activity_id: number;
   weather_code: number | null;
   temperature: number | null;
 }
@@ -94,7 +95,7 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
       if (!userId) return [];
       const { data, error } = await supabase
         .from('check_ins')
-        .select('id, checked_in_at, segment_id, weather_code, temperature')
+        .select('id, checked_in_at, segment_id, activity_id, weather_code, temperature')
         .eq('user_id', userId);
       if (error) throw error;
       return data as CheckIn[];
@@ -116,25 +117,40 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
 
   const earnedMap = new Map(earnedAchievements?.map(a => [a.achievement, a.earned_at]) || []);
   
-  // Calculate stats for progress
-  const totalRuns = checkIns ? new Set(checkIns.map(c => {
-    const date = new Date(c.checked_in_at).toDateString();
-    return date;
-  })).size : 0;
+  // Calculate stats for progress - use String(activity_id) to properly deduplicate
+  const totalRuns = checkIns ? new Set(checkIns.map(c => String(c.activity_id))).size : 0;
   
   const uniqueSegments = checkIns ? new Set(checkIns.map(c => c.segment_id)).size : 0;
   const currentStreak = calculateStreak(checkIns || []);
   
-  // Weather-based runs
+  // Weather-based runs - count UNIQUE activities, not check-ins
   const snowCodes = [71, 73, 75, 77, 85, 86];
   const rainCodes = [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99];
   
-  const snowRuns = checkIns?.filter(c => c.weather_code && snowCodes.includes(c.weather_code)).length || 0;
-  const frostRuns = checkIns?.filter(c => c.temperature !== null && c.temperature < 0).length || 0;
-  const rainRuns = checkIns?.filter(c => c.weather_code && rainCodes.includes(c.weather_code)).length || 0;
+  const snowRuns = new Set(
+    checkIns?.filter(c => c.weather_code && snowCodes.includes(c.weather_code))
+      .map(c => String(c.activity_id)) || []
+  ).size;
   
-  // Coiffeur runs (segments with "coiffeur" in name would need segment data - simplified here)
-  const coiffeurRuns = 0; // Would need segment names joined
+  const frostRuns = new Set(
+    checkIns?.filter(c => c.temperature !== null && c.temperature < 0)
+      .map(c => String(c.activity_id)) || []
+  ).size;
+  
+  const rainRuns = new Set(
+    checkIns?.filter(c => c.weather_code && rainCodes.includes(c.weather_code))
+      .map(c => String(c.activity_id)) || []
+  ).size;
+  
+  // Coiffeur runs (current year only)
+  const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
+  const currentYear = new Date().getFullYear();
+  const coiffeurRuns = new Set(
+    checkIns?.filter(c => {
+      const checkInYear = new Date(c.checked_in_at).getFullYear();
+      return checkInYear === currentYear && COIFFEUR_SEGMENT_IDS.includes(c.segment_id);
+    }).map(c => String(c.activity_id)) || []
+  ).size;
 
   const getProgress = (badgeId: string, target?: number, progressType?: string): { current: number; target: number } | null => {
     if (!target || !progressType) return null;
