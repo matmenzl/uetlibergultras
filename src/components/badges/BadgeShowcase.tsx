@@ -214,7 +214,7 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-pass-paper dark:from-card to-transparent z-10 pointer-events-none" />
         
         <div 
-          className="flex gap-6 overflow-x-auto pb-2 scrollbar-hide"
+          className="flex gap-8 overflow-x-auto pb-3 scrollbar-hide"
           onClick={(e) => e.stopPropagation()}
         >
           {categories.map(category => {
@@ -237,7 +237,7 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
                 </div>
                 
                 {/* Badges for this category */}
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   {badges.map(badge => {
                     const earnedAt = earnedMap.get(badge.id);
                     const progress = getProgress(badge.id, badge.target, badge.progressType);
@@ -249,7 +249,7 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
                         isEarned={!!earnedAt}
                         earnedAt={earnedAt}
                         progress={progress}
-                        size="sm"
+                        size="md"
                       />
                     );
                   })}

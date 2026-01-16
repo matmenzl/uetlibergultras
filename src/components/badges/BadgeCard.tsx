@@ -17,8 +17,8 @@ interface BadgeCardProps {
 }
 
 const sizeClasses = {
-  sm: 'w-12 sm:w-14',
-  md: 'w-16 sm:w-18 md:w-20',
+  sm: 'w-14 sm:w-16',
+  md: 'w-18 sm:w-20 md:w-24',
   lg: 'w-20 sm:w-24 md:w-28',
 };
 
