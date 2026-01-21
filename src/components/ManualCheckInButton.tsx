@@ -213,6 +213,9 @@ export function ManualCheckInButton({ userId, onSuccess }: ManualCheckInButtonPr
           <p className="text-xs text-muted-foreground">
             Wähle die Segmente aus, die du gelaufen bist, um segment-spezifische Achievements freizuschalten.
           </p>
+          <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+            ⚠️ Bitte nur Segmente wählen, die du tatsächlich gelaufen bist.
+          </p>
         </div>
       </div>
 
