@@ -9,23 +9,38 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Camera, Loader2, Trash2, User, Mountain, CalendarIcon, Pencil, X, Check } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Trash2, User, Mountain, CalendarIcon, Pencil, X, Check, Route } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { SegmentMultiSelect, useSegmentsLookup } from "@/components/SegmentMultiSelect";
 
 interface ManualCheckIn {
   id: string;
+  activity_id: number;
+  segment_id: number;
   activity_name: string | null;
   distance: number | null;
   elevation_gain: number | null;
   checked_in_at: string;
 }
 
+// Group check-ins by activity_id for display
+interface GroupedRun {
+  activity_id: number;
+  activity_name: string | null;
+  distance: number | null;
+  elevation_gain: number | null;
+  checked_in_at: string;
+  segment_ids: number[];
+  check_in_ids: string[];
+}
+
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { segmentsMap, loading: segmentsLoading } = useSegmentsLookup();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -45,20 +60,51 @@ const Profile = () => {
   
   // Manual check-ins state
   const [manualRuns, setManualRuns] = useState<ManualCheckIn[]>([]);
-  const [editingRun, setEditingRun] = useState<string | null>(null);
+  const [groupedRuns, setGroupedRuns] = useState<GroupedRun[]>([]);
+  const [editingRun, setEditingRun] = useState<number | null>(null); // activity_id
   const [editForm, setEditForm] = useState<{
     activity_name: string;
     distance: string;
     elevation_gain: string;
     checked_in_at: Date;
-  }>({ activity_name: "", distance: "", elevation_gain: "", checked_in_at: new Date() });
+    segment_ids: number[];
+  }>({ activity_name: "", distance: "", elevation_gain: "", checked_in_at: new Date(), segment_ids: [] });
   const [savingRun, setSavingRun] = useState(false);
-  const [deletingRun, setDeletingRun] = useState<string | null>(null);
+  const [deletingRun, setDeletingRun] = useState<number | null>(null); // activity_id
+
+  // Group runs by activity_id
+  useEffect(() => {
+    const grouped = new Map<number, GroupedRun>();
+    
+    manualRuns.forEach((run) => {
+      if (grouped.has(run.activity_id)) {
+        const existing = grouped.get(run.activity_id)!;
+        if (run.segment_id !== 0) {
+          existing.segment_ids.push(run.segment_id);
+        }
+        existing.check_in_ids.push(run.id);
+      } else {
+        grouped.set(run.activity_id, {
+          activity_id: run.activity_id,
+          activity_name: run.activity_name,
+          distance: run.distance,
+          elevation_gain: run.elevation_gain,
+          checked_in_at: run.checked_in_at,
+          segment_ids: run.segment_id !== 0 ? [run.segment_id] : [],
+          check_in_ids: [run.id],
+        });
+      }
+    });
+
+    setGroupedRuns(Array.from(grouped.values()).sort(
+      (a, b) => new Date(b.checked_in_at).getTime() - new Date(a.checked_in_at).getTime()
+    ));
+  }, [manualRuns]);
 
   const fetchManualRuns = async (userId: string) => {
     const { data } = await supabase
       .from("check_ins")
-      .select("id, activity_name, distance, elevation_gain, checked_in_at")
+      .select("id, activity_id, segment_id, activity_name, distance, elevation_gain, checked_in_at")
       .eq("user_id", userId)
       .eq("is_manual", true)
       .order("checked_in_at", { ascending: false });
@@ -263,23 +309,24 @@ const Profile = () => {
     return "U";
   };
 
-  const startEditRun = (run: ManualCheckIn) => {
-    setEditingRun(run.id);
+  const startEditRun = (run: GroupedRun) => {
+    setEditingRun(run.activity_id);
     setEditForm({
       activity_name: run.activity_name || "",
       distance: run.distance ? (run.distance / 1000).toString() : "",
       elevation_gain: run.elevation_gain?.toString() || "",
       checked_in_at: new Date(run.checked_in_at),
+      segment_ids: run.segment_ids,
     });
   };
 
   const cancelEditRun = () => {
     setEditingRun(null);
-    setEditForm({ activity_name: "", distance: "", elevation_gain: "", checked_in_at: new Date() });
+    setEditForm({ activity_name: "", distance: "", elevation_gain: "", checked_in_at: new Date(), segment_ids: [] });
   };
 
-  const handleSaveRun = async (runId: string) => {
-    if (!editForm.activity_name.trim()) {
+  const handleSaveRun = async (run: GroupedRun) => {
+    if (!editForm.activity_name.trim() || !user) {
       toast({ title: "Fehler", description: "Bitte gib einen Titel ein.", variant: "destructive" });
       return;
     }
@@ -289,34 +336,62 @@ const Profile = () => {
     const distanceValue = editForm.distance ? parseFloat(editForm.distance) * 1000 : null;
     const elevationValue = editForm.elevation_gain ? parseInt(editForm.elevation_gain, 10) : null;
 
-    const { error } = await supabase
-      .from("check_ins")
-      .update({
-        activity_name: editForm.activity_name.trim(),
-        distance: distanceValue,
-        elevation_gain: elevationValue,
-        checked_in_at: editForm.checked_in_at.toISOString(),
-      })
-      .eq("id", runId);
+    try {
+      // Delete all existing check-ins for this activity
+      const { error: deleteError } = await supabase
+        .from("check_ins")
+        .delete()
+        .in("id", run.check_in_ids);
 
-    setSavingRun(false);
+      if (deleteError) throw deleteError;
 
-    if (error) {
-      toast({ title: "Fehler", description: "Run konnte nicht gespeichert werden.", variant: "destructive" });
-    } else {
+      // Re-create check-ins with new segment selections
+      const newCheckIns = editForm.segment_ids.length > 0
+        ? editForm.segment_ids.map((segmentId) => ({
+            user_id: user.id,
+            segment_id: segmentId,
+            activity_id: run.activity_id,
+            checked_in_at: editForm.checked_in_at.toISOString(),
+            is_manual: true,
+            activity_name: editForm.activity_name.trim(),
+            distance: distanceValue,
+            elevation_gain: elevationValue,
+          }))
+        : [{
+            user_id: user.id,
+            segment_id: 0,
+            activity_id: run.activity_id,
+            checked_in_at: editForm.checked_in_at.toISOString(),
+            is_manual: true,
+            activity_name: editForm.activity_name.trim(),
+            distance: distanceValue,
+            elevation_gain: elevationValue,
+          }];
+
+      const { error: insertError } = await supabase.from("check_ins").insert(newCheckIns);
+      if (insertError) throw insertError;
+
+      // Re-check achievements after segment changes
+      await supabase.functions.invoke('check-achievements');
+
       toast({ title: "Gespeichert", description: "Dein Run wurde aktualisiert." });
       setEditingRun(null);
-      if (user) await fetchManualRuns(user.id);
+      await fetchManualRuns(user.id);
+    } catch (error) {
+      console.error("Save error:", error);
+      toast({ title: "Fehler", description: "Run konnte nicht gespeichert werden.", variant: "destructive" });
+    } finally {
+      setSavingRun(false);
     }
   };
 
-  const handleDeleteRun = async (runId: string) => {
-    setDeletingRun(runId);
+  const handleDeleteRun = async (run: GroupedRun) => {
+    setDeletingRun(run.activity_id);
 
     const { error } = await supabase
       .from("check_ins")
       .delete()
-      .eq("id", runId);
+      .in("id", run.check_in_ids);
 
     setDeletingRun(null);
 
@@ -326,6 +401,14 @@ const Profile = () => {
       toast({ title: "Gelöscht", description: "Dein Run wurde entfernt." });
       if (user) await fetchManualRuns(user.id);
     }
+  };
+
+  const getSegmentNames = (segmentIds: number[]) => {
+    if (segmentsLoading || segmentIds.length === 0) return null;
+    return segmentIds
+      .map((id) => segmentsMap.get(id)?.name)
+      .filter(Boolean)
+      .join(", ");
   };
 
   if (loading) {
@@ -458,22 +541,22 @@ const Profile = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mountain className="h-5 w-5" />
-              Meine manuellen Runs ({manualRuns.length})
+              Meine manuellen Runs ({groupedRuns.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {manualRuns.length === 0 ? (
+            {groupedRuns.length === 0 ? (
               <p className="text-muted-foreground text-sm text-center py-4">
                 Noch keine manuellen Runs erfasst.
               </p>
             ) : (
               <div className="space-y-3">
-                {manualRuns.map((run) => (
+                {groupedRuns.map((run) => (
                   <div
-                    key={run.id}
+                    key={run.activity_id}
                     className="border rounded-lg p-3 space-y-3"
                   >
-                    {editingRun === run.id ? (
+                    {editingRun === run.activity_id ? (
                       // Edit mode
                       <div className="space-y-3">
                         <div className="space-y-1.5">
@@ -520,7 +603,7 @@ const Profile = () => {
                                 {format(editForm.checked_in_at, "dd. MMMM yyyy", { locale: de })}
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent className="w-auto p-0 z-50 bg-popover" align="start">
                               <Calendar
                                 mode="single"
                                 selected={editForm.checked_in_at}
@@ -532,12 +615,20 @@ const Profile = () => {
                             </PopoverContent>
                           </Popover>
                         </div>
+                        <div className="space-y-1.5">
+                          <Label>Segmente</Label>
+                          <SegmentMultiSelect
+                            selectedSegmentIds={editForm.segment_ids}
+                            onSelectionChange={(ids) => setEditForm(prev => ({ ...prev, segment_ids: ids }))}
+                            disabled={savingRun}
+                          />
+                        </div>
                         <div className="flex gap-2 justify-end">
                           <Button variant="ghost" size="sm" onClick={cancelEditRun} disabled={savingRun}>
                             <X className="h-4 w-4 mr-1" />
                             Abbrechen
                           </Button>
-                          <Button size="sm" onClick={() => handleSaveRun(run.id)} disabled={savingRun}>
+                          <Button size="sm" onClick={() => handleSaveRun(run)} disabled={savingRun}>
                             {savingRun ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Check className="h-4 w-4 mr-1" />}
                             Speichern
                           </Button>
@@ -546,7 +637,7 @@ const Profile = () => {
                     ) : (
                       // View mode
                       <div className="flex items-start justify-between">
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <p className="font-medium">{run.activity_name || "Unbenannter Run"}</p>
                           <p className="text-sm text-muted-foreground">
                             {format(new Date(run.checked_in_at), "dd. MMMM yyyy", { locale: de })}
@@ -559,8 +650,14 @@ const Profile = () => {
                               <span>{run.elevation_gain} hm</span>
                             )}
                           </div>
+                          {run.segment_ids.length > 0 && (
+                            <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
+                              <Route className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{getSegmentNames(run.segment_ids) || `${run.segment_ids.length} Segment(e)`}</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 shrink-0">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -572,11 +669,11 @@ const Profile = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDeleteRun(run.id)}
-                            disabled={deletingRun === run.id}
+                            onClick={() => handleDeleteRun(run)}
+                            disabled={deletingRun === run.activity_id}
                             className="h-8 w-8 text-destructive hover:text-destructive"
                           >
-                            {deletingRun === run.id ? (
+                            {deletingRun === run.activity_id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                               <Trash2 className="h-4 w-4" />

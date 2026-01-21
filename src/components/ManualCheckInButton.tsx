@@ -11,8 +11,9 @@ import { de } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { triggerConfetti } from '@/lib/confetti';
+import { SegmentMultiSelect } from './SegmentMultiSelect';
 
-// Manual check-ins use segment_id = 0 to indicate "general Uetliberg activity"
+// Manual check-ins use segment_id = 0 to indicate "general Uetliberg activity" (when no segments selected)
 const MANUAL_CHECKIN_SEGMENT_ID = 0;
 
 interface ManualCheckInButtonProps {
@@ -25,6 +26,7 @@ export function ManualCheckInButton({ userId, onSuccess }: ManualCheckInButtonPr
   const [title, setTitle] = useState('');
   const [distance, setDistance] = useState('');
   const [elevation, setElevation] = useState('');
+  const [selectedSegmentIds, setSelectedSegmentIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -65,18 +67,37 @@ export function ManualCheckInButton({ userId, onSuccess }: ManualCheckInButtonPr
       const distanceValue = distance ? parseFloat(distance) * 1000 : null; // Convert km to meters
       const elevationValue = elevation ? parseInt(elevation, 10) : null;
 
-      const { error } = await supabase.from('check_ins').insert({
-        user_id: userId,
-        segment_id: MANUAL_CHECKIN_SEGMENT_ID,
-        activity_id: activityId,
-        checked_in_at: date.toISOString(),
-        is_manual: true,
-        activity_name: title.trim(),
-        distance: distanceValue,
-        elevation_gain: elevationValue,
-      });
+      // Build check-in entries
+      if (selectedSegmentIds.length > 0) {
+        // Create one check-in per selected segment (all with same activity_id)
+        const checkIns = selectedSegmentIds.map((segmentId) => ({
+          user_id: userId,
+          segment_id: segmentId,
+          activity_id: activityId,
+          checked_in_at: date.toISOString(),
+          is_manual: true,
+          activity_name: title.trim(),
+          distance: distanceValue,
+          elevation_gain: elevationValue,
+        }));
 
-      if (error) throw error;
+        const { error } = await supabase.from('check_ins').insert(checkIns);
+        if (error) throw error;
+      } else {
+        // No segments selected: create single check-in with segment_id = 0
+        const { error } = await supabase.from('check_ins').insert({
+          user_id: userId,
+          segment_id: MANUAL_CHECKIN_SEGMENT_ID,
+          activity_id: activityId,
+          checked_in_at: date.toISOString(),
+          is_manual: true,
+          activity_name: title.trim(),
+          distance: distanceValue,
+          elevation_gain: elevationValue,
+        });
+
+        if (error) throw error;
+      }
 
       // Check for achievements
       await supabase.functions.invoke('check-achievements');
@@ -89,6 +110,7 @@ export function ManualCheckInButton({ userId, onSuccess }: ManualCheckInButtonPr
       setDistance('');
       setElevation('');
       setDate(new Date());
+      setSelectedSegmentIds([]);
       
       onSuccess?.();
     } catch (error) {
@@ -163,7 +185,7 @@ export function ManualCheckInButton({ userId, onSuccess }: ManualCheckInButtonPr
                 {format(date, 'dd. MMMM yyyy', { locale: de })}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 z-50 bg-popover" align="start">
               <Calendar
                 mode="single"
                 selected={date}
@@ -179,6 +201,18 @@ export function ManualCheckInButton({ userId, onSuccess }: ManualCheckInButtonPr
               />
             </PopoverContent>
           </Popover>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Segmente (optional)</Label>
+          <SegmentMultiSelect
+            selectedSegmentIds={selectedSegmentIds}
+            onSelectionChange={setSelectedSegmentIds}
+            disabled={isLoading}
+          />
+          <p className="text-xs text-muted-foreground">
+            Wähle die Segmente aus, die du gelaufen bist, um segment-spezifische Achievements freizuschalten.
+          </p>
         </div>
       </div>
 
