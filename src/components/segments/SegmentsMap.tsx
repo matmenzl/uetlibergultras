@@ -25,6 +25,7 @@ interface Segment {
 interface SegmentsMapProps {
   segments: Segment[];
   mapboxToken: string;
+  selectedSegmentId?: number | null;
 }
 
 const getPriorityColor = (priority: string | null): string => {
@@ -44,10 +45,11 @@ const formatDistance = (meters: number): string => {
   return (meters / 1000).toFixed(2) + ' km';
 };
 
-export function SegmentsMap({ segments, mapboxToken }: SegmentsMapProps) {
+export function SegmentsMap({ segments, mapboxToken, selectedSegmentId }: SegmentsMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
 
   useEffect(() => {
@@ -67,6 +69,7 @@ export function SegmentsMap({ segments, mapboxToken }: SegmentsMapProps) {
 
     map.current.on('load', () => {
       setIsLoading(false);
+      setMapLoaded(true);
 
       // Add segments as sources and layers
       segments.forEach((segment) => {
@@ -223,6 +226,112 @@ export function SegmentsMap({ segments, mapboxToken }: SegmentsMapProps) {
       }
     };
   }, [segments, mapboxToken]);
+
+  // Effect to zoom to selected segment
+  useEffect(() => {
+    if (!map.current || !mapLoaded || !selectedSegmentId) return;
+
+    const segment = segments.find(s => s.segment_id === selectedSegmentId);
+    if (!segment?.polyline) return;
+
+    try {
+      const coordinates = decodePolyline(segment.polyline);
+      if (coordinates.length < 2) return;
+
+      // Calculate bounds
+      const bounds = coordinates.reduce(
+        (acc, coord) => ({
+          minLng: Math.min(acc.minLng, coord[0]),
+          maxLng: Math.max(acc.maxLng, coord[0]),
+          minLat: Math.min(acc.minLat, coord[1]),
+          maxLat: Math.max(acc.maxLat, coord[1]),
+        }),
+        { minLng: Infinity, maxLng: -Infinity, minLat: Infinity, maxLat: -Infinity }
+      );
+
+      // Fly to segment
+      map.current.fitBounds(
+        [
+          [bounds.minLng, bounds.minLat],
+          [bounds.maxLng, bounds.maxLat],
+        ],
+        { padding: 100, duration: 1000, maxZoom: 15 }
+      );
+
+      // Highlight the segment
+      const layerId = `segment-line-${selectedSegmentId}`;
+      const outlineLayerId = `segment-outline-${selectedSegmentId}`;
+      
+      // Reset all segments first
+      segments.forEach(s => {
+        const lid = `segment-line-${s.segment_id}`;
+        const olid = `segment-outline-${s.segment_id}`;
+        if (map.current?.getLayer(lid)) {
+          map.current.setPaintProperty(lid, 'line-width', 4);
+        }
+        if (map.current?.getLayer(olid)) {
+          map.current.setPaintProperty(olid, 'line-width', 7);
+        }
+      });
+
+      // Highlight selected
+      if (map.current.getLayer(layerId)) {
+        map.current.setPaintProperty(layerId, 'line-width', 8);
+      }
+      if (map.current.getLayer(outlineLayerId)) {
+        map.current.setPaintProperty(outlineLayerId, 'line-width', 12);
+      }
+
+      // Show popup
+      if (popupRef.current) {
+        popupRef.current.remove();
+      }
+
+      const midIndex = Math.floor(coordinates.length / 2);
+      const midPoint = coordinates[midIndex];
+      const color = getPriorityColor(segment.priority);
+      const priorityLabel =
+        segment.priority === 'high'
+          ? 'Hoch'
+          : segment.priority === 'medium'
+          ? 'Mittel'
+          : 'Niedrig';
+
+      const popupContent = `
+        <div class="p-2">
+          <h3 class="font-semibold text-sm mb-1">${segment.name}</h3>
+          <p class="text-xs text-gray-600 mb-1">
+            ${formatDistance(segment.distance)} · ${segment.avg_grade?.toFixed(1) ?? 0}%
+          </p>
+          <p class="text-xs mb-2">
+            <span class="inline-block px-1.5 py-0.5 rounded text-white text-xs" style="background-color: ${color}">
+              ${priorityLabel}
+            </span>
+            ${segment.ends_at_uetliberg ? '<span class="ml-1 text-gray-500">📍 Uetliberg</span>' : ''}
+          </p>
+          <a 
+            href="https://www.strava.com/segments/${segment.segment_id}" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="text-xs text-orange-600 hover:underline"
+          >
+            Auf Strava öffnen →
+          </a>
+        </div>
+      `;
+
+      popupRef.current = new mapboxgl.Popup({
+        closeButton: true,
+        closeOnClick: true,
+        maxWidth: '250px',
+      })
+        .setLngLat([midPoint[0], midPoint[1]])
+        .setHTML(popupContent)
+        .addTo(map.current);
+    } catch (error) {
+      console.error('Error zooming to segment:', error);
+    }
+  }, [selectedSegmentId, mapLoaded, segments]);
 
   if (!mapboxToken) {
     return (

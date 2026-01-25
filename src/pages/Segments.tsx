@@ -51,6 +51,7 @@ export default function Segments() {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [onlyUetliberg, setOnlyUetliberg] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -309,7 +310,15 @@ export default function Segments() {
               ) : filteredSegments.length > 0 ? (
                 <div className="space-y-4">
                   {filteredSegments.map(segment => (
-                    <SegmentCard key={segment.segment_id} segment={segment} />
+                    <SegmentCard 
+                      key={segment.segment_id} 
+                      segment={segment}
+                      isSelected={selectedSegmentId === segment.segment_id}
+                      onShowOnMap={(id) => {
+                        setSelectedSegmentId(id);
+                        setViewMode('map');
+                      }}
+                    />
                   ))}
                 </div>
               ) : (
@@ -326,7 +335,11 @@ export default function Segments() {
               isLoading ? (
                 <Skeleton className="w-full h-[500px] sm:h-[600px] rounded-lg" />
               ) : (
-                <SegmentsMap segments={filteredSegments} mapboxToken={MAPBOX_TOKEN} />
+                <SegmentsMap 
+                  segments={filteredSegments} 
+                  mapboxToken={MAPBOX_TOKEN}
+                  selectedSegmentId={selectedSegmentId}
+                />
               )
             )}
           </TooltipProvider>

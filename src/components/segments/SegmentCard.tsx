@@ -19,6 +19,8 @@ interface Segment {
 
 interface SegmentCardProps {
   segment: Segment;
+  isSelected?: boolean;
+  onShowOnMap?: (segmentId: number) => void;
 }
 
 const formatDistance = (meters: number) => {
@@ -62,9 +64,14 @@ const getPriorityTooltip = (priority: string | null) => {
   }
 };
 
-export function SegmentCard({ segment }: SegmentCardProps) {
+export function SegmentCard({ segment, isSelected, onShowOnMap }: SegmentCardProps) {
   return (
-    <Card className="p-4 sm:p-5 hover:shadow-md transition-shadow">
+    <Card 
+      className={`p-4 sm:p-5 hover:shadow-md transition-all cursor-pointer ${
+        isSelected ? 'ring-2 ring-primary shadow-lg' : ''
+      }`}
+      onClick={() => onShowOnMap?.(segment.segment_id)}
+    >
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -73,6 +80,7 @@ export function SegmentCard({ segment }: SegmentCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="font-semibold text-base sm:text-lg hover:text-primary transition-colors inline-flex items-center gap-1.5 group"
+              onClick={(e) => e.stopPropagation()}
             >
               {segment.name}
               <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
