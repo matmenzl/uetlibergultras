@@ -14,6 +14,7 @@ import {
   SegmentFilters,
   SegmentCard,
   ViewToggle,
+  SegmentsMap,
   type SortOption,
   type PriorityFilter,
   type CategoryFilter,
@@ -32,7 +33,13 @@ interface Segment {
   priority: string | null;
   distance_to_center: number | null;
   ends_at_uetliberg: boolean | null;
+  polyline?: string | null;
+  start_latlng?: number[] | null;
+  end_latlng?: number[] | null;
 }
+
+// Mapbox public token from environment
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
 export default function Segments() {
   const [user, setUser] = useState<User | null>(null);
@@ -56,11 +63,11 @@ export default function Segments() {
   }, []);
 
   const { data: segments, isLoading } = useQuery({
-    queryKey: ['all-segments'],
+    queryKey: ['all-segments-with-polylines'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('uetliberg_segments')
-        .select('segment_id, name, distance, avg_grade, elevation_high, elevation_low, climb_category, effort_count, priority, distance_to_center, ends_at_uetliberg')
+        .select('segment_id, name, distance, avg_grade, elevation_high, elevation_low, climb_category, effort_count, priority, distance_to_center, ends_at_uetliberg, polyline, start_latlng, end_latlng')
         .order('name', { ascending: true });
       if (error) throw error;
       return data as Segment[];
@@ -316,10 +323,11 @@ export default function Segments() {
                 </Card>
               )
             ) : (
-              <Card className="p-8 text-center">
-                <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Kartenansicht wird geladen...</p>
-              </Card>
+              isLoading ? (
+                <Skeleton className="w-full h-[500px] sm:h-[600px] rounded-lg" />
+              ) : (
+                <SegmentsMap segments={filteredSegments} mapboxToken={MAPBOX_TOKEN} />
+              )
             )}
           </TooltipProvider>
         </div>
