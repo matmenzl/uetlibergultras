@@ -1,15 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { SegmentSuggestionForm } from '@/components/SegmentSuggestionForm';
 import { useQuery } from '@tanstack/react-query';
-import { Mountain, TrendingUp, Ruler, Users, MapPin, Clock, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { Mountain, Clock, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import {
+  SegmentFilters,
+  SegmentCard,
+  ViewToggle,
+  type SortOption,
+  type PriorityFilter,
+  type CategoryFilter,
+  type ViewMode,
+} from '@/components/segments';
+
 interface Segment {
   segment_id: number;
   name: string;
@@ -23,40 +33,38 @@ interface Segment {
   distance_to_center: number | null;
   ends_at_uetliberg: boolean | null;
 }
+
 export default function Segments() {
   const [user, setUser] = useState<User | null>(null);
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('name-asc');
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
+  const [onlyUetliberg, setOnlyUetliberg] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+
   useEffect(() => {
-    supabase.auth.getSession().then(({
-      data: {
-        session
-      }
-    }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
-    const {
-      data: {
-        subscription
-      }
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
   }, []);
-  const {
-    data: segments,
-    isLoading
-  } = useQuery({
+
+  const { data: segments, isLoading } = useQuery({
     queryKey: ['all-segments'],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('uetliberg_segments').select('segment_id, name, distance, avg_grade, elevation_high, elevation_low, climb_category, effort_count, priority, distance_to_center, ends_at_uetliberg').order('name', {
-        ascending: true
-      });
+      const { data, error } = await supabase
+        .from('uetliberg_segments')
+        .select('segment_id, name, distance, avg_grade, elevation_high, elevation_low, climb_category, effort_count, priority, distance_to_center, ends_at_uetliberg')
+        .order('name', { ascending: true });
       if (error) throw error;
       return data as Segment[];
-    }
+    },
   });
 
   // Fetch user's own suggestions
@@ -74,6 +82,65 @@ export default function Segments() {
     },
     enabled: !!user,
   });
+
+  // Helper to check if segment has valid name
+  const isValidSegment = (segment: Segment) => {
+    const isPlaceholder = segment.name.startsWith('Segment ') && /^\d+$/.test(segment.name.replace('Segment ', ''));
+    return !isPlaceholder;
+  };
+
+  const validSegments = useMemo(() => segments?.filter(isValidSegment) || [], [segments]);
+  const placeholderSegments = useMemo(() => segments?.filter(s => !isValidSegment(s)) || [], [segments]);
+
+  // Filter and sort segments
+  const filteredSegments = useMemo(() => {
+    let result = [...validSegments];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(s => s.name.toLowerCase().includes(query));
+    }
+
+    // Priority filter
+    if (priorityFilter !== 'all') {
+      result = result.filter(s => s.priority === priorityFilter);
+    }
+
+    // Category filter
+    if (categoryFilter !== 'all') {
+      result = result.filter(s => s.climb_category === parseInt(categoryFilter));
+    }
+
+    // Uetliberg filter
+    if (onlyUetliberg) {
+      result = result.filter(s => s.ends_at_uetliberg === true);
+    }
+
+    // Sorting
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'distance-asc':
+          return (a.distance ?? 0) - (b.distance ?? 0);
+        case 'distance-desc':
+          return (b.distance ?? 0) - (a.distance ?? 0);
+        case 'grade-asc':
+          return Math.abs(a.avg_grade ?? 0) - Math.abs(b.avg_grade ?? 0);
+        case 'grade-desc':
+          return Math.abs(b.avg_grade ?? 0) - Math.abs(a.avg_grade ?? 0);
+        case 'popularity':
+          return (b.effort_count ?? 0) - (a.effort_count ?? 0);
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [validSegments, searchQuery, priorityFilter, categoryFilter, onlyUetliberg, sortBy]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -114,64 +181,17 @@ export default function Segments() {
     }
   };
 
-  // Helper to check if segment has valid name
-  const isValidSegment = (segment: Segment) => {
-    const isPlaceholder = segment.name.startsWith('Segment ') && /^\d+$/.test(segment.name.replace('Segment ', ''));
-    return !isPlaceholder;
-  };
-  const validSegments = segments?.filter(isValidSegment) || [];
-  const placeholderSegments = segments?.filter(s => !isValidSegment(s)) || [];
-  const formatDistance = (meters: number) => {
-    return (meters / 1000).toFixed(2) + ' km';
-  };
-  const formatElevation = (high: number | null, low: number | null) => {
-    if (high === null || low === null) return '-';
-    return `${Math.round(high - low)} m`;
-  };
-  const getClimbCategoryLabel = (category: number) => {
-    if (category === 0) return 'Flach';
-    if (category === 5) return 'HC';
-    return `Kat. ${category}`;
-  };
-  const getPriorityColor = (priority: string | null) => {
-    switch (priority) {
-      case 'high':
-        return 'bg-green-500/20 text-green-700 dark:text-green-400';
-      case 'medium':
-        return 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400';
-      case 'low':
-        return 'bg-red-500/20 text-red-700 dark:text-red-400';
-      default:
-        return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getPriorityTooltip = (priority: string | null) => {
-    switch (priority) {
-      case 'high':
-        return 'Endet innerhalb 2 km vom Uetliberg-Gipfel';
-      case 'medium':
-        return 'Endet weiter als 2 km vom Uetliberg-Gipfel';
-      case 'low':
-        return 'Ohne direkten Uetliberg-Bezug';
-      default:
-        return 'Priorität nicht klassifiziert';
-    }
-  };
-  return <div className="min-h-screen flex flex-col bg-background">
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
-      
+
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
             <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
-            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">
-              Uetliberg Segmente
-            </h1>
+            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Uetliberg Segmente</h1>
           </div>
-          <p className="text-muted-foreground mb-8">
-            Alle getrackten Segmente rund um den Uetliberg
-          </p>
+          <p className="text-muted-foreground mb-8">Alle getrackten Segmente rund um den Uetliberg</p>
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -193,7 +213,7 @@ export default function Segments() {
             </Card>
           </div>
 
-          {/* Segment Suggestion Form - shown to all users */}
+          {/* Segment Suggestion Form */}
           <div className="mb-6">
             <SegmentSuggestionForm />
           </div>
@@ -204,11 +224,11 @@ export default function Segments() {
               <h3 className="text-sm font-semibold mb-3">Deine Vorschläge</h3>
               <div className="space-y-2">
                 {mySuggestions.map((suggestion) => (
-                  <div 
+                  <div
                     key={suggestion.id}
                     className={`flex items-center justify-between gap-3 p-2 rounded-lg ${
-                      suggestion.status === 'pending' 
-                        ? 'bg-muted/50' 
+                      suggestion.status === 'pending'
+                        ? 'bg-muted/50'
                         : suggestion.status === 'approved'
                         ? 'bg-green-500/10'
                         : 'bg-red-500/10'
@@ -216,13 +236,15 @@ export default function Segments() {
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       {getStatusIcon(suggestion.status)}
-                      <a 
+                      <a
                         href={suggestion.strava_segment_url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-primary hover:underline truncate flex items-center gap-1"
                       >
-                        <span className="truncate">{suggestion.strava_segment_url.replace('https://www.strava.com/segments/', 'Segment ')}</span>
+                        <span className="truncate">
+                          {suggestion.strava_segment_url.replace('https://www.strava.com/segments/', 'Segment ')}
+                        </span>
                         <ExternalLink className="w-3 h-3 flex-shrink-0" />
                       </a>
                     </div>
@@ -236,90 +258,74 @@ export default function Segments() {
           )}
 
           {/* Placeholder segments info */}
-          {placeholderSegments.length > 0 && <Card className="p-4 mb-6 border-muted bg-muted/30">
+          {placeholderSegments.length > 0 && (
+            <Card className="p-4 mb-6 border-muted bg-muted/30">
               <p className="text-sm text-muted-foreground">
                 {placeholderSegments.length} Segment(e) werden noch von Strava geladen...
               </p>
-            </Card>}
+            </Card>
+          )}
 
-          {/* Segment List */}
+          {/* Filters and View Toggle */}
+          <div className="mb-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <ViewToggle value={viewMode} onChange={setViewMode} />
+            </div>
+            <SegmentFilters
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              priorityFilter={priorityFilter}
+              onPriorityChange={setPriorityFilter}
+              categoryFilter={categoryFilter}
+              onCategoryChange={setCategoryFilter}
+              onlyUetliberg={onlyUetliberg}
+              onOnlyUetlibergChange={setOnlyUetliberg}
+              resultCount={filteredSegments.length}
+              totalCount={validSegments.length}
+            />
+          </div>
+
+          {/* Segment List or Map */}
           <TooltipProvider>
-          {isLoading ? <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map(i => <Card key={i} className="p-4">
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2" />
-                </Card>)}
-            </div> : validSegments.length > 0 ? <div className="space-y-4">
-              {validSegments.map(segment => <Card key={segment.segment_id} className="p-4 sm:p-5 hover:shadow-md transition-shadow">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <a 
-                          href={`https://www.strava.com/segments/${segment.segment_id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-semibold text-base sm:text-lg hover:text-primary transition-colors inline-flex items-center gap-1.5 group"
-                        >
-                          {segment.name}
-                          <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </a>
-                        {segment.ends_at_uetliberg && <Badge variant="secondary" className="flex-shrink-0">
-                            <MapPin className="w-3 h-3 mr-1" />
-                            Uetliberg
-                          </Badge>}
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-3 sm:gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Ruler className="w-4 h-4" />
-                          {formatDistance(segment.distance ?? 0)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <TrendingUp className="w-4 h-4" />
-                          {(segment.avg_grade != null ? segment.avg_grade : 0).toFixed(1)}%
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Mountain className="w-4 h-4" />
-                          {formatElevation(segment.elevation_high, segment.elevation_low)}
-                        </span>
-                        {segment.effort_count && segment.effort_count > 0 && <span className="flex items-center gap-1">
-                            <Users className="w-4 h-4" />
-                            {segment.effort_count.toLocaleString()}
-                          </span>}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2 flex-shrink-0">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge className={`${getPriorityColor(segment.priority)} cursor-help`}>
-                            {segment.priority === 'high' ? 'Hoch' : segment.priority === 'medium' ? 'Mittel' : 'Niedrig'}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{getPriorityTooltip(segment.priority)}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <Badge variant="outline">
-                        {getClimbCategoryLabel(segment.climb_category)}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  {segment.distance_to_center != null && <p className="text-xs text-muted-foreground mt-3">
-                      {segment.distance_to_center.toFixed(2)} km vom Uetliberg-Zentrum
-                    </p>}
-                </Card>)}
-            </div> : <Card className="p-8 text-center">
-              <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">
-                Noch keine Segmente vorhanden
-              </p>
-            </Card>}
+            {viewMode === 'list' ? (
+              isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <Card key={i} className="p-4">
+                      <Skeleton className="h-6 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </Card>
+                  ))}
+                </div>
+              ) : filteredSegments.length > 0 ? (
+                <div className="space-y-4">
+                  {filteredSegments.map(segment => (
+                    <SegmentCard key={segment.segment_id} segment={segment} />
+                  ))}
+                </div>
+              ) : (
+                <Card className="p-8 text-center">
+                  <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    {validSegments.length === 0
+                      ? 'Noch keine Segmente vorhanden'
+                      : 'Keine Segmente gefunden'}
+                  </p>
+                </Card>
+              )
+            ) : (
+              <Card className="p-8 text-center">
+                <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Kartenansicht wird geladen...</p>
+              </Card>
+            )}
           </TooltipProvider>
         </div>
       </main>
 
       <Footer />
-    </div>;
+    </div>
+  );
 }
