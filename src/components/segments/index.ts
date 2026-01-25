@@ -3,3 +3,4 @@ export type { SortOption, PriorityFilter, CategoryFilter } from './SegmentFilter
 export { SegmentCard } from './SegmentCard';
 export { ViewToggle } from './ViewToggle';
 export type { ViewMode } from './ViewToggle';
+export { SegmentsMap } from './SegmentsMap';
