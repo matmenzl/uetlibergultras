@@ -9,7 +9,13 @@ import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { SegmentSuggestionForm } from '@/components/SegmentSuggestionForm';
 import { useQuery } from '@tanstack/react-query';
-import { Mountain, Clock, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { Mountain, Clock, CheckCircle, XCircle, ExternalLink, Lightbulb } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import {
   SegmentFilters,
   SegmentCard,
@@ -50,7 +56,7 @@ export default function Segments() {
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [onlyUetliberg, setOnlyUetliberg] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -199,71 +205,63 @@ export default function Segments() {
             <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
             <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Uetliberg Segmente</h1>
           </div>
-          <p className="text-muted-foreground mb-8">Alle getrackten Segmente rund um den Uetliberg</p>
+          <p className="text-muted-foreground mb-6">Alle getrackten Segmente rund um den Uetliberg</p>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <Card className="p-4 text-center">
-              <p className="text-2xl sm:text-3xl font-bold text-primary">{validSegments.length}</p>
-              <p className="text-sm text-muted-foreground">Segmente</p>
-            </Card>
-            <Card className="p-4 text-center">
-              <p className="text-2xl sm:text-3xl font-bold text-primary">
-                {validSegments.filter(s => s.priority === 'high').length}
-              </p>
-              <p className="text-sm text-muted-foreground">Hohe Priorität</p>
-            </Card>
-            <Card className="p-4 text-center">
-              <p className="text-2xl sm:text-3xl font-bold text-primary">
-                {validSegments.filter(s => s.ends_at_uetliberg).length}
-              </p>
-              <p className="text-sm text-muted-foreground">Enden am Uetliberg</p>
-            </Card>
-          </div>
-
-          {/* Segment Suggestion Form */}
-          <div className="mb-6">
-            <SegmentSuggestionForm />
-          </div>
-
-          {/* User's own suggestions */}
-          {user && mySuggestions && mySuggestions.length > 0 && (
-            <Card className="p-4 mb-6">
-              <h3 className="text-sm font-semibold mb-3">Deine Vorschläge</h3>
-              <div className="space-y-2">
-                {mySuggestions.map((suggestion) => (
-                  <div
-                    key={suggestion.id}
-                    className={`flex items-center justify-between gap-3 p-2 rounded-lg ${
-                      suggestion.status === 'pending'
-                        ? 'bg-muted/50'
-                        : suggestion.status === 'approved'
-                        ? 'bg-green-500/10'
-                        : 'bg-red-500/10'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      {getStatusIcon(suggestion.status)}
-                      <a
-                        href={suggestion.strava_segment_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-primary hover:underline truncate flex items-center gap-1"
-                      >
-                        <span className="truncate">
-                          {suggestion.strava_segment_url.replace('https://www.strava.com/segments/', 'Segment ')}
-                        </span>
-                        <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                      </a>
+          {/* Segment Suggestion Accordion */}
+          <Accordion type="single" collapsible className="mb-6">
+            <AccordionItem value="suggest" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4 text-primary" />
+                  <span>Segment vorschlagen</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="pt-2">
+                  <SegmentSuggestionForm />
+                  
+                  {/* User's own suggestions */}
+                  {user && mySuggestions && mySuggestions.length > 0 && (
+                    <div className="mt-4 pt-4 border-t">
+                      <h3 className="text-sm font-semibold mb-3">Deine Vorschläge</h3>
+                      <div className="space-y-2">
+                        {mySuggestions.map((suggestion) => (
+                          <div
+                            key={suggestion.id}
+                            className={`flex items-center justify-between gap-3 p-2 rounded-lg ${
+                              suggestion.status === 'pending'
+                                ? 'bg-muted/50'
+                                : suggestion.status === 'approved'
+                                ? 'bg-green-500/10'
+                                : 'bg-red-500/10'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              {getStatusIcon(suggestion.status)}
+                              <a
+                                href={suggestion.strava_segment_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-primary hover:underline truncate flex items-center gap-1"
+                              >
+                                <span className="truncate">
+                                  {suggestion.strava_segment_url.replace('https://www.strava.com/segments/', 'Segment ')}
+                                </span>
+                                <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                              </a>
+                            </div>
+                            <Badge className={`${getStatusColor(suggestion.status)} flex-shrink-0`}>
+                              {getStatusLabel(suggestion.status)}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <Badge className={`${getStatusColor(suggestion.status)} flex-shrink-0`}>
-                      {getStatusLabel(suggestion.status)}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
           {/* Placeholder segments info */}
           {placeholderSegments.length > 0 && (
