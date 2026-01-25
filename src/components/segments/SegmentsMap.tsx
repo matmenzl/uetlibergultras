@@ -30,11 +30,11 @@ interface SegmentsMapProps {
 const getPriorityColor = (priority: string | null): string => {
   switch (priority) {
     case 'high':
-      return '#22c55e'; // green
+      return '#2563eb'; // blue - high contrast on outdoor maps
     case 'medium':
-      return '#f59e0b'; // amber
+      return '#9333ea'; // violet - rarely appears on maps
     case 'low':
-      return '#ef4444'; // red
+      return '#ea580c'; // orange - distinct from red marker
     default:
       return '#6b7280'; // gray
   }
@@ -99,6 +99,25 @@ export function SegmentsMap({ segments, mapboxToken }: SegmentsMapProps) {
             },
           });
 
+          const outlineLayerId = `segment-outline-${segment.segment_id}`;
+
+          // White outline layer (behind the colored line)
+          map.current.addLayer({
+            id: outlineLayerId,
+            type: 'line',
+            source: sourceId,
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round',
+            },
+            paint: {
+              'line-color': '#ffffff',
+              'line-width': 7,
+              'line-opacity': 0.9,
+            },
+          });
+
+          // Colored line layer (on top)
           map.current.addLayer({
             id: layerId,
             type: 'line',
@@ -110,15 +129,16 @@ export function SegmentsMap({ segments, mapboxToken }: SegmentsMapProps) {
             paint: {
               'line-color': color,
               'line-width': 4,
-              'line-opacity': 0.8,
+              'line-opacity': 1,
             },
           });
 
-          // Hover effect
+          // Hover effect on both layers
           map.current.on('mouseenter', layerId, () => {
             if (map.current) {
               map.current.getCanvas().style.cursor = 'pointer';
               map.current.setPaintProperty(layerId, 'line-width', 6);
+              map.current.setPaintProperty(outlineLayerId, 'line-width', 9);
             }
           });
 
@@ -126,6 +146,7 @@ export function SegmentsMap({ segments, mapboxToken }: SegmentsMapProps) {
             if (map.current) {
               map.current.getCanvas().style.cursor = '';
               map.current.setPaintProperty(layerId, 'line-width', 4);
+              map.current.setPaintProperty(outlineLayerId, 'line-width', 7);
             }
           });
 
@@ -225,15 +246,15 @@ export function SegmentsMap({ segments, mapboxToken }: SegmentsMapProps) {
       {/* Legend */}
       <div className="mt-4 flex flex-wrap gap-4 text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-1 rounded" style={{ backgroundColor: '#22c55e' }} />
+          <div className="w-4 h-1 rounded shadow-sm" style={{ backgroundColor: '#2563eb', boxShadow: '0 0 0 1px white' }} />
           <span>Hohe Priorität</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-1 rounded" style={{ backgroundColor: '#f59e0b' }} />
+          <div className="w-4 h-1 rounded shadow-sm" style={{ backgroundColor: '#9333ea', boxShadow: '0 0 0 1px white' }} />
           <span>Mittlere Priorität</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-1 rounded" style={{ backgroundColor: '#ef4444' }} />
+          <div className="w-4 h-1 rounded shadow-sm" style={{ backgroundColor: '#ea580c', boxShadow: '0 0 0 1px white' }} />
           <span>Niedrige Priorität</span>
         </div>
         <div className="flex items-center gap-2">
