@@ -27,7 +27,8 @@ type AchievementType =
   | 'snow_bunny'
   | 'frosty'
   | 'alternativliga'
-  | 'wasserratte';
+  | 'wasserratte'
+  | 'founding_member';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
@@ -87,6 +88,13 @@ serve(async (req) => {
       .eq('user_id', userId);
     
     const existingSet = new Set(existingAchievements?.map(a => a.achievement) || []);
+
+    // Get user profile for founding member status
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('is_founding_member')
+      .eq('id', userId)
+      .single();
 
     // Get check-in stats (including weather data and manual flag)
     const { data: checkIns } = await supabaseAdmin
@@ -322,6 +330,11 @@ serve(async (req) => {
     const uniqueRainActivities = new Set(rainRuns.map(c => c.activity_id));
     if (uniqueRainActivities.size >= 5 && !existingSet.has('wasserratte')) {
       newAchievements.push('wasserratte');
+    }
+
+    // Check Founding Member achievement
+    if (profile?.is_founding_member === true && !existingSet.has('founding_member')) {
+      newAchievements.push('founding_member');
     }
 
     // Insert new achievements
