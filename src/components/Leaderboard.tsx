@@ -68,6 +68,7 @@ export function Leaderboard() {
         .from('leaderboard_stats')
         .select('*')
         .order('total_runs', { ascending: false })
+        .order('achievement_count', { ascending: false })
         .limit(10);
       
       if (error) throw error;
