@@ -1,43 +1,35 @@
 
 
-# Monats-Challenge Dropdown angleichen an "Uetliberg-Ultras unterwegs"
+## Profilbild automatisch aktualisieren
 
-## Was sich aendert
+### Problem
+Strava-Profilbild-URLs laufen nach einiger Zeit ab. Aktuell wird das Bild nur beim Login (strava-auth-exchange) aktualisiert. Nutzer, die sich selten neu anmelden, haben veraltete URLs.
 
-Der "Vergangene Monate"-Dropdown wird von unten (als separate Sektion) nach oben in die Header-Zeile verschoben -- genau wie der Zeitraum-Filter bei "Uetliberg-Ultras unterwegs".
+### Loesung
+Das Profilbild wird zusaetzlich bei jeder Webhook-Aktivitaet (neue Runs) automatisch aktualisiert, da wir dort bereits einen gueltig authentifizierten API-Zugang haben.
+
+### Aenderungen
+
+**1. strava-webhook/index.ts erweitern**
+- Nach dem Abrufen der Aktivitaetsdetails wird zusaetzlich der Strava-Athleten-Endpunkt (`/api/v3/athlete`) aufgerufen
+- Das Profilbild (`athlete.profile`) wird in der `profiles`-Tabelle aktualisiert
+- Dies geschieht nur bei `create`/`update` Events (nicht bei `delete`)
+- Ein einzelner zusaetzlicher API-Call pro Webhook-Event
+
+**2. Ablauf**
 
 ```text
-Vorher:
-+----------------------------------------------+
-| Trophy  Monats-Challenge Februar   Noch 17 T |
-| (Leaderboard...)                             |
-| [v Vergangene Monate               ] <-- unten, volle Breite
-+----------------------------------------------+
-
-Nachher:
-+----------------------------------------------+
-| Trophy  Monats-Challenge  [v Februar  ]      |
-| (Leaderboard oder Past Winners anzeigen)     |
-+----------------------------------------------+
+Strava Webhook (neue Aktivitaet)
+  |
+  +-> Aktivitaet abrufen (bestehend)
+  +-> Athleten-Profil abrufen (NEU)
+  +-> Profilbild in DB aktualisieren (NEU)
+  +-> Check-Ins erstellen (bestehend)
 ```
 
-## Verhalten
+### Technische Details
 
-- Der Dropdown steht rechts neben dem Titel in der Header-Zeile
-- Optionen: der aktuelle Monat (z.B. "Februar 2026") plus alle vergangenen Monate aus `pastWinners`
-- Standardmaessig ist der aktuelle Monat ausgewaehlt -> zeigt das Live-Leaderboard
-- Waehlt man einen vergangenen Monat -> zeigt die gespeicherten Gewinner
-- Der "Noch X Tage"-Badge wird nur angezeigt, wenn der aktuelle Monat ausgewaehlt ist
-
-## Technische Umsetzung
-
-### Datei: `src/components/MonthlyChallenge.tsx`
-
-1. **State aendern**: `selectedMonth` startet mit dem Wert des aktuellen Monats (z.B. `"2026-2"`) statt leer
-2. **Dropdown in die Header-Zeile verschieben**: Das Select wird neben den Titel platziert (wie `TodaysRunners` Zeile 220-231), mit kompakter Breite (`w-[160px]`)
-3. **Dropdown-Optionen**: Aktueller Monat als erste Option, dann alle `pastWinners`-Monate
-4. **Conditional Rendering**: Wenn `selectedMonth` dem aktuellen Monat entspricht, wird das Live-Leaderboard angezeigt; andernfalls die historischen Gewinner
-5. **"Noch X Tage"-Badge** nur bei aktuellem Monat sichtbar
-6. **Untere Dropdown-Sektion entfernen**: Die gesamte bisherige Select-Sektion am Ende der Card wird entfernt
-7. **Trophy-Icon und Titel vereinfachen**: Titel wird zu "Monats-Challenge" ohne den Monatsnamen (der Monat steht ja im Dropdown)
+- In der `processActivityEvent` Funktion wird nach dem Token-Refresh ein zusaetzlicher Fetch auf `https://www.strava.com/api/v3/athlete` durchgefuehrt
+- Das Ergebnis wird per `supabaseAdmin.from('profiles').update({ profile_picture: athlete.profile })` gespeichert
+- Fehler beim Bild-Update sind nicht-fatal (werden geloggt, blockieren aber nicht die Verarbeitung)
 
