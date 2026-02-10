@@ -156,6 +156,22 @@ export default function PublicProfile() {
     enabled: isAuthenticated === true && !!userId,
   });
 
+  // Fetch monthly challenge medals
+  const { data: monthlyMedals } = useQuery({
+    queryKey: ['public-profile-monthly-medals', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('monthly_challenge_winners')
+        .select('year, month, rank, total_runs')
+        .eq('user_id', userId!)
+        .order('year', { ascending: false })
+        .order('month', { ascending: false });
+      if (error) throw error;
+      return data as { year: number; month: number; rank: number; total_runs: number }[];
+    },
+    enabled: isAuthenticated === true && !!userId,
+  });
+
   if (isAuthenticated === null) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
