@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Mountain, Award, Route, TrendingUp, Calendar, Snowflake, CloudRain, User, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Mountain, Award, Route, TrendingUp, Calendar, Snowflake, CloudRain, User, Clock, ChevronDown, ChevronUp, Trophy, Medal } from 'lucide-react';
 import { BadgeGrid, EarnedBadge } from '@/components/badges/BadgeGrid';
 import { badgeDefinitions, getBadgeById } from '@/config/badge-definitions';
 import { format } from 'date-fns';
@@ -152,6 +152,22 @@ export default function PublicProfile() {
         .order('earned_at', { ascending: false });
       if (error) throw error;
       return data as UserAchievement[];
+    },
+    enabled: isAuthenticated === true && !!userId,
+  });
+
+  // Fetch monthly challenge medals
+  const { data: monthlyMedals } = useQuery({
+    queryKey: ['public-profile-monthly-medals', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('monthly_challenge_winners')
+        .select('year, month, rank, total_runs')
+        .eq('user_id', userId!)
+        .order('year', { ascending: false })
+        .order('month', { ascending: false });
+      if (error) throw error;
+      return data as { year: number; month: number; rank: number; total_runs: number }[];
     },
     enabled: isAuthenticated === true && !!userId,
   });
@@ -347,6 +363,37 @@ export default function PublicProfile() {
                   earnedBadges={earnedBadges}
                   size="sm"
                 />
+              </Card>
+            )}
+
+            {/* Monthly Challenge Medals */}
+            {monthlyMedals && monthlyMedals.length > 0 && (
+              <Card className="p-6">
+                <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-primary" />
+                  Monats-Challenge Medaillen
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {monthlyMedals.map((medal) => {
+                    const MONTHS_DE_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+                    const medalIcon = medal.rank === 1
+                      ? <Trophy className="w-3.5 h-3.5 text-yellow-500" />
+                      : medal.rank === 2
+                      ? <Medal className="w-3.5 h-3.5 text-gray-400" />
+                      : <Medal className="w-3.5 h-3.5 text-amber-600" />;
+                    const medalLabel = medal.rank === 1 ? 'Gold' : medal.rank === 2 ? 'Silber' : 'Bronze';
+                    return (
+                      <Badge
+                        key={`${medal.year}-${medal.month}`}
+                        variant="secondary"
+                        className="gap-1 py-1"
+                      >
+                        {medalIcon}
+                        {MONTHS_DE_SHORT[medal.month - 1]} {medal.year} · {medalLabel}
+                      </Badge>
+                    );
+                  })}
+                </div>
               </Card>
             )}
 

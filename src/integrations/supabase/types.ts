@@ -113,6 +113,36 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_challenge_winners: {
+        Row: {
+          awarded_at: string
+          id: string
+          month: number
+          rank: number
+          total_runs: number
+          user_id: string
+          year: number
+        }
+        Insert: {
+          awarded_at?: string
+          id?: string
+          month: number
+          rank: number
+          total_runs: number
+          user_id: string
+          year: number
+        }
+        Update: {
+          awarded_at?: string
+          id?: string
+          month?: number
+          rank?: number
+          total_runs?: number
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
