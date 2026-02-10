@@ -48,15 +48,13 @@ const getRankBackground = (rank: number) => {
   }
 };
 
-export function MonthlyChallenge() {
+  const navigate = useNavigate();
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
   const currentMonthKey = `${currentYear}-${currentMonth}`;
   const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthKey);
   const [user, setUser] = useState<any>(null);
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1; // 1-12
   const daysRemaining = differenceInDays(lastDayOfMonth(now), now);
 
   useEffect(() => {
