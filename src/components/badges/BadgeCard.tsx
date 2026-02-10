@@ -191,7 +191,9 @@ export function BadgeCard({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-foreground leading-tight">{badge.title}</h4>
+              <h4 className="font-bold text-foreground leading-tight">
+                {badge.title}{isMonthly && monthLabel ? ` – ${monthLabel}` : ''}
+              </h4>
               <p className="text-xs text-muted-foreground mt-0.5">{badge.description}</p>
             </div>
           </div>
