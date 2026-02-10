@@ -15,7 +15,7 @@ const MONTHS_DE = [
 function getMonthLabel(earnedAt?: string): string | null {
   if (!earnedAt) return null;
   const d = new Date(earnedAt);
-  return MONTHS_DE[d.getMonth()];
+  return MONTHS_DE[d.getUTCMonth()];
 }
 
 const MONTHLY_BADGE_IDS = ['monthly_gold', 'monthly_silver', 'monthly_bronze'];
