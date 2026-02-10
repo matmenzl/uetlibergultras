@@ -366,6 +366,37 @@ export default function PublicProfile() {
               </Card>
             )}
 
+            {/* Monthly Challenge Medals */}
+            {monthlyMedals && monthlyMedals.length > 0 && (
+              <Card className="p-6">
+                <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-primary" />
+                  Monats-Challenge Medaillen
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {monthlyMedals.map((medal) => {
+                    const MONTHS_DE_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+                    const medalIcon = medal.rank === 1
+                      ? <Trophy className="w-3.5 h-3.5 text-yellow-500" />
+                      : medal.rank === 2
+                      ? <Medal className="w-3.5 h-3.5 text-gray-400" />
+                      : <Medal className="w-3.5 h-3.5 text-amber-600" />;
+                    const medalLabel = medal.rank === 1 ? 'Gold' : medal.rank === 2 ? 'Silber' : 'Bronze';
+                    return (
+                      <Badge
+                        key={`${medal.year}-${medal.month}`}
+                        variant="secondary"
+                        className="gap-1 py-1"
+                      >
+                        {medalIcon}
+                        {MONTHS_DE_SHORT[medal.month - 1]} {medal.year} · {medalLabel}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
             {/* Recent Runs */}
             <Card className="p-6">
               <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
