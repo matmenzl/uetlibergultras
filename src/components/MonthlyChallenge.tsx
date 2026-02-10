@@ -278,38 +278,59 @@ export function MonthlyChallenge() {
           })}
         </div>
       )}
-      {/* Past Winners History */}
+      {/* Past Winners History - Dropdown Filter */}
       {user && pastWinners && pastWinners.length > 0 && (
-        <Collapsible className="mt-4">
-          <CollapsibleTrigger className="w-full flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2">
-            <History className="w-4 h-4" />
-            <span>Vergangene Monate</span>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="space-y-3 pt-2">
+        <div className="mt-4 space-y-2">
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-full">
+              <div className="flex items-center gap-2">
+                <History className="w-4 h-4 text-muted-foreground" />
+                <SelectValue placeholder="Vergangene Monate" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
               {pastWinners.map(monthData => (
-                <div key={`${monthData.year}-${monthData.month}`} className="border-t border-border/50 pt-3">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">
-                    {MONTHS_DE[monthData.month - 1]} {monthData.year}
-                  </p>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1">
-                    {monthData.winners.map(winner => (
-                      <Link
-                        key={winner.user_id}
-                        to={`/runner/${winner.user_id}`}
-                        className="flex items-center gap-1.5 text-sm hover:text-primary transition-colors"
-                      >
-                        {getRankIcon(winner.rank)}
-                        <span className="truncate max-w-[120px]">{winner.display_name}</span>
-                        <span className="text-xs text-muted-foreground">({winner.total_runs})</span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+                <SelectItem key={`${monthData.year}-${monthData.month}`} value={`${monthData.year}-${monthData.month}`}>
+                  {MONTHS_DE[monthData.month - 1]} {monthData.year}
+                </SelectItem>
               ))}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+            </SelectContent>
+          </Select>
+          {selectedMonth && (() => {
+            const activeHistory = pastWinners.find(m => `${m.year}-${m.month}` === selectedMonth);
+            if (!activeHistory) return null;
+            return (
+              <div className="space-y-2">
+                {activeHistory.winners.map(winner => (
+                  <Link
+                    key={winner.user_id}
+                    to={`/runner/${winner.user_id}`}
+                    className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(winner.rank)}`}
+                  >
+                    <div className="w-6 flex justify-center">
+                      {getRankIcon(winner.rank)}
+                    </div>
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={winner.profile_picture || undefined} />
+                      <AvatarFallback>
+                        <User className="w-4 h-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate text-sm">
+                        {winner.display_name}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Mountain className="w-3 h-3" />
+                      {winner.total_runs}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
       )}
     </Card>
   );
