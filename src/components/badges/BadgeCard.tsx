@@ -63,6 +63,7 @@ export function BadgeCard({
     : 0;
 
   return (
+    <div className="flex flex-col items-center">
     <Popover>
       <PopoverTrigger asChild>
         <button
