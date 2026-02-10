@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Mountain, Award, Route, TrendingUp, Calendar, Snowflake, CloudRain, User, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Mountain, Award, Route, TrendingUp, Calendar, Snowflake, CloudRain, User, Clock, ChevronDown, ChevronUp, Trophy, Medal } from 'lucide-react';
 import { BadgeGrid, EarnedBadge } from '@/components/badges/BadgeGrid';
 import { badgeDefinitions, getBadgeById } from '@/config/badge-definitions';
 import { format } from 'date-fns';
