@@ -4,9 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Medal, Mountain, User, Calendar } from 'lucide-react';
+import { Trophy, Medal, Mountain, User, Calendar, History } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { differenceInDays, lastDayOfMonth } from 'date-fns';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 
 const MONTHS_DE = [
@@ -126,6 +127,51 @@ export function MonthlyChallenge() {
     enabled: !!user,
   });
 
+  // Past winners from monthly_challenge_winners table
+  const { data: pastWinners } = useQuery({
+    queryKey: ['monthly-challenge-history'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('monthly_challenge_winners')
+        .select('user_id, year, month, rank, total_runs')
+        .order('year', { ascending: false })
+        .order('month', { ascending: false })
+        .order('rank', { ascending: true });
+
+      if (error) throw error;
+      if (!data || data.length === 0) return [];
+
+      // Fetch profiles for all winners
+      const userIds = [...new Set(data.map(w => w.user_id))];
+      const { data: profiles } = await supabase
+        .from('public_profiles')
+        .select('id, display_name, profile_picture')
+        .in('id', userIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      // Group by year-month
+      const grouped = new Map<string, { year: number; month: number; winners: { user_id: string; rank: number; total_runs: number; display_name: string; profile_picture: string | null }[] }>();
+
+      data.forEach(w => {
+        const key = `${w.year}-${w.month}`;
+        if (!grouped.has(key)) {
+          grouped.set(key, { year: w.year, month: w.month, winners: [] });
+        }
+        grouped.get(key)!.winners.push({
+          user_id: w.user_id,
+          rank: w.rank,
+          total_runs: w.total_runs,
+          display_name: profileMap.get(w.user_id)?.display_name || 'Unbekannt',
+          profile_picture: profileMap.get(w.user_id)?.profile_picture || null,
+        });
+      });
+
+      return Array.from(grouped.values());
+    },
+    enabled: !!user,
+  });
+
   if (isLoading) {
     return (
       <Card className="p-6">
@@ -230,6 +276,39 @@ export function MonthlyChallenge() {
             );
           })}
         </div>
+      )}
+      {/* Past Winners History */}
+      {user && pastWinners && pastWinners.length > 0 && (
+        <Collapsible className="mt-4">
+          <CollapsibleTrigger className="w-full flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2">
+            <History className="w-4 h-4" />
+            <span>Vergangene Monate</span>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="space-y-3 pt-2">
+              {pastWinners.map(monthData => (
+                <div key={`${monthData.year}-${monthData.month}`} className="border-t border-border/50 pt-3">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">
+                    {MONTHS_DE[monthData.month - 1]} {monthData.year}
+                  </p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    {monthData.winners.map(winner => (
+                      <Link
+                        key={winner.user_id}
+                        to={`/runner/${winner.user_id}`}
+                        className="flex items-center gap-1.5 text-sm hover:text-primary transition-colors"
+                      >
+                        {getRankIcon(winner.rank)}
+                        <span className="truncate max-w-[120px]">{winner.display_name}</span>
+                        <span className="text-xs text-muted-foreground">({winner.total_runs})</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       )}
     </Card>
   );
