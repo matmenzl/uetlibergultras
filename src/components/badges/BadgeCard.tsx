@@ -227,5 +227,13 @@ export function BadgeCard({
         </div>
       </PopoverContent>
     </Popover>
+      {isMonthly && isEarned && monthLabel && (
+        <span 
+          className="mt-0.5 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+        >
+          {monthLabel}
+        </span>
+      )}
+    </div>
   );
 }
