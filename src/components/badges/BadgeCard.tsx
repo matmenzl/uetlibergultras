@@ -7,6 +7,19 @@ import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 
+const MONTHS_DE = [
+  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+];
+
+function getMonthLabel(earnedAt?: string): string | null {
+  if (!earnedAt) return null;
+  const d = new Date(earnedAt);
+  return MONTHS_DE[d.getMonth()];
+}
+
+const MONTHLY_BADGE_IDS = ['monthly_gold', 'monthly_silver', 'monthly_bronze'];
+
 interface BadgeCardProps {
   badge: BadgeDefinition;
   isEarned: boolean;
