@@ -14,6 +14,7 @@ import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Trophy, 
 import logo from "@/assets/uu_logo.svg";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Leaderboard } from "@/components/Leaderboard";
+import { MonthlyChallenge } from "@/components/MonthlyChallenge";
 import { Achievements } from "@/components/Achievements";
 import { BadgeShowcase } from "@/components/badges/BadgeShowcase";
 import { StreakCounter } from "@/components/StreakCounter";
