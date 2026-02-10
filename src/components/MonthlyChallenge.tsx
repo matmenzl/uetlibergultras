@@ -127,6 +127,51 @@ export function MonthlyChallenge() {
     enabled: !!user,
   });
 
+  // Past winners from monthly_challenge_winners table
+  const { data: pastWinners } = useQuery({
+    queryKey: ['monthly-challenge-history'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('monthly_challenge_winners')
+        .select('user_id, year, month, rank, total_runs')
+        .order('year', { ascending: false })
+        .order('month', { ascending: false })
+        .order('rank', { ascending: true });
+
+      if (error) throw error;
+      if (!data || data.length === 0) return [];
+
+      // Fetch profiles for all winners
+      const userIds = [...new Set(data.map(w => w.user_id))];
+      const { data: profiles } = await supabase
+        .from('public_profiles')
+        .select('id, display_name, profile_picture')
+        .in('id', userIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      // Group by year-month
+      const grouped = new Map<string, { year: number; month: number; winners: { user_id: string; rank: number; total_runs: number; display_name: string; profile_picture: string | null }[] }>();
+
+      data.forEach(w => {
+        const key = `${w.year}-${w.month}`;
+        if (!grouped.has(key)) {
+          grouped.set(key, { year: w.year, month: w.month, winners: [] });
+        }
+        grouped.get(key)!.winners.push({
+          user_id: w.user_id,
+          rank: w.rank,
+          total_runs: w.total_runs,
+          display_name: profileMap.get(w.user_id)?.display_name || 'Unbekannt',
+          profile_picture: profileMap.get(w.user_id)?.profile_picture || null,
+        });
+      });
+
+      return Array.from(grouped.values());
+    },
+    enabled: !!user,
+  });
+
   if (isLoading) {
     return (
       <Card className="p-6">
