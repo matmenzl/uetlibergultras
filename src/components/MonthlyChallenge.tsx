@@ -50,6 +50,7 @@ const getRankBackground = (rank: number) => {
 
 export function MonthlyChallenge() {
   const navigate = useNavigate();
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
   const [user, setUser] = useState<any>(null);
   const now = new Date();
   const currentYear = now.getFullYear();
