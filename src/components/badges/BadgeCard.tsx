@@ -129,7 +129,17 @@ export function BadgeCard({
             )}
           </div>
 
-          {/* Progress bar for unearned badges */}
+          {/* Month label for monthly badges */}
+          {isMonthly && isEarned && monthLabel && (
+            <div className="absolute bottom-[12%] left-[10%] right-[10%] text-center">
+              <span 
+                className="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider"
+                style={{ color: `hsl(${badge.colors.primary})` }}
+              >
+                {monthLabel}
+              </span>
+            </div>
+          )}
           {!isEarned && progress && progress.target > 0 && (
             <div className="absolute bottom-[15%] left-[15%] right-[15%]">
               <div className="h-1.5 bg-muted rounded-full overflow-hidden">
