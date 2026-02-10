@@ -218,7 +218,10 @@ export function BadgeCard({
           {isEarned && earnedAt ? (
             <div className="pt-2 border-t border-border">
               <p className="text-xs text-muted-foreground">
-                Verdient am {format(new Date(earnedAt), 'd. MMMM yyyy', { locale: de })}
+                Verdient am {(() => {
+                  const d = new Date(earnedAt);
+                  return `${d.getUTCDate()}. ${MONTHS_DE[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+                })()}
               </p>
             </div>
           ) : progress && progress.target > 0 ? (
