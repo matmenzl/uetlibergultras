@@ -63,6 +63,7 @@ export function BadgeCard({
     : 0;
 
   return (
+    <div className="flex flex-col items-center">
     <Popover>
       <PopoverTrigger asChild>
         <button
@@ -129,17 +130,7 @@ export function BadgeCard({
             )}
           </div>
 
-          {/* Month label for monthly badges */}
-          {isMonthly && isEarned && monthLabel && (
-            <div className="absolute bottom-[12%] left-[10%] right-[10%] text-center">
-              <span 
-                className="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider"
-                style={{ color: `hsl(${badge.colors.primary})` }}
-              >
-                {monthLabel}
-              </span>
-            </div>
-          )}
+          {/* Month label rendered outside badge below */}
           {!isEarned && progress && progress.target > 0 && (
             <div className="absolute bottom-[15%] left-[15%] right-[15%]">
               <div className="h-1.5 bg-muted rounded-full overflow-hidden">
@@ -236,5 +227,13 @@ export function BadgeCard({
         </div>
       </PopoverContent>
     </Popover>
+      {isMonthly && isEarned && monthLabel && (
+        <span 
+          className="mt-0.5 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+        >
+          {monthLabel}
+        </span>
+      )}
+    </div>
   );
 }
