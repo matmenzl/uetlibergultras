@@ -1,99 +1,48 @@
 
 
-# Plan: Monats-Challenge mit Gold/Silber/Bronze Badges
+# Monats-Challenge Historie: Dropdown-Filter statt Collapsible
 
-## Uebersicht
+## Konzept
 
-Jeden Monat werden die Top 3 Laeufer (nach Anzahl Runs) mit einem Gold-, Silber- bzw. Bronze-Badge fuer diesen Monat ausgezeichnet. Die Badges sind permanent und sammeln sich ueber die Monate an.
+Die aktuelle Collapsible-Liste aller vergangenen Monate wird durch ein Select-Dropdown ersetzt -- genau wie bei "Uetliberg-Ultras unterwegs" mit dem Zeitraum-Filter. Der User waehlt einen Monat aus dem Dropdown und sieht dann die Gewinner dieses Monats.
 
-## 1. Datenbank-Aenderungen
+## Visuelles Konzept
 
-### Neue Tabelle: `monthly_challenge_winners`
-
-```sql
-CREATE TABLE monthly_challenge_winners (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL,
-  year integer NOT NULL,
-  month integer NOT NULL, -- 1-12
-  rank integer NOT NULL,  -- 1=Gold, 2=Silber, 3=Bronze
-  total_runs integer NOT NULL,
-  awarded_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE(year, month, rank)
-);
+```text
++----------------------------------------------+
+| Monats-Challenge Februar                     |
+|                                    Noch 18 T |
++----------------------------------------------+
+| (aktuelles Live-Leaderboard wie bisher)      |
++----------------------------------------------+
+| [v Vergangene Monate: Januar 2026       ]    |
+|   Gold   Max M.         (12 Runs)            |
+|   Silber Anna S.        (10 Runs)            |
+|   Bronze Peter K.       (8 Runs)             |
++----------------------------------------------+
 ```
 
-- RLS: Authentifizierte User koennen alle Eintraege lesen (fuer Anzeige)
-- Kein INSERT/UPDATE/DELETE fuer normale User (nur Edge Function mit Service Role)
+Das Dropdown zeigt alle verfuegbaren Monate als Optionen (z.B. "Januar 2026", "Dezember 2025", ...). Standardmaessig ist kein Monat ausgewaehlt und die Historie ist zugeklappt -- erst beim Auswaehlen eines Monats erscheinen die Gewinner darunter.
 
-### Kein neuer achievement_type Enum noetig
+## Technische Umsetzung
 
-Die monatlichen Badges sind ein separates System (eigene Tabelle), nicht Teil der bestehenden `user_achievements`. Das haelt es sauber getrennt, da monatliche Badges sich jeden Monat wiederholen koennen.
+### Datei: `src/components/MonthlyChallenge.tsx`
 
-## 2. Edge Function: `check-monthly-challenge`
+1. **Collapsible entfernen** -- der Import und die gesamte Collapsible-Sektion (Zeilen 10, 282-312) werden entfernt
+2. **Select-Dropdown einbauen** -- Import der Select-Komponenten, ein neuer State `selectedHistoryMonth` (String wie "2026-1")
+3. **Dropdown-Optionen** generieren aus den `pastWinners`-Daten: Jeder Eintrag wird zu einer SelectItem-Option (z.B. "Januar 2026")
+4. **Gewinner-Anzeige** unterhalb des Dropdowns: Zeigt nur die Gewinner des ausgewaehlten Monats in der bestehenden Darstellung (Rang-Icon + Avatar + Name + Runs), jetzt aber als klickbare Links zum Profil
+5. **Placeholder** im Dropdown: "Vergangene Monate" mit dem History-Icon, damit klar ist was der Filter macht
 
-Neue Edge Function die am Ende jedes Monats (oder on-demand) aufgerufen wird:
+### Aenderungen im Detail
 
-- Zaehlt DISTINCT `activity_id` pro User fuer den angegebenen Monat/Jahr
-- Ermittelt Top 3 Laeufer
-- Schreibt Ergebnisse in `monthly_challenge_winners`
-- Bei Gleichstand: User mit mehr unique Segmenten gewinnt (sekundaerer Tiebreaker)
+- Neuer State: `const [selectedMonth, setSelectedMonth] = useState<string>("")`
+- Select mit Options aus `pastWinners.map(m => value: `${m.year}-${m.month}`, label: `${MONTHS_DE[m.month-1]} ${m.year}`)`
+- Conditional Rendering: Wenn `selectedMonth` gesetzt, finde den passenden `pastWinners`-Eintrag und zeige dessen Gewinner
+- Die Gewinner werden im gleichen Stil wie das aktuelle Leaderboard dargestellt (mit getRankIcon, getRankBackground, Avatar, Link zum Profil)
 
-Parameter: `{ year: number, month: number }` (Default: vorheriger Monat)
+### Keine neuen Abhaengigkeiten
 
-## 3. Frontend: Monats-Challenge Leaderboard
-
-### Neue Komponente: `MonthlyChallenge.tsx`
-
-- Zeigt aktuellen Monat mit Countdown (Tage verbleibend)
-- Top 10 Laeufer des aktuellen Monats (live aus `check_ins` berechnet)
-- Gold/Silber/Bronze Icons fuer Platz 1-3
-- Vergangene Monate: kleine Badge-Uebersicht der Gewinner
-
-### Integration auf der Startseite (`Index.tsx`)
-
-- Tabs oder untereinander: "365-Tage Challenge" und "Monats-Challenge {Monat}"
-- Monats-Challenge wird neben dem bestehenden Leaderboard angezeigt
-
-### Profil-Anzeige
-
-- Gesammelte monatliche Medaillen auf dem Profil anzeigen (z.B. "3x Gold, 1x Silber, 2x Bronze")
-
-## 4. Automatische Auswertung
-
-Zwei Optionen fuer die monatliche Auswertung:
-
-**Option A**: Cron-Job (wie bei Webcam) - laeuft am 1. jedes Monats
-**Option B**: Lazy Evaluation - beim Laden der Monats-Challenge wird geprueft ob der Vormonat schon ausgewertet wurde
-
-Empfehlung: **Option B** (einfacher, kein zusaetzlicher Cron noetig). Die Edge Function prueft beim Aufruf, ob der Vormonat Gewinner hat, und wertet ihn ggf. aus.
-
-## Dateien die erstellt/geaendert werden
-
-| Datei | Aenderung |
-|-------|----------|
-| Migration SQL | Neue Tabelle `monthly_challenge_winners` + RLS |
-| `supabase/functions/check-monthly-challenge/index.ts` | Neue Edge Function |
-| `supabase/config.toml` | Neue Function registrieren |
-| `src/components/MonthlyChallenge.tsx` | Neue Komponente |
-| `src/pages/Index.tsx` | MonthlyChallenge einbinden |
-| `src/pages/Profile.tsx` | Monatliche Medaillen anzeigen |
-| `src/pages/PublicProfile.tsx` | Monatliche Medaillen anzeigen |
-
-## Resultierende Darstellung auf der Startseite
-
-```
-+------------------------------------------+
-| 365-Tage Challenge 2026                  |
-| (bestehendes Leaderboard)                |
-+------------------------------------------+
-| Monats-Challenge Februar 2026            |
-| Noch X Tage | Gold/Silber/Bronze Icons   |
-| 1. [Gold]   Laeufer A    12 Runs        |
-| 2. [Silber] Laeufer B     9 Runs        |
-| 3. [Bronze] Laeufer C     7 Runs        |
-| 4.          Laeufer D     5 Runs        |
-| ...                                      |
-+------------------------------------------+
-```
+- Select-Komponente ist bereits importiert und verfuegbar
+- Alle anderen benoetigten Komponenten (Avatar, Link, Icons) sind schon in der Datei
 
