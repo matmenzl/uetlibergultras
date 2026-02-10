@@ -47,6 +47,9 @@ export function BadgeCard({
   const Symbol = getSymbol(badge.symbolId);
   const categoryStyle = categoryStyles[badge.category];
 
+  const isMonthly = MONTHLY_BADGE_IDS.includes(badge.id);
+  const monthLabel = isMonthly ? getMonthLabel(earnedAt) : null;
+
   useEffect(() => {
     if (isNewlyEarned) {
       setShowAnimation(true);
