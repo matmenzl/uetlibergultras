@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Medal, Mountain, User, Calendar, History } from 'lucide-react';
+import { Trophy, Medal, Mountain, User, Calendar } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { differenceInDays, lastDayOfMonth } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -50,11 +50,12 @@ const getRankBackground = (rank: number) => {
 
 export function MonthlyChallenge() {
   const navigate = useNavigate();
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
-  const [user, setUser] = useState<any>(null);
   const now = new Date();
   const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1; // 1-12
+  const currentMonth = now.getMonth() + 1;
+  const currentMonthKey = `${currentYear}-${currentMonth}`;
+  const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthKey);
+  const [user, setUser] = useState<any>(null);
   const daysRemaining = differenceInDays(lastDayOfMonth(now), now);
 
   useEffect(() => {
@@ -219,14 +220,33 @@ export function MonthlyChallenge() {
 
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-primary" />
-          <h3 className="font-bold text-lg">Monats-Challenge {MONTHS_DE[currentMonth - 1]}</h3>
+          <h3 className="font-bold text-lg">Monats-Challenge</h3>
         </div>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
-          <Calendar className="w-3 h-3" />
-          <span>Noch {daysRemaining} Tage</span>
+        <div className="flex items-center gap-2">
+          {selectedMonth === currentMonthKey && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+              <Calendar className="w-3 h-3" />
+              <span>Noch {daysRemaining} Tage</span>
+            </div>
+          )}
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-[160px] h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={currentMonthKey}>
+                {MONTHS_DE[currentMonth - 1]} {currentYear}
+              </SelectItem>
+              {pastWinners?.map(monthData => (
+                <SelectItem key={`${monthData.year}-${monthData.month}`} value={`${monthData.year}-${monthData.month}`}>
+                  {MONTHS_DE[monthData.month - 1]} {monthData.year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -245,7 +265,7 @@ export function MonthlyChallenge() {
         </div>
       )}
 
-      {user && (
+      {user && selectedMonth === currentMonthKey && (
         <div className="space-y-2">
           {monthlyLeaderboard.map((entry, index) => {
             const rank = index + 1;
@@ -278,60 +298,40 @@ export function MonthlyChallenge() {
           })}
         </div>
       )}
-      {/* Past Winners History - Dropdown Filter */}
-      {user && pastWinners && pastWinners.length > 0 && (
-        <div className="mt-4 space-y-2">
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-full">
-              <div className="flex items-center gap-2">
-                <History className="w-4 h-4 text-muted-foreground" />
-                <SelectValue placeholder="Vergangene Monate" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              {pastWinners.map(monthData => (
-                <SelectItem key={`${monthData.year}-${monthData.month}`} value={`${monthData.year}-${monthData.month}`}>
-                  {MONTHS_DE[monthData.month - 1]} {monthData.year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {selectedMonth && (() => {
-            const activeHistory = pastWinners.find(m => `${m.year}-${m.month}` === selectedMonth);
-            if (!activeHistory) return null;
-            return (
-              <div className="space-y-2">
-                {activeHistory.winners.map(winner => (
-                  <Link
-                    key={winner.user_id}
-                    to={`/runner/${winner.user_id}`}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(winner.rank)}`}
-                  >
-                    <div className="w-6 flex justify-center">
-                      {getRankIcon(winner.rank)}
-                    </div>
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={winner.profile_picture || undefined} />
-                      <AvatarFallback>
-                        <User className="w-4 h-4" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate text-sm">
-                        {winner.display_name}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Mountain className="w-3 h-3" />
-                      {winner.total_runs}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            );
-          })()}
-        </div>
-      )}
+      {user && selectedMonth !== currentMonthKey && (() => {
+        const activeHistory = pastWinners?.find(m => `${m.year}-${m.month}` === selectedMonth);
+        if (!activeHistory) return null;
+        return (
+          <div className="space-y-2">
+            {activeHistory.winners.map(winner => (
+              <Link
+                key={winner.user_id}
+                to={`/runner/${winner.user_id}`}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(winner.rank)}`}
+              >
+                <div className="w-6 flex justify-center">
+                  {getRankIcon(winner.rank)}
+                </div>
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={winner.profile_picture || undefined} />
+                  <AvatarFallback>
+                    <User className="w-4 h-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate text-sm">
+                    {winner.display_name}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Mountain className="w-3 h-3" />
+                  {winner.total_runs}
+                </div>
+              </Link>
+            ))}
+          </div>
+        );
+      })()}
     </Card>
   );
 }
