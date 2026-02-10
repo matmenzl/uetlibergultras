@@ -48,6 +48,7 @@ const getRankBackground = (rank: number) => {
   }
 };
 
+export function MonthlyChallenge() {
   const navigate = useNavigate();
   const now = new Date();
   const currentYear = now.getFullYear();
