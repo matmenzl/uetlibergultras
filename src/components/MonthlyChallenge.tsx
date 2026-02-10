@@ -277,6 +277,39 @@ export function MonthlyChallenge() {
           })}
         </div>
       )}
+      {/* Past Winners History */}
+      {user && pastWinners && pastWinners.length > 0 && (
+        <Collapsible className="mt-4">
+          <CollapsibleTrigger className="w-full flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2">
+            <History className="w-4 h-4" />
+            <span>Vergangene Monate</span>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="space-y-3 pt-2">
+              {pastWinners.map(monthData => (
+                <div key={`${monthData.year}-${monthData.month}`} className="border-t border-border/50 pt-3">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">
+                    {MONTHS_DE[monthData.month - 1]} {monthData.year}
+                  </p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    {monthData.winners.map(winner => (
+                      <Link
+                        key={winner.user_id}
+                        to={`/runner/${winner.user_id}`}
+                        className="flex items-center gap-1.5 text-sm hover:text-primary transition-colors"
+                      >
+                        {getRankIcon(winner.rank)}
+                        <span className="truncate max-w-[120px]">{winner.display_name}</span>
+                        <span className="text-xs text-muted-foreground">({winner.total_runs})</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
     </Card>
   );
 }
