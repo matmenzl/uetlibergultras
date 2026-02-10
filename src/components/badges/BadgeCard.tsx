@@ -7,6 +7,19 @@ import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 
+const MONTHS_DE = [
+  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+];
+
+function getMonthLabel(earnedAt?: string): string | null {
+  if (!earnedAt) return null;
+  const d = new Date(earnedAt);
+  return MONTHS_DE[d.getMonth()];
+}
+
+const MONTHLY_BADGE_IDS = ['monthly_gold', 'monthly_silver', 'monthly_bronze'];
+
 interface BadgeCardProps {
   badge: BadgeDefinition;
   isEarned: boolean;
@@ -33,6 +46,9 @@ export function BadgeCard({
   const [showAnimation, setShowAnimation] = useState(false);
   const Symbol = getSymbol(badge.symbolId);
   const categoryStyle = categoryStyles[badge.category];
+
+  const isMonthly = MONTHLY_BADGE_IDS.includes(badge.id);
+  const monthLabel = isMonthly ? getMonthLabel(earnedAt) : null;
 
   useEffect(() => {
     if (isNewlyEarned) {
@@ -113,7 +129,17 @@ export function BadgeCard({
             )}
           </div>
 
-          {/* Progress bar for unearned badges */}
+          {/* Month label for monthly badges */}
+          {isMonthly && isEarned && monthLabel && (
+            <div className="absolute bottom-[12%] left-[10%] right-[10%] text-center">
+              <span 
+                className="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider"
+                style={{ color: `hsl(${badge.colors.primary})` }}
+              >
+                {monthLabel}
+              </span>
+            </div>
+          )}
           {!isEarned && progress && progress.target > 0 && (
             <div className="absolute bottom-[15%] left-[15%] right-[15%]">
               <div className="h-1.5 bg-muted rounded-full overflow-hidden">
@@ -165,7 +191,9 @@ export function BadgeCard({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-foreground leading-tight">{badge.title}</h4>
+              <h4 className="font-bold text-foreground leading-tight">
+                {badge.title}{isMonthly && monthLabel ? ` – ${monthLabel}` : ''}
+              </h4>
               <p className="text-xs text-muted-foreground mt-0.5">{badge.description}</p>
             </div>
           </div>
