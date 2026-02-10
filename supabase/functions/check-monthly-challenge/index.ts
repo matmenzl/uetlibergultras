@@ -129,6 +129,33 @@ Deno.serve(async (req) => {
         .insert(winners);
 
       if (insertError) throw insertError;
+
+      // Also award achievement badges (monthly_gold, monthly_silver, monthly_bronze)
+      const rankToAchievement: Record<number, string> = {
+        1: "monthly_gold",
+        2: "monthly_silver",
+        3: "monthly_bronze",
+      };
+
+      for (const winner of winners) {
+        const achievement = rankToAchievement[winner.rank];
+        if (!achievement) continue;
+
+        // Check if user already has this achievement type
+        const { data: existingAchievement } = await supabase
+          .from("user_achievements")
+          .select("id")
+          .eq("user_id", winner.user_id)
+          .eq("achievement", achievement)
+          .limit(1);
+
+        if (!existingAchievement || existingAchievement.length === 0) {
+          await supabase.from("user_achievements").insert({
+            user_id: winner.user_id,
+            achievement,
+          });
+        }
+      }
     }
 
     return new Response(
