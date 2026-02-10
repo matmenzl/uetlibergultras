@@ -482,6 +482,9 @@ export type Database = {
         | "frosty"
         | "alternativliga"
         | "wasserratte"
+        | "monthly_gold"
+        | "monthly_silver"
+        | "monthly_bronze"
       app_role: "admin" | "user"
       suggestion_status: "pending" | "approved" | "rejected"
     }
@@ -634,6 +637,9 @@ export const Constants = {
         "frosty",
         "alternativliga",
         "wasserratte",
+        "monthly_gold",
+        "monthly_silver",
+        "monthly_bronze",
       ],
       app_role: ["admin", "user"],
       suggestion_status: ["pending", "approved", "rejected"],

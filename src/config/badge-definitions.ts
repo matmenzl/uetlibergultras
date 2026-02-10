@@ -363,6 +363,47 @@ export const badgeDefinitions: BadgeDefinition[] = [
       background: "40 20% 95%",
     },
   },
+
+  // === MONTHLY CHALLENGE BADGES ===
+  {
+    id: "monthly_gold",
+    category: "community",
+    title: "Monats-Champion",
+    description: "Platz 1 der Monats-Challenge",
+    howToEarn: "Werde Monatssieger mit den meisten Runs",
+    symbolId: "medal-gold",
+    colors: {
+      primary: "45 93% 47%",
+      secondary: "45 93% 65%",
+      background: "45 30% 95%",
+    },
+  },
+  {
+    id: "monthly_silver",
+    category: "community",
+    title: "Silber-Läufer",
+    description: "Platz 2 der Monats-Challenge",
+    howToEarn: "Erreiche Platz 2 in einer Monats-Challenge",
+    symbolId: "medal-silver",
+    colors: {
+      primary: "0 0% 70%",
+      secondary: "0 0% 85%",
+      background: "0 0% 95%",
+    },
+  },
+  {
+    id: "monthly_bronze",
+    category: "community",
+    title: "Bronze-Läufer",
+    description: "Platz 3 der Monats-Challenge",
+    howToEarn: "Erreiche Platz 3 in einer Monats-Challenge",
+    symbolId: "medal-bronze",
+    colors: {
+      primary: "25 70% 45%",
+      secondary: "25 70% 60%",
+      background: "25 30% 95%",
+    },
+  },
 ];
 
 // Helper to get badge by ID
