@@ -153,6 +153,34 @@ async function processActivityEvent(
     const activity = await activityResponse.json();
     console.log(`Fetched activity: ${activity.name} (type: ${activity.type})`);
 
+    // Update profile picture from Strava athlete endpoint
+    try {
+      await delay(RATE_LIMIT.delayBetweenRequests);
+      const athleteResponse = await fetch('https://www.strava.com/api/v3/athlete', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (athleteResponse.ok) {
+        const athlete = await athleteResponse.json();
+        if (athlete.profile) {
+          const { error: profileUpdateError } = await supabaseAdmin
+            .from('profiles')
+            .update({ profile_picture: athlete.profile })
+            .eq('id', userId);
+
+          if (profileUpdateError) {
+            console.error('Failed to update profile picture:', profileUpdateError);
+          } else {
+            console.log(`Updated profile picture for user ${userId}`);
+          }
+        }
+      } else {
+        console.error(`Failed to fetch athlete profile: ${athleteResponse.status}`);
+      }
+    } catch (err) {
+      console.error('Error updating profile picture:', err);
+    }
+
     // Only process runs
     if (activity.type !== 'Run') {
       console.log(`Skipping non-run activity (type: ${activity.type})`);
