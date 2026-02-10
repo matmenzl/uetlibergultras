@@ -21,6 +21,9 @@ export { StarFoundingSymbol, TrophyTenSymbol, TrophyTwentyFiveSymbol, TrophyFift
 // Legend symbols
 export { CrownSymbol, CompassSymbol } from './LegendSymbols';
 
+// Medal symbols
+export { MedalGoldSymbol, MedalSilverSymbol, MedalBronzeSymbol } from './MedalSymbols';
+
 // Symbol mapping for badge definitions
 import { ComponentType, SVGProps } from 'react';
 import { 
@@ -31,6 +34,7 @@ import { FlameDouble, FlameQuad, FlameEight } from './FlameSymbols';
 import { SunriseSymbol, MoonSymbol, SnowflakeSymbol, FrostSymbol, RainSymbol } from './WeatherSymbols';
 import { StarFoundingSymbol, TrophyTenSymbol, TrophyTwentyFiveSymbol, TrophyFiftySymbol } from './CommunitySymbols';
 import { CrownSymbol, CompassSymbol } from './LegendSymbols';
+import { MedalGoldSymbol, MedalSilverSymbol, MedalBronzeSymbol } from './MedalSymbols';
 
 interface SymbolProps extends SVGProps<SVGSVGElement> {
   primaryColor?: string;
@@ -68,6 +72,11 @@ export const symbolMap: Record<string, ComponentType<SymbolProps>> = {
   // Legend
   'crown': CrownSymbol,
   'compass': CompassSymbol,
+
+  // Monthly challenge medals
+  'medal-gold': MedalGoldSymbol,
+  'medal-silver': MedalSilverSymbol,
+  'medal-bronze': MedalBronzeSymbol,
 };
 
 export function getSymbol(symbolId: string): ComponentType<SymbolProps> | null {
