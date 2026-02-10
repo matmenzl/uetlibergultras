@@ -179,7 +179,7 @@ export function MonthlyChallenge() {
       <Card className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <Trophy className="w-5 h-5 text-primary" />
-          <h3 className="font-bold text-lg">Monats-Challenge {MONTHS_DE[currentMonth - 1]}</h3>
+          <h3 className="font-bold text-lg">Monats-Challenge</h3>
         </div>
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
