@@ -489,6 +489,7 @@ export default function Index() {
             {/* Left column - main content with consistent spacing */}
             <div className="md:col-span-2 space-y-4 order-2 md:order-1">
               <Leaderboard />
+              <MonthlyChallenge />
               <TodaysRunners />
             </div>
 

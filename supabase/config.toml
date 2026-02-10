@@ -26,3 +26,6 @@ verify_jwt = true
 
 [functions.admin-resync-segment]
 verify_jwt = false
+
+[functions.check-monthly-challenge]
+verify_jwt = false
