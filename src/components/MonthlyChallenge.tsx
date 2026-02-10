@@ -220,14 +220,33 @@ export function MonthlyChallenge() {
 
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-primary" />
-          <h3 className="font-bold text-lg">Monats-Challenge {MONTHS_DE[currentMonth - 1]}</h3>
+          <h3 className="font-bold text-lg">Monats-Challenge</h3>
         </div>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
-          <Calendar className="w-3 h-3" />
-          <span>Noch {daysRemaining} Tage</span>
+        <div className="flex items-center gap-2">
+          {selectedMonth === currentMonthKey && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+              <Calendar className="w-3 h-3" />
+              <span>Noch {daysRemaining} Tage</span>
+            </div>
+          )}
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-[160px] h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={currentMonthKey}>
+                {MONTHS_DE[currentMonth - 1]} {currentYear}
+              </SelectItem>
+              {pastWinners?.map(monthData => (
+                <SelectItem key={`${monthData.year}-${monthData.month}`} value={`${monthData.year}-${monthData.month}`}>
+                  {MONTHS_DE[monthData.month - 1]} {monthData.year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
