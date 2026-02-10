@@ -4,9 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Medal, Mountain, User, Calendar } from 'lucide-react';
+import { Trophy, Medal, Mountain, User, Calendar, History } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { differenceInDays, lastDayOfMonth } from 'date-fns';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 
 const MONTHS_DE = [
