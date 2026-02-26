@@ -111,10 +111,12 @@ export default function PublicProfile() {
   const { data: checkIns, isLoading: checkInsLoading } = useQuery({
     queryKey: ['public-profile-checkins', userId],
     queryFn: async () => {
+      const currentYearStart = `${new Date().getFullYear()}-01-01T00:00:00Z`;
       const { data: checkInsData, error: checkInsError } = await supabase
         .from('check_ins')
         .select('id, checked_in_at, segment_id, activity_id, activity_name, activity_distance, activity_elapsed_time, distance, elevation_gain, weather_code, temperature, is_manual')
         .eq('user_id', userId!)
+        .gte('checked_in_at', currentYearStart)
         .order('checked_in_at', { ascending: false });
       
       if (checkInsError) throw checkInsError;
