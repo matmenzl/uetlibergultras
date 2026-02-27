@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trophy, Medal, Mountain, User, Calendar } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { differenceInDays, lastDayOfMonth } from 'date-fns';
+import { differenceInCalendarDays, lastDayOfMonth } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 
@@ -56,7 +56,7 @@ export function MonthlyChallenge() {
   const currentMonthKey = `${currentYear}-${currentMonth}`;
   const [selectedMonth, setSelectedMonth] = useState<string>(currentMonthKey);
   const [user, setUser] = useState<any>(null);
-  const daysRemaining = differenceInDays(lastDayOfMonth(now), now);
+  const daysRemaining = differenceInCalendarDays(lastDayOfMonth(now), now);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
