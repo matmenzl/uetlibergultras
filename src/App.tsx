@@ -1,8 +1,12 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { App as CapApp } from "@capacitor/app";
+import { Browser } from "@capacitor/browser";
+import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AuthStravaCallback from "./pages/AuthStravaCallback";
@@ -15,7 +19,38 @@ import Pass from "./pages/Pass";
 import Profile from "./pages/Profile";
 import BadgeDemo from "./pages/BadgeDemo";
 import PublicProfile from "./pages/PublicProfile";
+
 const queryClient = new QueryClient();
+
+function DeepLinkHandler() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const listener = CapApp.addListener("appUrlOpen", async (event) => {
+      const url = new URL(event.url);
+
+      if (url.hostname === "auth-success") {
+        const at = decodeURIComponent(url.searchParams.get("at") || "");
+        const rt = decodeURIComponent(url.searchParams.get("rt") || "");
+
+        if (at && rt) {
+          await Browser.close();
+          await supabase.auth.setSession({ access_token: at, refresh_token: rt });
+          navigate("/");
+        }
+      } else if (url.hostname === "auth-error") {
+        await Browser.close();
+        navigate("/auth");
+      }
+    });
+
+    return () => {
+      listener.then((l) => l.remove());
+    };
+  }, [navigate]);
+
+  return null;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -23,6 +58,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <DeepLinkHandler />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/pass" element={<Pass />} />

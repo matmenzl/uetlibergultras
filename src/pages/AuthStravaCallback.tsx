@@ -17,12 +17,18 @@ export default function AuthStravaCallback() {
     const handleCallback = async () => {
       const code = searchParams.get('code');
       const error = searchParams.get('error');
+      const state = searchParams.get('state');
+      const isNativeCallback = state === 'native';
 
       if (error) {
         setStatus('error');
         setMessage('Strava-Autorisierung abgebrochen');
         toast.error('Strava-Autorisierung abgebrochen');
-        setTimeout(() => navigate('/auth'), 3000);
+        if (isNativeCallback) {
+          window.location.href = 'uetlibergultras://auth-error';
+        } else {
+          setTimeout(() => navigate('/auth'), 3000);
+        }
         return;
       }
 
@@ -30,7 +36,11 @@ export default function AuthStravaCallback() {
         setStatus('error');
         setMessage('Ungültige Callback-Parameter');
         toast.error('Ungültige Callback-Parameter');
-        setTimeout(() => navigate('/auth'), 3000);
+        if (isNativeCallback) {
+          window.location.href = 'uetlibergultras://auth-error';
+        } else {
+          setTimeout(() => navigate('/auth'), 3000);
+        }
         return;
       }
 
@@ -91,11 +101,16 @@ export default function AuthStravaCallback() {
           }
         }
 
-        // Get return URL or default to home
-        const returnUrl = sessionStorage.getItem('auth_return_url') || '/';
-        sessionStorage.removeItem('auth_return_url');
-        
-        setTimeout(() => navigate(returnUrl), 2000);
+        // Redirect back to native app or web
+        if (isNativeCallback && data.session) {
+          const at = encodeURIComponent(data.session.access_token);
+          const rt = encodeURIComponent(data.session.refresh_token);
+          window.location.href = `uetlibergultras://auth-success?at=${at}&rt=${rt}`;
+        } else {
+          const returnUrl = sessionStorage.getItem('auth_return_url') || '/';
+          sessionStorage.removeItem('auth_return_url');
+          setTimeout(() => navigate(returnUrl), 2000);
+        }
 
       } catch (err) {
         console.error('Callback error:', err);

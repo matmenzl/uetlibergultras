@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -54,15 +56,22 @@ export default function Auth() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleStravaLogin = () => {
+  const handleStravaLogin = async () => {
     const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID || '186560';
-    const redirectUri = `${window.location.origin}/auth/strava-callback`;
+    const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+    const redirectUri = `${appUrl}/auth/strava-callback`;
     const scope = 'read,read_all,profile:read_all,activity:read_all';
-    
-    // Store return URL for after auth
-    sessionStorage.setItem('auth_return_url', '/');
-    
-    window.location.href = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&approval_prompt=force&scope=${scope}`;
+    const isNative = Capacitor.isNativePlatform();
+    const state = isNative ? 'native' : 'web';
+
+    const stravaUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&approval_prompt=force&scope=${scope}&state=${state}`;
+
+    if (isNative) {
+      await Browser.open({ url: stravaUrl });
+    } else {
+      sessionStorage.setItem('auth_return_url', '/');
+      window.location.href = stravaUrl;
+    }
   };
 
   const handleMagicLink = async () => {
