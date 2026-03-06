@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Medal, Award, Mountain, User, Calendar, Timer } from 'lucide-react';
+import { Trophy, Medal, Award, Mountain, User, Calendar, Timer, Lock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { useNavigate, Link } from 'react-router-dom';
 import { differenceInDays } from 'date-fns';
@@ -51,6 +52,8 @@ const getRankBackground = (rank: number) => {
   }
 };
 
+const TEASER_COUNT = 3; // Show top 3 to non-logged-in users
+
 export function Leaderboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
@@ -74,7 +77,7 @@ export function Leaderboard() {
       if (error) throw error;
       return data as LeaderboardEntry[];
     },
-    enabled: !!user,
+    // Fetch for everyone - leaderboard_stats view is accessible
   });
 
   // Fetch alternativliga achievements for all leaderboard users
@@ -88,7 +91,7 @@ export function Leaderboard() {
         .eq('achievement', 'alternativliga')
         .in('user_id', leaderboard.map(e => e.user_id));
       
-      if (error) throw error;
+      if (error) return [];
       return data.map(a => a.user_id);
     },
     enabled: !!leaderboard && leaderboard.length > 0,
@@ -142,6 +145,62 @@ export function Leaderboard() {
     );
   }
 
+  const renderEntry = (entry: LeaderboardEntry, index: number) => {
+    const rank = leaderboard.findIndex(
+      (e) => e.total_runs === entry.total_runs && e.achievement_count === entry.achievement_count
+    ) + 1;
+
+    const content = (
+      <div className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(rank)}`}>
+        <div className="w-6 flex justify-center">
+          {getRankIcon(rank)}
+        </div>
+        <Avatar className="w-8 h-8">
+          <AvatarImage src={entry.profile_picture || undefined} />
+          <AvatarFallback>
+            <User className="w-4 h-4" />
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0 flex items-center gap-1.5">
+          <p className="font-medium truncate text-sm">
+            {entry.display_name}
+          </p>
+          {alternativligaUsers?.includes(entry.user_id) && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Timer className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>GPS-nein-Danke! Hier wird von Hand gestoppt</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Mountain className="w-3 h-3" />
+            {entry.total_runs}
+          </span>
+          <span className="flex items-center gap-1">
+            <Award className="w-3 h-3" />
+            {entry.achievement_count}
+          </span>
+        </div>
+      </div>
+    );
+
+    if (user) {
+      return (
+        <Link to={`/runner/${entry.user_id}`} key={entry.user_id}>
+          {content}
+        </Link>
+      );
+    }
+    return <div key={entry.user_id}>{content}</div>;
+  };
+
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
@@ -155,80 +214,37 @@ export function Leaderboard() {
         </div>
       </div>
       
-      {/* CTA for non-logged-in users */}
-      {!user && (
-        <div className="bg-muted/50 rounded-lg p-4 mb-4 text-center">
-          <p className="text-sm text-muted-foreground mb-3">
-            Verbinde dich mit Strava und schau wer die 365-Tage Challenge {new Date().getFullYear()} anführt
-          </p>
-          <button 
-            onClick={() => navigate('/auth')}
-            className="hover:opacity-90 transition-opacity"
-          >
-            <img 
-              src={stravaConnectButton} 
-              alt="Mit Strava verbinden" 
-              className="h-10"
-            />
-          </button>
-        </div>
-      )}
-      
-      {user && leaderboard && (
-        <div className="space-y-2">
-          {leaderboard.map((entry, index) => {
-            // Calculate actual rank with ties
-            const rank = leaderboard.findIndex(
-              (e) => e.total_runs === entry.total_runs && e.achievement_count === entry.achievement_count
-            ) + 1;
-            
-            return (
-              <Link
-                to={`/runner/${entry.user_id}`}
-                key={entry.user_id}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(rank)}`}
+      <div className="space-y-2">
+        {/* Show top entries clearly */}
+        {leaderboard.slice(0, user ? leaderboard.length : TEASER_COUNT).map((entry, index) => 
+          renderEntry(entry, index)
+        )}
+        
+        {/* Blurred teaser for non-logged-in users */}
+        {!user && leaderboard.length > TEASER_COUNT && (
+          <div className="relative">
+            <div className="blur-[6px] pointer-events-none select-none space-y-2">
+              {leaderboard.slice(TEASER_COUNT, Math.min(leaderboard.length, 7)).map((entry, index) => 
+                renderEntry(entry, index + TEASER_COUNT)
+              )}
+            </div>
+            {/* Overlay CTA */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-card/90 via-card/60 to-transparent rounded-lg">
+              <Lock className="w-5 h-5 text-muted-foreground mb-2" />
+              <p className="text-sm font-medium text-foreground mb-3">
+                Melde dich an um das volle Ranking zu sehen
+              </p>
+              <Button 
+                onClick={() => navigate('/auth')} 
+                size="sm"
+                variant="default"
               >
-                <div className="w-6 flex justify-center">
-                  {getRankIcon(rank)}
-                </div>
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src={entry.profile_picture || undefined} />
-                  <AvatarFallback>
-                    <User className="w-4 h-4" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0 flex items-center gap-1.5">
-                  <p className="font-medium truncate text-sm">
-                    {entry.display_name}
-                  </p>
-                  {alternativligaUsers?.includes(entry.user_id) && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Timer className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>GPS-nein-Danke! Hier wird von Hand gestoppt</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Mountain className="w-3 h-3" />
-                    {entry.total_runs}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Award className="w-3 h-3" />
-                    {entry.achievement_count}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+                Jetzt mitmachen
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </Card>
   );
 }

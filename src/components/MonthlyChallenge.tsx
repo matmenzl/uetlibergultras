@@ -4,11 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Medal, Mountain, User, Calendar } from 'lucide-react';
+import { Trophy, Medal, Mountain, User, Calendar, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { differenceInCalendarDays, lastDayOfMonth } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
+import { Button } from '@/components/ui/button';
 
 const MONTHS_DE = [
   'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -21,6 +21,8 @@ interface MonthlyEntry {
   profile_picture: string | null;
   total_runs: number;
 }
+
+const TEASER_COUNT = 3;
 
 const getRankIcon = (rank: number) => {
   switch (rank) {
@@ -77,7 +79,7 @@ export function MonthlyChallenge() {
       return data;
     },
     enabled: !!user,
-    staleTime: 1000 * 60 * 60, // Only check once per hour
+    staleTime: 1000 * 60 * 60,
   });
 
   // Live leaderboard for current month from check_ins
@@ -95,7 +97,6 @@ export function MonthlyChallenge() {
 
       if (error) throw error;
 
-      // Count distinct activities per user
       const userActivities = new Map<string, Set<number>>();
       checkIns?.forEach(ci => {
         if (!userActivities.has(ci.user_id)) {
@@ -104,7 +105,6 @@ export function MonthlyChallenge() {
         userActivities.get(ci.user_id)!.add(ci.activity_id);
       });
 
-      // Sort by count
       const sorted = Array.from(userActivities.entries())
         .map(([user_id, activities]) => ({ user_id, total_runs: activities.size }))
         .sort((a, b) => b.total_runs - a.total_runs)
@@ -112,7 +112,6 @@ export function MonthlyChallenge() {
 
       if (sorted.length === 0) return [];
 
-      // Fetch profiles
       const { data: profiles } = await supabase
         .from('public_profiles')
         .select('id, display_name, profile_picture')
@@ -126,7 +125,7 @@ export function MonthlyChallenge() {
         profile_picture: profileMap.get(entry.user_id)?.profile_picture || null,
       })) as MonthlyEntry[];
     },
-    enabled: !!user,
+    // Fetch for everyone - check_ins has public read policy for leaderboard
   });
 
   // Past winners from monthly_challenge_winners table
@@ -143,7 +142,6 @@ export function MonthlyChallenge() {
       if (error) throw error;
       if (!data || data.length === 0) return [];
 
-      // Fetch profiles for all winners
       const userIds = [...new Set(data.map(w => w.user_id))];
       const { data: profiles } = await supabase
         .from('public_profiles')
@@ -152,7 +150,6 @@ export function MonthlyChallenge() {
 
       const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
-      // Group by year-month
       const grouped = new Map<string, { year: number; month: number; winners: { user_id: string; rank: number; total_runs: number; display_name: string; profile_picture: string | null }[] }>();
 
       data.forEach(w => {
@@ -171,8 +168,41 @@ export function MonthlyChallenge() {
 
       return Array.from(grouped.values());
     },
-    enabled: !!user,
   });
+
+  const renderEntry = (entry: { user_id: string; display_name: string | null; profile_picture: string | null; total_runs: number }, rank: number) => {
+    const content = (
+      <div className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(rank)}`}>
+        <div className="w-6 flex justify-center">
+          {getRankIcon(rank)}
+        </div>
+        <Avatar className="w-8 h-8">
+          <AvatarImage src={entry.profile_picture || undefined} />
+          <AvatarFallback>
+            <User className="w-4 h-4" />
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <p className="font-medium truncate text-sm">
+            {entry.display_name}
+          </p>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Mountain className="w-3 h-3" />
+          {entry.total_runs}
+        </div>
+      </div>
+    );
+
+    if (user) {
+      return (
+        <Link to={`/runner/${entry.user_id}`} key={entry.user_id} className="block">
+          {content}
+        </Link>
+      );
+    }
+    return <div key={entry.user_id}>{content}</div>;
+  };
 
   if (isLoading) {
     return (
@@ -206,12 +236,9 @@ export function MonthlyChallenge() {
             Noch keine Runs in {MONTHS_DE[currentMonth - 1]}. Sei der Erste!
           </p>
           {!user && (
-            <button
-              onClick={() => navigate('/auth')}
-              className="hover:opacity-90 transition-opacity"
-            >
-              <img src={stravaConnectButton} alt="Mit Strava verbinden" className="h-10" />
-            </button>
+            <Button onClick={() => navigate('/auth')} size="sm">
+              Jetzt mitmachen
+            </Button>
           )}
         </div>
       </Card>
@@ -250,85 +277,43 @@ export function MonthlyChallenge() {
         </div>
       </div>
 
-      {/* CTA for non-logged-in users */}
-      {!user && (
-        <div className="bg-muted/50 rounded-lg p-4 mb-4 text-center">
-          <p className="text-sm text-muted-foreground mb-3">
-            Melde dich an um an der Monats-Challenge teilzunehmen
-          </p>
-          <button
-            onClick={() => navigate('/auth')}
-            className="hover:opacity-90 transition-opacity"
-          >
-            <img src={stravaConnectButton} alt="Mit Strava verbinden" className="h-10" />
-          </button>
-        </div>
-      )}
-
-      {user && selectedMonth === currentMonthKey && (
+      {selectedMonth === currentMonthKey && (
         <div className="space-y-2">
-          {monthlyLeaderboard.map((entry, index) => {
-            const rank = index + 1;
-            return (
-              <Link
-                to={`/runner/${entry.user_id}`}
-                key={entry.user_id}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(rank)}`}
-              >
-                <div className="w-6 flex justify-center">
-                  {getRankIcon(rank)}
-                </div>
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src={entry.profile_picture || undefined} />
-                  <AvatarFallback>
-                    <User className="w-4 h-4" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate text-sm">
-                    {entry.display_name}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Mountain className="w-3 h-3" />
-                  {entry.total_runs}
-                </div>
-              </Link>
-            );
-          })}
+          {/* Show top entries */}
+          {monthlyLeaderboard.slice(0, user ? monthlyLeaderboard.length : TEASER_COUNT).map((entry, index) => 
+            renderEntry(entry, index + 1)
+          )}
+          
+          {/* Blurred teaser for non-logged-in */}
+          {!user && monthlyLeaderboard.length > TEASER_COUNT && (
+            <div className="relative">
+              <div className="blur-[6px] pointer-events-none select-none space-y-2">
+                {monthlyLeaderboard.slice(TEASER_COUNT, Math.min(monthlyLeaderboard.length, 7)).map((entry, index) => 
+                  renderEntry(entry, index + TEASER_COUNT + 1)
+                )}
+              </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-card/90 via-card/60 to-transparent rounded-lg">
+                <Lock className="w-5 h-5 text-muted-foreground mb-2" />
+                <p className="text-sm font-medium text-foreground mb-3">
+                  Melde dich an für das volle Ranking
+                </p>
+                <Button onClick={() => navigate('/auth')} size="sm">
+                  Jetzt mitmachen
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
-      {user && selectedMonth !== currentMonthKey && (() => {
+      
+      {selectedMonth !== currentMonthKey && (() => {
         const activeHistory = pastWinners?.find(m => `${m.year}-${m.month}` === selectedMonth);
         if (!activeHistory) return null;
         return (
           <div className="space-y-2">
-            {activeHistory.winners.map(winner => (
-              <Link
-                key={winner.user_id}
-                to={`/runner/${winner.user_id}`}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-muted/50 ${getRankBackground(winner.rank)}`}
-              >
-                <div className="w-6 flex justify-center">
-                  {getRankIcon(winner.rank)}
-                </div>
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src={winner.profile_picture || undefined} />
-                  <AvatarFallback>
-                    <User className="w-4 h-4" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate text-sm">
-                    {winner.display_name}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Mountain className="w-3 h-3" />
-                  {winner.total_runs}
-                </div>
-              </Link>
-            ))}
+            {activeHistory.winners.map(winner => 
+              renderEntry(winner, winner.rank)
+            )}
           </div>
         );
       })()}

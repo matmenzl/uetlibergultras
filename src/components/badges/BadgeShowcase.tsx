@@ -47,8 +47,6 @@ function calculateStreak(checkIns: { checked_in_at: string }[]): number {
   
   let streak = 1;
   for (let i = 1; i < weeks.length; i++) {
-    const prevDate = new Date(weeks[i - 1].replace('-W', '-W'));
-    const currDate = new Date(weeks[i].replace('-W', '-W'));
     const prevWeekNum = parseInt(weeks[i - 1].split('-W')[1]);
     const currWeekNum = parseInt(weeks[i].split('-W')[1]);
     const prevYear = parseInt(weeks[i - 1].split('-W')[0]);
@@ -72,6 +70,7 @@ interface BadgeShowcaseProps {
 
 export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
   const navigate = useNavigate();
+  const isGuest = !userId;
   
   // Fetch earned achievements
   const { data: earnedAchievements } = useQuery({
@@ -154,6 +153,8 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
 
   const getProgress = (badgeId: string, target?: number, progressType?: string): { current: number; target: number } | null => {
     if (!target || !progressType) return null;
+    // Don't show progress for guests
+    if (isGuest) return null;
     
     let current = 0;
     switch (progressType) {
@@ -190,19 +191,28 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
   return (
     <Card 
       className="p-4 mb-8 bg-pass-paper dark:bg-card border-pass-border dark:border-border overflow-hidden cursor-pointer group"
-      onClick={() => navigate('/pass')}
+      onClick={() => isGuest ? navigate('/auth') : navigate('/pass')}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-bold text-sm flex items-center gap-2">
-          Uetliberg Badges
+          {isGuest ? 'Diese Badges warten auf dich' : 'Uetliberg Badges'}
           <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
         </h3>
-        <div className="px-2 py-0.5 bg-primary/10 rounded-full">
-          <span className="text-xs font-medium text-primary">
-            {earnedCount}/{totalBadges}
-          </span>
-        </div>
+        {!isGuest && (
+          <div className="px-2 py-0.5 bg-primary/10 rounded-full">
+            <span className="text-xs font-medium text-primary">
+              {earnedCount}/{totalBadges}
+            </span>
+          </div>
+        )}
+        {isGuest && (
+          <div className="px-2 py-0.5 bg-primary/10 rounded-full">
+            <span className="text-xs font-medium text-primary">
+              {totalBadges} Badges
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Scrollable badge categories */}
