@@ -11,6 +11,7 @@ import NavBar from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin, CheckCircle2, Clock, RefreshCw, ChevronDown, Activity, Trophy, LogIn, HelpCircle, X, Mountain, Waypoints } from "lucide-react";
+import { HowItWorks } from "@/components/HowItWorks";
 import logo from "@/assets/uu_logo.svg";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Leaderboard } from "@/components/Leaderboard";
@@ -481,7 +482,10 @@ export default function Index() {
           {/* Sync Progress - zeigt Fortschritt für neue User */}
           {user && <SyncProgress userId={user.id} />}
 
-          {/* Badge Showcase - prominente Badge-Leiste */}
+          {/* So funktioniert's - nur für Gäste */}
+          {!user && <HowItWorks />}
+
+          {/* Badge Showcase - für alle sichtbar (Gäste sehen Teaser) */}
           <BadgeShowcase userId={user?.id} />
 
           {/* ===== BENTO GRID LAYOUT ===== */}
