@@ -48,29 +48,29 @@ export function HeroStats() {
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20">
       <div className="bg-black/40 backdrop-blur-sm border-t border-white/10">
-        <div className="flex items-center justify-center gap-6 sm:gap-10 py-3 px-4">
-          <div className="flex items-center gap-2 text-white">
-            <Users className="w-4 h-4 text-amber-400" />
-            <span className="text-lg sm:text-xl font-bold">
+        <div className="flex items-center justify-center gap-3 xs:gap-4 sm:gap-10 py-2.5 sm:py-3 px-2 sm:px-4">
+          <div className="flex items-center gap-1 sm:gap-2 text-white min-w-0">
+            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+            <span className="text-base sm:text-xl font-bold">
               <AnimatedNumber target={stats.totalRunners} />
             </span>
-            <span className="text-xs sm:text-sm text-white/70">Läufer</span>
+            <span className="text-[10px] sm:text-sm text-white/70">Läufer</span>
           </div>
-          <div className="w-px h-6 bg-white/20" />
-          <div className="flex items-center gap-2 text-white">
-            <Mountain className="w-4 h-4 text-amber-400" />
-            <span className="text-lg sm:text-xl font-bold">
+          <div className="w-px h-5 sm:h-6 bg-white/20 shrink-0" />
+          <div className="flex items-center gap-1 sm:gap-2 text-white min-w-0">
+            <Mountain className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+            <span className="text-base sm:text-xl font-bold">
               <AnimatedNumber target={stats.totalRuns} />
             </span>
-            <span className="text-xs sm:text-sm text-white/70">Runs</span>
+            <span className="text-[10px] sm:text-sm text-white/70">Runs</span>
           </div>
-          <div className="w-px h-6 bg-white/20" />
-          <div className="flex items-center gap-2 text-white">
-            <Route className="w-4 h-4 text-amber-400" />
-            <span className="text-lg sm:text-xl font-bold">
+          <div className="w-px h-5 sm:h-6 bg-white/20 shrink-0" />
+          <div className="flex items-center gap-1 sm:gap-2 text-white min-w-0">
+            <Route className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+            <span className="text-base sm:text-xl font-bold">
               <AnimatedNumber target={stats.totalDistanceKm} decimals={0} />
             </span>
-            <span className="text-xs sm:text-sm text-white/70">km</span>
+            <span className="text-[10px] sm:text-sm text-white/70">km</span>
           </div>
         </div>
       </div>
