@@ -424,7 +424,7 @@ export default function Index() {
             <WebcamBackground />
             {/* Content */}
             <div className="relative z-20 pb-16 md:pb-8">
-              {/* Logo ausgeblendet */}
+              <img src={logo} alt="Uetliberg Ultras" className="h-32 sm:h-40 w-auto mx-auto mb-6 drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]" />
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 tracking-tight text-white [text-shadow:_0_1px_8px_rgb(0_0_0_/_40%)]">
                 {getGreeting(weatherData?.weather)}
               </h2>
