@@ -207,13 +207,14 @@ export function WebcamBackground() {
             </div>
 
             {/* Mobile: two lines */}
-            <div className="md:hidden px-3 py-1.5">
+            <div className="md:hidden px-2.5 py-1">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-white/90 text-xs">
+                <div className="flex items-center gap-1.5 text-white/80 text-[11px]">
+                  <Camera className="w-3 h-3 opacity-70" />
                   {weatherData && (
                     <span>{weatherData.weather} {weatherData.temperature}°C</span>
                   )}
-                  <span>·</span>
+                  <span className="opacity-50">·</span>
                   {isLive ? (
                     <span className="flex items-center gap-1">
                       <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
@@ -227,17 +228,14 @@ export function WebcamBackground() {
                   size="sm"
                   onClick={captureScreenshot}
                   disabled={isCapturing || cooldownInfo.isOnCooldown}
-                  className="bg-white/20 hover:bg-white/30 text-white border-0 h-8 px-2.5 text-xs"
+                  className="bg-white/15 hover:bg-white/25 text-white border-0 h-6 px-1.5 text-[11px]"
                 >
                   {isCapturing ? (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <RefreshCw className="w-3 h-3 animate-spin" />
                   ) : cooldownInfo.isOnCooldown ? (
                     <>⏳ {cooldownInfo.remainingMinutes}m</>
                   ) : (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 mr-1" />
-                      Neu
-                    </>
+                    <RefreshCw className="w-3 h-3" />
                   )}
                 </Button>
               </div>
