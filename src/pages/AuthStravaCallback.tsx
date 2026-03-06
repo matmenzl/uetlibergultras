@@ -117,7 +117,11 @@ export default function AuthStravaCallback() {
         setStatus('error');
         setMessage('Fehler beim Anmelden');
         toast.error('Fehler beim Anmelden mit Strava');
-        setTimeout(() => navigate('/auth'), 3000);
+        if (isNativeCallback) {
+          window.location.href = 'uetlibergultras://auth-error';
+        } else {
+          setTimeout(() => navigate('/auth'), 3000);
+        }
       }
     };
 
