@@ -163,20 +163,20 @@ export function WebcamBackground() {
       {/* Webcam Info Bar - Bottom */}
       {imageLoaded && (
         <div className="absolute top-0 left-0 right-0 z-20">
-          <div className="bg-black/60 backdrop-blur-sm">
+          <div className="bg-black/40 backdrop-blur-sm">
             {/* Desktop: single line */}
-            <div className="hidden md:flex items-center justify-between px-4 py-2.5">
+            <div className="hidden md:flex items-center justify-between px-4 py-1.5">
               <div className="flex items-center gap-4 text-white">
-                <span className="flex items-center gap-1.5">
-                  <Camera className="w-4 h-4" />
-                  <span className="text-sm font-medium">Uetliberg Webcam</span>
+                <span className="flex items-center gap-1">
+                  <Camera className="w-3.5 h-3.5 opacity-70" />
+                  <span className="text-xs font-medium opacity-90">Webcam</span>
                 </span>
                 {weatherData && (
-                  <span className="text-sm">
+                <span className="text-xs opacity-80">
                     {weatherData.weather} {weatherData.temperature}°C
                   </span>
                 )}
-                <span className="text-sm text-white/80">
+                <span className="text-xs text-white/70">
                   {isLive ? (
                     <span className="flex items-center gap-1.5">
                       <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
@@ -191,39 +191,30 @@ export function WebcamBackground() {
                 size="sm"
                 onClick={captureScreenshot}
                 disabled={isCapturing || cooldownInfo.isOnCooldown}
-                className="bg-white/20 hover:bg-white/30 text-white border-0"
+                className="bg-white/15 hover:bg-white/25 text-white border-0 h-7 px-2 text-xs"
               >
                 {isCapturing ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin mr-1.5" />
-                    Lädt...
-                  </>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                 ) : cooldownInfo.isOnCooldown ? (
                   <>
-                    <Clock className="w-4 h-4 mr-1.5" />
-                    {cooldownInfo.remainingMinutes} Min
+                    <Clock className="w-3.5 h-3.5 mr-1" />
+                    {cooldownInfo.remainingMinutes}m
                   </>
                 ) : (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-1.5" />
-                    Aktualisieren
-                  </>
+                  <RefreshCw className="w-3.5 h-3.5" />
                 )}
               </Button>
             </div>
 
             {/* Mobile: two lines */}
-            <div className="md:hidden px-3 py-2">
-              <div className="flex items-center gap-1.5 text-white text-sm mb-1.5">
-                <Camera className="w-3.5 h-3.5" />
-                <span className="font-medium">Uetliberg Webcam</span>
-              </div>
+            <div className="md:hidden px-2.5 py-1">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-white/90 text-xs">
+                <div className="flex items-center gap-1.5 text-white/80 text-[11px]">
+                  <Camera className="w-3 h-3 opacity-70" />
                   {weatherData && (
                     <span>{weatherData.weather} {weatherData.temperature}°C</span>
                   )}
-                  <span>·</span>
+                  <span className="opacity-50">·</span>
                   {isLive ? (
                     <span className="flex items-center gap-1">
                       <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
@@ -237,17 +228,14 @@ export function WebcamBackground() {
                   size="sm"
                   onClick={captureScreenshot}
                   disabled={isCapturing || cooldownInfo.isOnCooldown}
-                  className="bg-white/20 hover:bg-white/30 text-white border-0 h-8 px-2.5 text-xs"
+                  className="bg-white/15 hover:bg-white/25 text-white border-0 h-6 px-1.5 text-[11px]"
                 >
                   {isCapturing ? (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <RefreshCw className="w-3 h-3 animate-spin" />
                   ) : cooldownInfo.isOnCooldown ? (
                     <>⏳ {cooldownInfo.remainingMinutes}m</>
                   ) : (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 mr-1" />
-                      Neu
-                    </>
+                    <RefreshCw className="w-3 h-3" />
                   )}
                 </Button>
               </div>
