@@ -23,6 +23,7 @@ import { CommunityCounter } from "@/components/CommunityCounter";
 import { TodaysRunners } from "@/components/TodaysRunners";
 import { ManualCheckInButton } from "@/components/ManualCheckInButton";
 import { WebcamBackground } from "@/components/WebcamBackground";
+import { HeroStats } from "@/components/HeroStats";
 import { SyncProgress } from "@/components/SyncProgress";
 import { triggerFirstCheckInConfetti, triggerConfetti } from "@/lib/confetti";
 import { useWeather } from "@/hooks/useWeather";
@@ -477,6 +478,8 @@ export default function Index() {
                   </Dialog>
                 </>}
             </div>
+            {/* Community Stats Overlay */}
+            <HeroStats />
           </Card>
 
           {/* Sync Progress - zeigt Fortschritt für neue User */}
