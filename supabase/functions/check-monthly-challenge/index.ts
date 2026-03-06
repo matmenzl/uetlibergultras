@@ -131,6 +131,10 @@ Deno.serve(async (req) => {
       if (insertError) throw insertError;
 
       // Also award achievement badges (monthly_gold, monthly_silver, monthly_bronze)
+      // Set earned_at to the last day of the evaluated month at 23:00 UTC
+      const lastDay = new Date(Date.UTC(year, month, 0, 23, 0, 0)); // month is 1-indexed, day 0 = last day of prev month
+      const earnedAt = lastDay.toISOString();
+
       const rankToAchievement: Record<number, string> = {
         1: "monthly_gold",
         2: "monthly_silver",
@@ -153,6 +157,7 @@ Deno.serve(async (req) => {
           await supabase.from("user_achievements").insert({
             user_id: winner.user_id,
             achievement,
+            earned_at: earnedAt,
           });
         }
       }
