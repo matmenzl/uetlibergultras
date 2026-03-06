@@ -46,7 +46,7 @@ export function HeroStats() {
   if (!stats || (stats.totalRuns === 0 && stats.totalRunners === 0)) return null;
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20">
+    <div className="absolute bottom-[60px] md:bottom-[44px] left-0 right-0 z-20">
       <div className="bg-black/40 backdrop-blur-sm border-t border-white/10">
         <div className="flex items-center justify-center gap-3 xs:gap-4 sm:gap-10 py-2.5 sm:py-3 px-2 sm:px-4">
           <div className="flex items-center gap-1 sm:gap-2 text-white min-w-0">
