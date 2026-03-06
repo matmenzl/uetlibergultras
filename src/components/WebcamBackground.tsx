@@ -162,7 +162,7 @@ export function WebcamBackground() {
       
       {/* Webcam Info Bar - Bottom */}
       {imageLoaded && (
-        <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className="absolute top-0 left-0 right-0 z-20">
           <div className="bg-black/60 backdrop-blur-sm">
             {/* Desktop: single line */}
             <div className="hidden md:flex items-center justify-between px-4 py-2.5">
