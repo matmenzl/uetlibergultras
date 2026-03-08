@@ -182,6 +182,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "4 Wochen Durchhaltevermögen",
     howToEarn: "Laufe 4 Wochen in Folge auf den Uetliberg",
     symbolId: "flame-quad",
+    imageUrl: streak4Hybrid,
     colors: {
       primary: "12 76% 61%",
       background: "40 20% 95%",
