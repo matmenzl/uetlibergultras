@@ -214,6 +214,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Alle Routen erkundet",
     howToEarn: "Laufe alle Uetliberg-Segmente mindestens einmal",
     symbolId: "paths",
+    imageUrl: allSegmentsHybrid,
     colors: {
       primary: "12 76% 61%",
       background: "40 20% 95%",
