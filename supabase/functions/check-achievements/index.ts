@@ -97,10 +97,12 @@ serve(async (req) => {
       .single();
 
     // Get check-in stats (including weather data and manual flag)
+    // Only count activities from 2026 onwards
     const { data: checkIns } = await supabaseAdmin
       .from('check_ins')
       .select('activity_id, segment_id, checked_in_at, weather_code, temperature, is_manual')
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .gte('checked_in_at', '2026-01-01T00:00:00Z');
 
     if (!checkIns || checkIns.length === 0) {
       return new Response(JSON.stringify({ newAchievements: [] }), {
