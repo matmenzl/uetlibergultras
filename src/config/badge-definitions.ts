@@ -21,7 +21,7 @@ import pioneer50Hybrid from "@/assets/badges/pioneer-50-hybrid.png";
 import monthlyGoldHybrid from "@/assets/badges/monthly-gold-hybrid.png";
 import monthlySilverHybrid from "@/assets/badges/monthly-silver-hybrid.png";
 import monthlyBronzeHybrid from "@/assets/badges/monthly-bronze-hybrid.png";
-import denzlerwegKingHybrid from "@/assets/badges/denzlerweg-king-hybrid.png";
+import denzlerwegKingHybrid from "@/assets/badges/denzlerweg-king-3d.png";
 import coiffeurHybrid from "@/assets/badges/coiffeur-hybrid.png";
 import alternativligaHybrid from "@/assets/badges/alternativliga-hybrid.png";
 
