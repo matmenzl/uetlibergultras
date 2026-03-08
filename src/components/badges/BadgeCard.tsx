@@ -124,7 +124,7 @@ export function BadgeCard({
                 alt={badge.title}
                 className={cn(
                   'w-full h-auto max-h-[70%] object-contain transition-all duration-300 drop-shadow-md',
-                  !isEarned && 'grayscale-[80%] opacity-50 contrast-75'
+                  !isEarned && 'grayscale-[90%] opacity-50 contrast-75'
                 )}
               />
             ) : Symbol && (
