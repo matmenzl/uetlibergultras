@@ -259,6 +259,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Die Dunkelheit ist dein Freund",
     howToEarn: "Starte einen Lauf nach 21:00 Uhr",
     symbolId: "moon",
+    imageUrl: nightOwlHybrid,
     colors: {
       primary: "230 35% 35%",
       secondary: "45 93% 70%",
