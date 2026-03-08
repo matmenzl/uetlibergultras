@@ -179,10 +179,12 @@ export function BadgeCard({
           {/* Header */}
           <div className="flex items-start gap-3">
             <div 
-              className="w-10 h-14 flex-shrink-0 rounded"
+              className="w-10 h-14 flex-shrink-0 rounded overflow-hidden"
               style={{ backgroundColor: `hsl(${badge.colors.background})` }}
             >
-              {Symbol && (
+              {badge.imageUrl ? (
+                <img src={badge.imageUrl} alt={badge.title} className="w-full h-full object-contain p-0.5" />
+              ) : Symbol && (
                 <Symbol
                   className="w-full h-full p-1"
                   primaryColor={`hsl(${badge.colors.primary})`}
