@@ -320,6 +320,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Von Anfang an dabei",
     howToEarn: "Sei unter den ersten 100 Mitgliedern",
     symbolId: "star-founding",
+    imageUrl: foundingMemberHybrid,
     colors: {
       primary: "142 71% 45%",
       secondary: "45 93% 47%",
