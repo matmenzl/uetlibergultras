@@ -6,31 +6,49 @@ interface SymbolProps extends SVGProps<SVGSVGElement> {
   secondaryColor?: string;
 }
 
-// First ascent - single summit silhouette with path
-export function MountainSingle({ primaryColor = 'currentColor', ...props }: SymbolProps) {
+// First ascent - flat design single summit
+export function MountainSingle({ primaryColor = 'currentColor', secondaryColor, ...props }: SymbolProps) {
+  // Derive darker/lighter shades from primary for flat layering
   return (
-    <svg viewBox="0 0 60 50" fill="none" {...props}>
-      {/* Consistent Uetliberg horizon base */}
-      <UetlibergHorizon opacity={0.1} />
-      {/* Uetliberg silhouette */}
+    <svg viewBox="0 0 60 60" fill="none" {...props}>
+      {/* Circular background */}
+      <circle cx="30" cy="30" r="28" fill={primaryColor} opacity={0.15} />
+      
+      {/* Back mountain - darker shade */}
       <path
-        d="M4 44 L18 28 L24 32 L30 20 L36 28 L42 24 L56 44 Z"
+        d="M10 46 L22 28 L30 34 L42 24 L54 46 Z"
         fill={primaryColor}
-        stroke="hsl(0 0% 15%)"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
+        opacity={0.4}
       />
-      {/* Summit marker */}
-      <line x1="30" y1="20" x2="30" y2="12" stroke="hsl(0 0% 15%)" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx="30" cy="10" r="3" fill={primaryColor} stroke="hsl(0 0% 15%)" strokeWidth="2" />
-      {/* Ascent path */}
+      
+      {/* Front mountain - full color */}
       <path
-        d="M12 44 Q20 36 30 24"
+        d="M6 46 L18 30 L26 36 L34 22 L42 30 L50 46 Z"
+        fill={primaryColor}
+      />
+      
+      {/* Snow cap highlight */}
+      <path
+        d="M30 22 L34 22 L32 26 L28 28 L26 26 Z"
+        fill="white"
+        opacity={0.6}
+      />
+      
+      {/* Summit flag */}
+      <rect x="33" y="14" width="1.8" height="10" rx="0.9" fill={primaryColor} opacity={0.7} />
+      <path
+        d="M35 14 L43 17 L35 20 Z"
+        fill={primaryColor}
+        opacity={0.85}
+      />
+      
+      {/* Ground line */}
+      <path
+        d="M4 46 L56 46"
         fill="none"
-        stroke="hsl(0 0% 95%)"
+        stroke={primaryColor}
         strokeWidth="2"
-        strokeLinecap="round"
-        strokeDasharray="4 3"
+        opacity={0.25}
       />
     </svg>
   );
