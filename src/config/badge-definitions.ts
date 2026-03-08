@@ -375,14 +375,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Meister des steilsten Weges",
     howToEarn: "Halte den Rekord auf dem Denzlerweg-Segment",
     symbolId: "crown",
-    colors: {
-      primary: "280 68% 60%",
-      secondary: "45 93% 47%",
-      background: "280 30% 15%",
-    },
-  },
-  {
-    id: "coiffeur",
+    imageUrl: denzlerwegKingHybrid,
     category: "legend",
     title: "Vokuhila",
     description: "Stammgast beim Coiffeur",
