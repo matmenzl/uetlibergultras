@@ -5,6 +5,9 @@ import runs10Hybrid from "@/assets/badges/runs-10-hybrid.png";
 import runs25Hybrid from "@/assets/badges/runs-25-hybrid.png";
 import runs50Hybrid from "@/assets/badges/runs-50-hybrid.png";
 import runs100Hybrid from "@/assets/badges/runs-100-hybrid.png";
+import streak2Hybrid from "@/assets/badges/streak-2-hybrid.png";
+import streak4Hybrid from "@/assets/badges/streak-4-hybrid.png";
+import streak8Hybrid from "@/assets/badges/streak-8-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
@@ -164,6 +167,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "2 Wochen am Stück aktiv",
     howToEarn: "Laufe 2 Wochen in Folge auf den Uetliberg",
     symbolId: "flame-double",
+    imageUrl: streak2Hybrid,
     colors: {
       primary: "12 76% 61%",
       background: "40 20% 95%",
@@ -178,6 +182,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "4 Wochen Durchhaltevermögen",
     howToEarn: "Laufe 4 Wochen in Folge auf den Uetliberg",
     symbolId: "flame-quad",
+    imageUrl: streak4Hybrid,
     colors: {
       primary: "12 76% 61%",
       background: "40 20% 95%",
@@ -192,6 +197,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "8 Wochen - nichts hält dich auf",
     howToEarn: "Laufe 8 Wochen in Folge auf den Uetliberg",
     symbolId: "flame-eight",
+    imageUrl: streak8Hybrid,
     colors: {
       primary: "12 76% 61%",
       secondary: "45 93% 47%",
