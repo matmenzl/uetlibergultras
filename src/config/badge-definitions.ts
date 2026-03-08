@@ -146,6 +146,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "100 Besteigungen - legendär!",
     howToEarn: "Besteige den Uetliberg 100 Mal",
     symbolId: "mountain-hundred",
+    imageUrl: runs100_3d,
     colors: {
       primary: "45 93% 47%",
       secondary: "280 68% 60%",
