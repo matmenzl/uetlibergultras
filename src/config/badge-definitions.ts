@@ -71,7 +71,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Dein erster Schritt auf den Uetliberg",
     howToEarn: "Absolviere deinen ersten Uetliberg-Lauf",
     symbolId: "mountain-single",
-    imageUrl: firstRun3d,
+    imageUrl: firstRunHybrid,
     colors: {
       primary: "45 93% 47%",
       background: "40 20% 95%",
