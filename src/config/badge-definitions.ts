@@ -101,7 +101,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "10 Besteigungen - nicht schlecht",
     howToEarn: "Besteige den Uetliberg 10 Mal",
     symbolId: "mountain-ten",
-    imageUrl: runs10_3d,
+    imageUrl: runs10Hybrid,
     colors: {
       primary: "45 93% 47%",
       background: "40 20% 95%",
