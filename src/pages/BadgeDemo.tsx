@@ -3,6 +3,7 @@ import { badgeDefinitions, getBadgesByCategory, BadgeCategory } from '@/config/b
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import firstRun3d from '@/assets/badges/first-run-3d.png';
+import denzlerwegKing3d from '@/assets/badges/denzlerweg-king-3d.png';
 
 // Demo data: simulate some earned badges with different states
 const demoEarnedBadges = [
@@ -81,6 +82,35 @@ export default function BadgeDemo() {
                 <img 
                   src={firstRun3d} 
                   alt="First Run Badge - nicht verdient" 
+                  className="w-full h-full object-contain grayscale opacity-40"
+                />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground">Nicht verdient</p>
+            </div>
+
+            {/* Divider */}
+            <div className="w-px h-32 bg-border hidden sm:block" />
+
+            {/* Denzlerweg 3D Clay */}
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">3D Clay (Bild)</p>
+              <div className="w-28 h-28 flex items-center justify-center">
+                <img 
+                  src={denzlerwegKing3d} 
+                  alt="S Brot isch no warm - 3D Clay Stil" 
+                  className="w-full h-full object-contain drop-shadow-lg"
+                />
+              </div>
+              <p className="text-sm font-medium">S Brot isch no warm</p>
+            </div>
+
+            {/* Denzlerweg unearned */}
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">3D Clay (nicht verdient)</p>
+              <div className="w-28 h-28 flex items-center justify-center">
+                <img 
+                  src={denzlerwegKing3d} 
+                  alt="S Brot isch no warm - nicht verdient" 
                   className="w-full h-full object-contain grayscale opacity-40"
                 />
               </div>
