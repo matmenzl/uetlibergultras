@@ -376,11 +376,20 @@ export const badgeDefinitions: BadgeDefinition[] = [
     howToEarn: "Halte den Rekord auf dem Denzlerweg-Segment",
     symbolId: "crown",
     imageUrl: denzlerwegKingHybrid,
+    colors: {
+      primary: "280 68% 60%",
+      secondary: "45 93% 47%",
+      background: "280 30% 15%",
+    },
+  },
+  {
+    id: "coiffeur",
     category: "legend",
     title: "Vokuhila",
     description: "Stammgast beim Coiffeur",
     howToEarn: "Laufe 10 mal im Jahr über ein Coiffeur-Segment",
     symbolId: "crown",
+    imageUrl: coiffeurHybrid,
     colors: {
       primary: "280 68% 60%",
       secondary: "45 93% 47%",
@@ -396,6 +405,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Ohne GPS unterwegs",
     howToEarn: "Nutze den manuellen Check-in",
     symbolId: "compass",
+    imageUrl: alternativligaHybrid,
     colors: {
       primary: "280 68% 60%",
       background: "40 20% 95%",
