@@ -347,6 +347,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Top 25 der Community",
     howToEarn: "Gehöre zu den Top 25 Läufern",
     symbolId: "trophy-twentyfive",
+    imageUrl: pioneer25Hybrid,
     colors: {
       primary: "142 71% 45%",
       background: "40 20% 95%",
