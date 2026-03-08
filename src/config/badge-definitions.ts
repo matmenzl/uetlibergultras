@@ -1,10 +1,10 @@
 import { ComponentType, SVGProps } from "react";
-import firstRun3d from "@/assets/badges/first-run-3d.png";
-import runs5_3d from "@/assets/badges/runs-5-3d.png";
-import runs10_3d from "@/assets/badges/runs-10-3d.png";
-import runs25_3d from "@/assets/badges/runs-25-3d.png";
-import runs50_3d from "@/assets/badges/runs-50-3d.png";
-import runs100_3d from "@/assets/badges/runs-100-3d.png";
+import firstRunHybrid from "@/assets/badges/first-run-hybrid.png";
+import runs5Hybrid from "@/assets/badges/runs-5-hybrid.png";
+import runs10Hybrid from "@/assets/badges/runs-10-hybrid.png";
+import runs25Hybrid from "@/assets/badges/runs-25-hybrid.png";
+import runs50Hybrid from "@/assets/badges/runs-50-hybrid.png";
+import runs100Hybrid from "@/assets/badges/runs-100-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
