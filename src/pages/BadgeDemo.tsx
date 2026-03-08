@@ -4,6 +4,7 @@ import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import firstRun3d from '@/assets/badges/first-run-3d.png';
 import denzlerwegKing3d from '@/assets/badges/denzlerweg-king-3d.png';
+import firstRunHybrid from '@/assets/badges/first-run-hybrid.png';
 
 // Demo data: simulate some earned badges with different states
 const demoEarnedBadges = [
