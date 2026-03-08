@@ -8,7 +8,8 @@ export interface BadgeDefinition {
   title: string;
   description: string;
   howToEarn: string;
-  symbolId: string; // Reference to symbol component
+  symbolId: string; // Reference to symbol component (fallback)
+  imageUrl?: string; // Optional 3D clay image path (preferred over symbolId)
   colors: {
     primary: string; // HSL values for primary color
     secondary?: string; // Optional accent
