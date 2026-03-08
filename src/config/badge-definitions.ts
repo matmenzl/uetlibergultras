@@ -5,6 +5,9 @@ import runs10Hybrid from "@/assets/badges/runs-10-hybrid.png";
 import runs25Hybrid from "@/assets/badges/runs-25-hybrid.png";
 import runs50Hybrid from "@/assets/badges/runs-50-hybrid.png";
 import runs100Hybrid from "@/assets/badges/runs-100-hybrid.png";
+import streak2Hybrid from "@/assets/badges/streak-2-hybrid.png";
+import streak4Hybrid from "@/assets/badges/streak-4-hybrid.png";
+import streak8Hybrid from "@/assets/badges/streak-8-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
