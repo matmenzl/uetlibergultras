@@ -434,6 +434,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Platz 2 der Monats-Challenge",
     howToEarn: "Erreiche Platz 2 in einer Monats-Challenge",
     symbolId: "medal-silver",
+    imageUrl: monthlySilverHybrid,
     colors: {
       primary: "0 0% 70%",
       secondary: "0 0% 85%",
