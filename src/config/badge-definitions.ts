@@ -360,6 +360,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Top 50 der Community",
     howToEarn: "Gehöre zu den Top 50 Läufern",
     symbolId: "trophy-fifty",
+    imageUrl: pioneer50Hybrid,
     colors: {
       primary: "142 71% 45%",
       background: "40 20% 95%",
