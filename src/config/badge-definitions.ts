@@ -245,6 +245,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Vor Sonnenaufgang unterwegs",
     howToEarn: "Starte einen Lauf vor 6:00 Uhr",
     symbolId: "sunrise",
+    imageUrl: earlyBirdHybrid,
     colors: {
       primary: "35 91% 55%",
       secondary: "199 89% 48%",
