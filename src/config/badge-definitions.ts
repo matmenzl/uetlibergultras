@@ -288,6 +288,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Unter null Grad unterwegs",
     howToEarn: "Laufe 5 mal bei Temperaturen unter 0°C",
     symbolId: "frost",
+    imageUrl: frostyHybrid,
     colors: {
       primary: "199 89% 48%",
       background: "199 30% 95%",
