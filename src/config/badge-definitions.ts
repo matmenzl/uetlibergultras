@@ -273,6 +273,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Laufen bei Schneefall",
     howToEarn: "Laufe 3 mal bei Schnee auf den Uetliberg",
     symbolId: "snowflake",
+    imageUrl: snowBunnyHybrid,
     colors: {
       primary: "199 89% 70%",
       background: "199 30% 95%",
