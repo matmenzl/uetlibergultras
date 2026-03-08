@@ -9,6 +9,21 @@ import streak2Hybrid from "@/assets/badges/streak-2-hybrid.png";
 import streak4Hybrid from "@/assets/badges/streak-4-hybrid.png";
 import streak8Hybrid from "@/assets/badges/streak-8-hybrid.png";
 import allSegmentsHybrid from "@/assets/badges/all-segments-hybrid.png";
+import earlyBirdHybrid from "@/assets/badges/early-bird-hybrid.png";
+import nightOwlHybrid from "@/assets/badges/night-owl-hybrid.png";
+import snowBunnyHybrid from "@/assets/badges/snow-bunny-hybrid.png";
+import frostyHybrid from "@/assets/badges/frosty-hybrid.png";
+import wasserratteHybrid from "@/assets/badges/wasserratte-hybrid.png";
+import foundingMemberHybrid from "@/assets/badges/founding-member-hybrid.png";
+import pioneer10Hybrid from "@/assets/badges/pioneer-10-hybrid.png";
+import pioneer25Hybrid from "@/assets/badges/pioneer-25-hybrid.png";
+import pioneer50Hybrid from "@/assets/badges/pioneer-50-hybrid.png";
+import monthlyGoldHybrid from "@/assets/badges/monthly-gold-hybrid.png";
+import monthlySilverHybrid from "@/assets/badges/monthly-silver-hybrid.png";
+import monthlyBronzeHybrid from "@/assets/badges/monthly-bronze-hybrid.png";
+import denzlerwegKingHybrid from "@/assets/badges/denzlerweg-king-hybrid.png";
+import coiffeurHybrid from "@/assets/badges/coiffeur-hybrid.png";
+import alternativligaHybrid from "@/assets/badges/alternativliga-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
@@ -230,6 +245,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Vor Sonnenaufgang unterwegs",
     howToEarn: "Starte einen Lauf vor 6:00 Uhr",
     symbolId: "sunrise",
+    imageUrl: earlyBirdHybrid,
     colors: {
       primary: "35 91% 55%",
       secondary: "199 89% 48%",
@@ -243,6 +259,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Die Dunkelheit ist dein Freund",
     howToEarn: "Starte einen Lauf nach 21:00 Uhr",
     symbolId: "moon",
+    imageUrl: nightOwlHybrid,
     colors: {
       primary: "230 35% 35%",
       secondary: "45 93% 70%",
@@ -256,6 +273,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Laufen bei Schneefall",
     howToEarn: "Laufe 3 mal bei Schnee auf den Uetliberg",
     symbolId: "snowflake",
+    imageUrl: snowBunnyHybrid,
     colors: {
       primary: "199 89% 70%",
       background: "199 30% 95%",
@@ -270,6 +288,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Unter null Grad unterwegs",
     howToEarn: "Laufe 5 mal bei Temperaturen unter 0°C",
     symbolId: "frost",
+    imageUrl: frostyHybrid,
     colors: {
       primary: "199 89% 48%",
       background: "199 30% 95%",
@@ -284,6 +303,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Regen kann dich nicht stoppen",
     howToEarn: "Laufe 5 mal bei Regen auf den Uetliberg",
     symbolId: "rain",
+    imageUrl: wasserratteHybrid,
     colors: {
       primary: "199 89% 48%",
       background: "40 20% 95%",
@@ -300,6 +320,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Von Anfang an dabei",
     howToEarn: "Sei unter den ersten 100 Mitgliedern",
     symbolId: "star-founding",
+    imageUrl: foundingMemberHybrid,
     colors: {
       primary: "142 71% 45%",
       secondary: "45 93% 47%",
@@ -313,6 +334,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Top 10 der Community",
     howToEarn: "Gehöre zu den Top 10 Läufern",
     symbolId: "trophy-ten",
+    imageUrl: pioneer10Hybrid,
     colors: {
       primary: "142 71% 45%",
       background: "40 20% 95%",
@@ -325,6 +347,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Top 25 der Community",
     howToEarn: "Gehöre zu den Top 25 Läufern",
     symbolId: "trophy-twentyfive",
+    imageUrl: pioneer25Hybrid,
     colors: {
       primary: "142 71% 45%",
       background: "40 20% 95%",
@@ -337,6 +360,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Top 50 der Community",
     howToEarn: "Gehöre zu den Top 50 Läufern",
     symbolId: "trophy-fifty",
+    imageUrl: pioneer50Hybrid,
     colors: {
       primary: "142 71% 45%",
       background: "40 20% 95%",
@@ -351,6 +375,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Meister des steilsten Weges",
     howToEarn: "Halte den Rekord auf dem Denzlerweg-Segment",
     symbolId: "crown",
+    imageUrl: denzlerwegKingHybrid,
     colors: {
       primary: "280 68% 60%",
       secondary: "45 93% 47%",
@@ -364,6 +389,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Stammgast beim Coiffeur",
     howToEarn: "Laufe 10 mal im Jahr über ein Coiffeur-Segment",
     symbolId: "crown",
+    imageUrl: coiffeurHybrid,
     colors: {
       primary: "280 68% 60%",
       secondary: "45 93% 47%",
@@ -379,6 +405,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Ohne GPS unterwegs",
     howToEarn: "Nutze den manuellen Check-in",
     symbolId: "compass",
+    imageUrl: alternativligaHybrid,
     colors: {
       primary: "280 68% 60%",
       background: "40 20% 95%",
@@ -393,6 +420,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Platz 1 der Monats-Challenge",
     howToEarn: "Werde Monatssieger mit den meisten Runs",
     symbolId: "medal-gold",
+    imageUrl: monthlyGoldHybrid,
     colors: {
       primary: "45 93% 47%",
       secondary: "45 93% 65%",
@@ -406,6 +434,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Platz 2 der Monats-Challenge",
     howToEarn: "Erreiche Platz 2 in einer Monats-Challenge",
     symbolId: "medal-silver",
+    imageUrl: monthlySilverHybrid,
     colors: {
       primary: "0 0% 70%",
       secondary: "0 0% 85%",
@@ -419,6 +448,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Platz 3 der Monats-Challenge",
     howToEarn: "Erreiche Platz 3 in einer Monats-Challenge",
     symbolId: "medal-bronze",
+    imageUrl: monthlyBronzeHybrid,
     colors: {
       primary: "25 70% 45%",
       secondary: "25 70% 60%",
