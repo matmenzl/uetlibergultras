@@ -1,4 +1,10 @@
 import { ComponentType, SVGProps } from "react";
+import firstRun3d from "@/assets/badges/first-run-3d.png";
+import runs5_3d from "@/assets/badges/runs-5-3d.png";
+import runs10_3d from "@/assets/badges/runs-10-3d.png";
+import runs25_3d from "@/assets/badges/runs-25-3d.png";
+import runs50_3d from "@/assets/badges/runs-50-3d.png";
+import runs100_3d from "@/assets/badges/runs-100-3d.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
@@ -8,7 +14,8 @@ export interface BadgeDefinition {
   title: string;
   description: string;
   howToEarn: string;
-  symbolId: string; // Reference to symbol component
+  symbolId: string; // Reference to symbol component (fallback)
+  imageUrl?: string; // Optional 3D clay image path (preferred over symbolId)
   colors: {
     primary: string; // HSL values for primary color
     secondary?: string; // Optional accent
@@ -64,6 +71,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Dein erster Schritt auf den Uetliberg",
     howToEarn: "Absolviere deinen ersten Uetliberg-Lauf",
     symbolId: "mountain-single",
+    imageUrl: firstRun3d,
     colors: {
       primary: "45 93% 47%",
       background: "40 20% 95%",
@@ -78,6 +86,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "5 Besteigungen geschafft",
     howToEarn: "Besteige den Uetliberg 5 Mal",
     symbolId: "mountain-five",
+    imageUrl: runs5_3d,
     colors: {
       primary: "45 93% 47%",
       background: "40 20% 95%",
@@ -92,6 +101,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "10 Besteigungen - nicht schlecht",
     howToEarn: "Besteige den Uetliberg 10 Mal",
     symbolId: "mountain-ten",
+    imageUrl: runs10_3d,
     colors: {
       primary: "45 93% 47%",
       background: "40 20% 95%",
@@ -106,6 +116,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "25 Besteigungen - beeindruckend!",
     howToEarn: "Besteige den Uetliberg 25 Mal",
     symbolId: "mountain-twentyfive",
+    imageUrl: runs25_3d,
     colors: {
       primary: "45 93% 47%",
       background: "40 20% 95%",
@@ -120,6 +131,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "50 Besteigungen - eine wahre Leistung",
     howToEarn: "Besteige den Uetliberg 50 Mal",
     symbolId: "mountain-fifty",
+    imageUrl: runs50_3d,
     colors: {
       primary: "45 93% 47%",
       background: "40 20% 95%",
@@ -134,6 +146,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "100 Besteigungen - legendär!",
     howToEarn: "Besteige den Uetliberg 100 Mal",
     symbolId: "mountain-hundred",
+    imageUrl: runs100_3d,
     colors: {
       primary: "45 93% 47%",
       secondary: "280 68% 60%",
