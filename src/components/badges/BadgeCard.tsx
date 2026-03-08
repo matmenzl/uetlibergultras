@@ -118,7 +118,16 @@ export function BadgeCard({
 
           {/* Symbol container */}
           <div className="absolute inset-0 flex items-center justify-center p-3 pb-8">
-            {Symbol && (
+            {badge.imageUrl ? (
+              <img
+                src={badge.imageUrl}
+                alt={badge.title}
+                className={cn(
+                  'w-full h-auto max-h-[70%] object-contain transition-all duration-300 drop-shadow-md',
+                  !isEarned && 'grayscale opacity-40'
+                )}
+              />
+            ) : Symbol && (
               <Symbol
                 className={cn(
                   'w-full h-auto max-h-[60%] transition-all duration-300',
