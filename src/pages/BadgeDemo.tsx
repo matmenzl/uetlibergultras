@@ -4,6 +4,7 @@ import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import firstRun3d from '@/assets/badges/first-run-3d.png';
 import denzlerwegKing3d from '@/assets/badges/denzlerweg-king-3d.png';
+import firstRunHybrid from '@/assets/badges/first-run-hybrid.png';
 
 // Demo data: simulate some earned badges with different states
 const demoEarnedBadges = [
@@ -59,6 +60,19 @@ export default function BadgeDemo() {
                 <img 
                   src={firstRun3d} 
                   alt="First Run Badge - 3D Clay Stil" 
+                  className="w-full h-full object-contain drop-shadow-lg"
+                />
+              </div>
+              <p className="text-sm font-medium">Ein Mal ist keinmal</p>
+            </div>
+
+            {/* 2D/3D Hybrid version */}
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">2D/3D Hybrid</p>
+              <div className="w-28 h-28 flex items-center justify-center">
+                <img 
+                  src={firstRunHybrid} 
+                  alt="First Run Badge - 2D/3D Hybrid Stil" 
                   className="w-full h-full object-contain drop-shadow-lg"
                 />
               </div>
