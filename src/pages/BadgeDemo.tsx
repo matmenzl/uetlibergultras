@@ -2,6 +2,7 @@ import { BadgeGrid } from '@/components/badges';
 import { badgeDefinitions, getBadgesByCategory, BadgeCategory } from '@/config/badge-definitions';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
+import firstRun3d from '@/assets/badges/first-run-3d.png';
 
 // Demo data: simulate some earned badges with different states
 const demoEarnedBadges = [
@@ -41,6 +42,51 @@ export default function BadgeDemo() {
           <p className="text-muted-foreground">
             Alle Badges in verschiedenen Zuständen: verdient, nicht verdient, mit Fortschritt
           </p>
+        </div>
+
+        {/* 3D Clay Prototype comparison */}
+        <div className="space-y-4 p-6 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5">
+          <h2 className="text-xl font-bold">🧪 Stil-Vergleich: 3D Clay vs. SVG Flat</h2>
+          <p className="text-sm text-muted-foreground">
+            Gleicher Badge "Ein Mal ist keinmal" (First Run) in zwei Stilen
+          </p>
+          <div className="flex items-end gap-12 flex-wrap">
+            {/* 3D Clay version */}
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">3D Clay (Bild)</p>
+              <div className="w-28 h-28 flex items-center justify-center">
+                <img 
+                  src={firstRun3d} 
+                  alt="First Run Badge - 3D Clay Stil" 
+                  className="w-full h-full object-contain drop-shadow-lg"
+                />
+              </div>
+              <p className="text-sm font-medium">Ein Mal ist keinmal</p>
+            </div>
+            
+            {/* SVG Flat version for comparison */}
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">SVG Flat (aktuell)</p>
+              <BadgeGrid
+                badges={badgeDefinitions.slice(0, 1)}
+                earnedBadges={demoEarnedBadges}
+                size="lg"
+              />
+            </div>
+
+            {/* Unearned comparison */}
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">3D Clay (nicht verdient)</p>
+              <div className="w-28 h-28 flex items-center justify-center">
+                <img 
+                  src={firstRun3d} 
+                  alt="First Run Badge - nicht verdient" 
+                  className="w-full h-full object-contain grayscale opacity-40"
+                />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground">Nicht verdient</p>
+            </div>
+          </div>
         </div>
 
         {/* All badges by category */}
