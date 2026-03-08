@@ -131,7 +131,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "50 Besteigungen - eine wahre Leistung",
     howToEarn: "Besteige den Uetliberg 50 Mal",
     symbolId: "mountain-fifty",
-    imageUrl: runs50_3d,
+    imageUrl: runs50Hybrid,
     colors: {
       primary: "45 93% 47%",
       background: "40 20% 95%",
