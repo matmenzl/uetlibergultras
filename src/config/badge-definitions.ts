@@ -9,6 +9,21 @@ import streak2Hybrid from "@/assets/badges/streak-2-hybrid.png";
 import streak4Hybrid from "@/assets/badges/streak-4-hybrid.png";
 import streak8Hybrid from "@/assets/badges/streak-8-hybrid.png";
 import allSegmentsHybrid from "@/assets/badges/all-segments-hybrid.png";
+import earlyBirdHybrid from "@/assets/badges/early-bird-hybrid.png";
+import nightOwlHybrid from "@/assets/badges/night-owl-hybrid.png";
+import snowBunnyHybrid from "@/assets/badges/snow-bunny-hybrid.png";
+import frostyHybrid from "@/assets/badges/frosty-hybrid.png";
+import wasserratteHybrid from "@/assets/badges/wasserratte-hybrid.png";
+import foundingMemberHybrid from "@/assets/badges/founding-member-hybrid.png";
+import pioneer10Hybrid from "@/assets/badges/pioneer-10-hybrid.png";
+import pioneer25Hybrid from "@/assets/badges/pioneer-25-hybrid.png";
+import pioneer50Hybrid from "@/assets/badges/pioneer-50-hybrid.png";
+import monthlyGoldHybrid from "@/assets/badges/monthly-gold-hybrid.png";
+import monthlySilverHybrid from "@/assets/badges/monthly-silver-hybrid.png";
+import monthlyBronzeHybrid from "@/assets/badges/monthly-bronze-hybrid.png";
+import denzlerwegKingHybrid from "@/assets/badges/denzlerweg-king-hybrid.png";
+import coiffeurHybrid from "@/assets/badges/coiffeur-hybrid.png";
+import alternativligaHybrid from "@/assets/badges/alternativliga-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
