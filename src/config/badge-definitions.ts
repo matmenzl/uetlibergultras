@@ -116,7 +116,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "25 Besteigungen - beeindruckend!",
     howToEarn: "Besteige den Uetliberg 25 Mal",
     symbolId: "mountain-twentyfive",
-    imageUrl: runs25_3d,
+    imageUrl: runs25Hybrid,
     colors: {
       primary: "45 93% 47%",
       background: "40 20% 95%",
