@@ -334,6 +334,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Top 10 der Community",
     howToEarn: "Gehöre zu den Top 10 Läufern",
     symbolId: "trophy-ten",
+    imageUrl: pioneer10Hybrid,
     colors: {
       primary: "142 71% 45%",
       background: "40 20% 95%",
