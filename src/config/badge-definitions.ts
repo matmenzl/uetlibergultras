@@ -303,6 +303,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Regen kann dich nicht stoppen",
     howToEarn: "Laufe 5 mal bei Regen auf den Uetliberg",
     symbolId: "rain",
+    imageUrl: wasserratteHybrid,
     colors: {
       primary: "199 89% 48%",
       background: "40 20% 95%",
