@@ -167,6 +167,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "2 Wochen am Stück aktiv",
     howToEarn: "Laufe 2 Wochen in Folge auf den Uetliberg",
     symbolId: "flame-double",
+    imageUrl: streak2Hybrid,
     colors: {
       primary: "12 76% 61%",
       background: "40 20% 95%",
