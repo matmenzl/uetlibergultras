@@ -420,6 +420,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "Platz 1 der Monats-Challenge",
     howToEarn: "Werde Monatssieger mit den meisten Runs",
     symbolId: "medal-gold",
+    imageUrl: monthlyGoldHybrid,
     colors: {
       primary: "45 93% 47%",
       secondary: "45 93% 65%",
