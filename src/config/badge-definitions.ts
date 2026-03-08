@@ -197,6 +197,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     description: "8 Wochen - nichts hält dich auf",
     howToEarn: "Laufe 8 Wochen in Folge auf den Uetliberg",
     symbolId: "flame-eight",
+    imageUrl: streak8Hybrid,
     colors: {
       primary: "12 76% 61%",
       secondary: "45 93% 47%",
