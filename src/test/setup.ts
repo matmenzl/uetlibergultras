@@ -8,8 +8,10 @@ afterEach(() => {
 });
 
 // Mock environment variables for tests
-process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
-process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'test-key';
+// @ts-ignore -- node types available in test env
+globalThis.process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
+// @ts-ignore
+globalThis.process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'test-key';
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
