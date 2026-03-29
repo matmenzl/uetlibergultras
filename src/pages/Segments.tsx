@@ -44,10 +44,22 @@ interface Segment {
   end_latlng?: number[] | null;
 }
 
-// Mapbox public token from environment
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
+// Mapbox token loaded from backend
+const useMapboxToken = () => {
+  const { data } = useQuery({
+    queryKey: ['mapbox-token'],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+      if (error) throw error;
+      return data?.token as string || '';
+    },
+    staleTime: Infinity,
+  });
+  return data || '';
+};
 
 export default function Segments() {
+  const mapboxToken = useMapboxToken();
   const [user, setUser] = useState<User | null>(null);
   
   // Filter states
@@ -335,7 +347,7 @@ export default function Segments() {
               ) : (
                 <SegmentsMap 
                   segments={filteredSegments} 
-                  mapboxToken={MAPBOX_TOKEN}
+                  mapboxToken={mapboxToken}
                   selectedSegmentId={selectedSegmentId}
                 />
               )
