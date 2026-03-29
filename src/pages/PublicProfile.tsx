@@ -323,9 +323,9 @@ export default function PublicProfile() {
                       <Badge variant="outline">#{profile.user_number}</Badge>
                     )}
                   </div>
-                  {stravaProfile?.strava_id && (
+                  {profile?.strava_id && (
                     <a
-                      href={`https://www.strava.com/athletes/${stravaProfile.strava_id}`}
+                      href={`https://www.strava.com/athletes/${profile.strava_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#FC4C02] transition-colors mt-1"
