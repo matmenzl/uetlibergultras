@@ -347,7 +347,7 @@ export default function Segments() {
               ) : (
                 <SegmentsMap 
                   segments={filteredSegments} 
-                  mapboxToken={MAPBOX_TOKEN}
+                  mapboxToken={mapboxToken}
                   selectedSegmentId={selectedSegmentId}
                 />
               )
