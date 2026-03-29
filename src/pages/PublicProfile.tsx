@@ -99,7 +99,7 @@ export default function PublicProfile() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('public_profiles')
-        .select('*')
+        .select('id, display_name, profile_picture, is_founding_member, user_number, strava_id')
         .eq('id', userId)
         .maybeSingle();
       if (error) throw error;
