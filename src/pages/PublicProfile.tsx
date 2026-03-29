@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Mountain, Award, Route, TrendingUp, Calendar, Snowflake, CloudRain, User, Clock, ChevronDown, ChevronUp, Trophy, Medal } from 'lucide-react';
+import { ArrowLeft, Mountain, Award, Route, TrendingUp, Calendar, Snowflake, CloudRain, User, Clock, ChevronDown, ChevronUp, Trophy, Medal, ExternalLink } from 'lucide-react';
 import { BadgeGrid, EarnedBadge } from '@/components/badges/BadgeGrid';
 import { badgeDefinitions, getBadgeById } from '@/config/badge-definitions';
 import { format } from 'date-fns';
@@ -103,6 +103,21 @@ export default function PublicProfile() {
         .maybeSingle();
       if (error) throw error;
       return data as PublicProfile | null;
+    },
+    enabled: isAuthenticated === true && !!userId,
+  });
+
+  // Fetch strava_id for profile link
+  const { data: stravaProfile } = useQuery({
+    queryKey: ['public-profile-strava', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('strava_id')
+        .eq('id', userId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
     },
     enabled: isAuthenticated === true && !!userId,
   });
@@ -322,6 +337,20 @@ export default function PublicProfile() {
                       <Badge variant="outline">#{profile.user_number}</Badge>
                     )}
                   </div>
+                  {stravaProfile?.strava_id && (
+                    <a
+                      href={`https://www.strava.com/athletes/${stravaProfile.strava_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#FC4C02] transition-colors mt-1"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
+                      </svg>
+                      Strava Profil
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
                 </div>
               </div>
             </Card>
