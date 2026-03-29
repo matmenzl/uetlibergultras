@@ -337,6 +337,18 @@ export default function PublicProfile() {
                       <Badge variant="outline">#{profile.user_number}</Badge>
                     )}
                   </div>
+                  {stravaProfile?.strava_id && (
+                    <a
+                      href={`https://www.strava.com/athletes/${stravaProfile.strava_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#FC4C02] transition-colors mt-1"
+                    >
+                      <img src="/assets/strava-icon.svg" alt="Strava" className="w-4 h-4" />
+                      Strava Profil
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
                 </div>
               </div>
             </Card>
