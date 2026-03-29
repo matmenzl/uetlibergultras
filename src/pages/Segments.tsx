@@ -59,6 +59,7 @@ const useMapboxToken = () => {
 };
 
 export default function Segments() {
+  const mapboxToken = useMapboxToken();
   const [user, setUser] = useState<User | null>(null);
   
   // Filter states
