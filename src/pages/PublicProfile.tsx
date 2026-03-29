@@ -107,6 +107,21 @@ export default function PublicProfile() {
     enabled: isAuthenticated === true && !!userId,
   });
 
+  // Fetch strava_id for profile link
+  const { data: stravaProfile } = useQuery({
+    queryKey: ['public-profile-strava', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('strava_id')
+        .eq('id', userId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAuthenticated === true && !!userId,
+  });
+
   // Fetch check-ins with activity data
   const { data: checkIns, isLoading: checkInsLoading } = useQuery({
     queryKey: ['public-profile-checkins', userId],
