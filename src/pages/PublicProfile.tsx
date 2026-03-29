@@ -61,6 +61,7 @@ interface PublicProfile {
   profile_picture: string | null;
   is_founding_member: boolean | null;
   user_number: number | null;
+  strava_id: number | null;
 }
 
 const getWeatherIcon = (weatherCode: number | null, temperature: number | null) => {
