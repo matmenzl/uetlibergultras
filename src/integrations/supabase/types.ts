@@ -389,6 +389,7 @@ export type Database = {
           id: string | null
           is_founding_member: boolean | null
           profile_picture: string | null
+          strava_id: number | null
           user_number: number | null
         }
         Insert: {
@@ -396,6 +397,7 @@ export type Database = {
           id?: string | null
           is_founding_member?: boolean | null
           profile_picture?: string | null
+          strava_id?: number | null
           user_number?: number | null
         }
         Update: {
@@ -403,6 +405,7 @@ export type Database = {
           id?: string | null
           is_founding_member?: boolean | null
           profile_picture?: string | null
+          strava_id?: number | null
           user_number?: number | null
         }
         Relationships: []
