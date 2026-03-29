@@ -61,6 +61,7 @@ interface PublicProfile {
   profile_picture: string | null;
   is_founding_member: boolean | null;
   user_number: number | null;
+  strava_id: number | null;
 }
 
 const getWeatherIcon = (weatherCode: number | null, temperature: number | null) => {
@@ -103,21 +104,6 @@ export default function PublicProfile() {
         .maybeSingle();
       if (error) throw error;
       return data as PublicProfile | null;
-    },
-    enabled: isAuthenticated === true && !!userId,
-  });
-
-  // Fetch strava_id for profile link
-  const { data: stravaProfile } = useQuery({
-    queryKey: ['public-profile-strava', userId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('strava_id')
-        .eq('id', userId!)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
     },
     enabled: isAuthenticated === true && !!userId,
   });
@@ -337,9 +323,9 @@ export default function PublicProfile() {
                       <Badge variant="outline">#{profile.user_number}</Badge>
                     )}
                   </div>
-                  {stravaProfile?.strava_id && (
+                  {profile?.strava_id && (
                     <a
-                      href={`https://www.strava.com/athletes/${stravaProfile.strava_id}`}
+                      href={`https://www.strava.com/athletes/${profile.strava_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#FC4C02] transition-colors mt-1"
