@@ -430,9 +430,23 @@ export default function Index() {
                 {getGreeting(weatherData?.weather)}
               </h2>
               {!user ? <>
-                  <p className="text-white/90 mb-8 text-lg max-w-md mx-auto [text-shadow:_0_1px_6px_rgb(0_0_0_/_35%)]">
-                    Der Uetliberg wartet auf dich! Verbinde dich mit Strava und sammle deine Uetliberg Runs.
+                  <p className="text-white/95 mb-5 text-lg sm:text-xl font-semibold max-w-xl mx-auto [text-shadow:_0_1px_6px_rgb(0_0_0_/_45%)]">
+                    Verwandle deine Uetliberg-Runs in Badges, Ränge & Ruhm.
                   </p>
+                  <ul className="text-white/90 mb-8 text-sm sm:text-base max-w-md mx-auto space-y-1.5 [text-shadow:_0_1px_6px_rgb(0_0_0_/_45%)]">
+                    <li className="flex items-center justify-center gap-2">
+                      <span className="text-primary text-base">✓</span>
+                      <span>Sammle Badges für jeden Run — vollautomatisch</span>
+                    </li>
+                    <li className="flex items-center justify-center gap-2">
+                      <span className="text-primary text-base">✓</span>
+                      <span>Mach bei der Monats-Challenge mit (Gold, Silber, Bronze)</span>
+                    </li>
+                    <li className="flex items-center justify-center gap-2">
+                      <span className="text-primary text-base">✓</span>
+                      <span>Tritt der Uetliberg-Community bei</span>
+                    </li>
+                  </ul>
                   <Button onClick={() => navigate("/auth")} size="lg" className="text-sm sm:text-base px-4 sm:px-8 py-4 sm:py-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105">
                     <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
                     <span className="hidden sm:inline">Anmelden mit Strava oder E-Mail</span>
