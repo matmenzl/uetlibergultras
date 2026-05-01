@@ -169,12 +169,14 @@ Deno.serve(async (req) => {
         const achievement = rankToAchievement[winner.rank];
         if (!achievement) continue;
 
-        // Check if user already has this achievement type
+        // Check if user already has this achievement for THIS specific month
+        // (a user can win gold/silver/bronze in multiple different months)
         const { data: existingAchievement } = await supabase
           .from("user_achievements")
           .select("id")
           .eq("user_id", winner.user_id)
           .eq("achievement", achievement)
+          .eq("earned_at", earnedAt)
           .limit(1);
 
         if (!existingAchievement || existingAchievement.length === 0) {
