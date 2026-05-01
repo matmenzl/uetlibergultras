@@ -1,0 +1,2 @@
+ALTER TABLE public.user_achievements DROP CONSTRAINT IF EXISTS user_achievements_user_id_achievement_key;
+ALTER TABLE public.user_achievements ADD CONSTRAINT user_achievements_user_id_achievement_earned_at_key UNIQUE (user_id, achievement, earned_at);
