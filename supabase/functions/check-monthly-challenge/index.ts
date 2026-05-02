@@ -106,46 +106,44 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Count distinct activities and unique segments per user
-    const userStats = new Map<
-      string,
-      { activities: Set<number>; segments: Set<number> }
-    >();
+    // Count distinct activities per user
+    const userStats = new Map<string, Set<number>>();
 
     for (const ci of checkIns) {
       if (!userStats.has(ci.user_id)) {
-        userStats.set(ci.user_id, {
-          activities: new Set(),
-          segments: new Set(),
-        });
+        userStats.set(ci.user_id, new Set());
       }
-      const stats = userStats.get(ci.user_id)!;
-      stats.activities.add(ci.activity_id);
-      if (ci.segment_id !== 0) {
-        stats.segments.add(ci.segment_id);
-      }
+      userStats.get(ci.user_id)!.add(ci.activity_id);
     }
 
-    // Sort: primary by activity count desc, secondary by unique segments desc
+    // Sort by activity count desc
     const ranked = Array.from(userStats.entries())
-      .map(([user_id, stats]) => ({
+      .map(([user_id, activities]) => ({
         user_id,
-        total_runs: stats.activities.size,
-        unique_segments: stats.segments.size,
+        total_runs: activities.size,
       }))
-      .sort((a, b) => {
-        if (b.total_runs !== a.total_runs) return b.total_runs - a.total_runs;
-        return b.unique_segments - a.unique_segments;
-      });
+      .sort((a, b) => b.total_runs - a.total_runs);
 
-    // Take top 3
-    const winners = ranked.slice(0, 3).map((entry, index) => ({
-      user_id: entry.user_id,
-      year,
-      month,
-      rank: index + 1,
-      total_runs: entry.total_runs,
-    }));
+    // Assign ranks with ties: users with the same total_runs share the same rank.
+    // Award medals only for ranks 1, 2, 3 (standard competition ranking, e.g. 1,1,3).
+    const winners: { user_id: string; year: number; month: number; rank: number; total_runs: number }[] = [];
+    let currentRank = 0;
+    let lastRuns = -1;
+    for (let i = 0; i < ranked.length; i++) {
+      const entry = ranked[i];
+      if (entry.total_runs !== lastRuns) {
+        currentRank = i + 1;
+        lastRuns = entry.total_runs;
+      }
+      if (currentRank > 3) break;
+      winners.push({
+        user_id: entry.user_id,
+        year,
+        month,
+        rank: currentRank,
+        total_runs: entry.total_runs,
+      });
+    }
 
     if (winners.length > 0) {
       const { error: insertError } = await supabase
