@@ -2,10 +2,16 @@ import NavBar from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/Seo";
 
 const Terms = () => {
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="AGB – Uetliberg Ultras"
+        description="Allgemeine Geschäftsbedingungen für die Nutzung der Uetliberg-Ultras-Community-Plattform."
+        path="/terms"
+      />
       <NavBar />
       
       <main className="container mx-auto px-4 py-12 max-w-4xl">

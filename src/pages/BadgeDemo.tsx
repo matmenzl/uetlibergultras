@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import firstRun3d from '@/assets/badges/first-run-3d.png';
 import denzlerwegKing3d from '@/assets/badges/denzlerweg-king-3d.png';
 import firstRunHybrid from '@/assets/badges/first-run-hybrid.png';
+import { Seo } from '@/components/Seo';
 
 // Demo data: simulate some earned badges with different states
 const demoEarnedBadges = [
@@ -36,6 +37,12 @@ const categories: { key: BadgeCategory; title: string }[] = [
 export default function BadgeDemo() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <Seo
+        title="Badge System Demo – Uetliberg Ultras"
+        description="Interne Demo aller Badges im Uetliberg-Ultras-Stempelbuch in verschiedenen Zuständen."
+        path="/badge-demo"
+        noindex
+      />
       <NavBar />
       
       <main className="flex-1 container py-8 space-y-12">

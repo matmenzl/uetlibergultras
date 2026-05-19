@@ -15,6 +15,7 @@ import { de } from 'date-fns/locale';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Seo } from '@/components/Seo';
 
 interface CheckIn {
   id: string;
@@ -266,6 +267,13 @@ export default function PublicProfile() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title={`${profile?.display_name || 'Läufer'} – Uetliberg Ultras Profil`}
+        description={`Öffentliches Profil von ${profile?.display_name || 'einem Uetliberg-Ultra'} mit Runs, Badges und Statistiken am Uetliberg.`}
+        path={`/runner/${userId}`}
+        ogType="profile"
+        noindex
+      />
       <NavBar />
       
       <main className="container mx-auto px-4 py-8 max-w-2xl">

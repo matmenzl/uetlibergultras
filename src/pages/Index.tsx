@@ -29,6 +29,7 @@ import { SyncProgress } from "@/components/SyncProgress";
 import { triggerFirstCheckInConfetti, triggerConfetti } from "@/lib/confetti";
 import { useWeather } from "@/hooks/useWeather";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Seo } from "@/components/Seo";
 const MONTHS_FULL_DE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 interface CheckIn {
   id: string;
@@ -397,6 +398,11 @@ export default function Index() {
     return dateB.getTime() - dateA.getTime();
   });
   return <div className="min-h-screen flex flex-col bg-background">
+      <Seo
+        title="Uetliberg Ultras – Trail Running Community Zürich"
+        description="Verbinde Strava, sammle Stempel für deine Uetliberg-Läufe und verdiene Achievements. Die kostenlose Trail Running Community am Zürcher Hausberg."
+        path="/"
+      />
       <NavBar />
 
       <main className="flex-1 container mx-auto px-4 py-8">

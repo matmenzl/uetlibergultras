@@ -15,6 +15,7 @@ import { AdminEmailContacts } from '@/components/AdminEmailContacts';
 import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award, RotateCcw, Bell, BellOff } from 'lucide-react';
 import { z } from 'zod';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Seo } from '@/components/Seo';
 
 const segmentIdSchema = z.string()
   .trim()
@@ -493,6 +494,12 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Seo
+        title="Admin – Uetliberg Ultras"
+        description="Admin-Bereich von Uetliberg Ultras."
+        path="/admin"
+        noindex
+      />
       <NavBar />
       
       <main className="flex-1 container mx-auto px-4 py-8">

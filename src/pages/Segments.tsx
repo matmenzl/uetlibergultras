@@ -26,6 +26,7 @@ import {
   type CategoryFilter,
   type ViewMode,
 } from '@/components/segments';
+import { Seo } from '@/components/Seo';
 
 interface Segment {
   segment_id: number;
@@ -209,6 +210,11 @@ export default function Segments() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Seo
+        title="Uetliberg Segmente – Trail Strecken am Zürcher Hausberg"
+        description="Alle offiziellen Uetliberg-Segmente mit Distanz, Höhenmeter und Schwierigkeit. Finde deine nächste Strava-Challenge am Uetliberg."
+        path="/segments"
+      />
       <NavBar />
 
       <main className="flex-1 container mx-auto px-4 py-8">

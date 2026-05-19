@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { SegmentMultiSelect, useSegmentsLookup } from "@/components/SegmentMultiSelect";
+import { Seo } from "@/components/Seo";
 
 interface ManualCheckIn {
   id: string;
@@ -421,6 +422,12 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="Mein Profil – Uetliberg Ultras"
+        description="Verwalte dein Uetliberg-Ultras-Profil, deine manuellen Check-ins und Einstellungen."
+        path="/profile"
+        noindex
+      />
       <div className="container max-w-lg mx-auto px-4 py-8">
         <Button
           variant="ghost"
