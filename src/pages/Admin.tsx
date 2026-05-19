@@ -12,7 +12,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { AdminEmailContacts } from '@/components/AdminEmailContacts';
-import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award, RotateCcw, Bell, BellOff } from 'lucide-react';
+import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award, RotateCcw, Bell, BellOff, Send } from 'lucide-react';
 import { z } from 'zod';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Seo } from '@/components/Seo';
@@ -36,6 +36,7 @@ export default function Admin() {
   const [isTogglingCron, setIsTogglingCron] = useState(false);
   const [isResyncing, setIsResyncing] = useState(false);
   const [resyncSegmentId, setResyncSegmentId] = useState<string>('all');
+  const [isSubmittingSitemap, setIsSubmittingSitemap] = useState(false);
 
   // Fetch webcam cron status
   const { data: cronStatus, refetch: refetchCronStatus } = useQuery({
@@ -55,6 +56,53 @@ export default function Admin() {
     enabled: isAdmin,
     refetchInterval: 30000,
   });
+
+  // Fetch sitemap submission state
+  const { data: sitemapState, refetch: refetchSitemapState } = useQuery({
+    queryKey: ['sitemap-submission-state'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sitemap_submission_state')
+        .select('*')
+        .eq('id', 'default')
+        .maybeSingle();
+      if (error) throw error;
+      return data as {
+        last_hash: string | null;
+        last_submitted_at: string | null;
+        last_status: string | null;
+        last_error: string | null;
+        last_trigger: string | null;
+      } | null;
+    },
+    enabled: isAdmin,
+  });
+
+  const handleResubmitSitemap = async (force = false) => {
+    setIsSubmittingSitemap(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('resubmit-sitemap', {
+        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+        body: { force, trigger: force ? 'admin-force' : 'admin' },
+      });
+      if (error) throw error;
+      if ((data as any)?.submitted) {
+        toast({ title: 'Sitemap eingereicht', description: 'Google Search Console wurde aktualisiert.' });
+      } else {
+        toast({ title: 'Keine Änderung', description: 'Sitemap-Hash unverändert – nichts gesendet.' });
+      }
+      await refetchSitemapState();
+    } catch (e) {
+      toast({
+        title: 'Fehler',
+        description: e instanceof Error ? e.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmittingSitemap(false);
+    }
+  };
   
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
@@ -860,6 +908,60 @@ export default function Admin() {
                   <PowerOff className="w-4 h-4 mr-2" />
                 )}
                 Deaktivieren
+              </Button>
+            </div>
+          </Card>
+
+          {/* Sitemap Resubmission */}
+          <Card className="p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <Send className="w-5 h-5" />
+              Sitemap → Google
+              {sitemapState?.last_status === 'ok' && (
+                <Badge variant="secondary" className="bg-green-500/20 text-green-700 dark:text-green-400">
+                  OK
+                </Badge>
+              )}
+              {sitemapState?.last_status && sitemapState.last_status !== 'ok' && (
+                <Badge variant="secondary" className="bg-red-500/20 text-red-700 dark:text-red-400">
+                  {sitemapState.last_status}
+                </Badge>
+              )}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Pingt Google Search Console automatisch alle 6 Stunden und immer dann,
+              wenn sich der Inhalt von <code>/sitemap.xml</code> ändert (Hash-Vergleich).
+              {sitemapState?.last_submitted_at && (
+                <>
+                  <br />
+                  <span className="text-xs">
+                    Letzter Versuch: {new Date(sitemapState.last_submitted_at).toLocaleString('de-CH')}
+                    {sitemapState.last_trigger ? ` · ${sitemapState.last_trigger}` : ''}
+                  </span>
+                </>
+              )}
+              {sitemapState?.last_error && (
+                <>
+                  <br />
+                  <span className="text-xs text-destructive">{sitemapState.last_error}</span>
+                </>
+              )}
+            </p>
+            <div className="flex gap-2">
+              <Button onClick={() => handleResubmitSitemap(false)} disabled={isSubmittingSitemap}>
+                {isSubmittingSitemap ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4 mr-2" />
+                )}
+                Jetzt prüfen & senden
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleResubmitSitemap(true)}
+                disabled={isSubmittingSitemap}
+              >
+                Erzwingen
               </Button>
             </div>
           </Card>
