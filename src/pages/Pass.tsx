@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { UetlibergPass } from '@/components/pass/UetlibergPass';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { Seo } from '@/components/Seo';
 
 export default function Pass() {
   const navigate = useNavigate();
@@ -63,6 +64,12 @@ export default function Pass() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Seo
+        title="Mein Uetliberg-Pass – Stempelbuch & Badges"
+        description="Dein persönlicher Uetliberg-Pass mit allen gesammelten Stempeln, Badges und Streaks. Tracke deinen Fortschritt am Zürcher Hausberg."
+        path="/pass"
+        noindex
+      />
       <NavBar />
       
       <main className="flex-1 container mx-auto px-4 py-8">

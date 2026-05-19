@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Award, Mail, Loader2, CheckCircle, User } from 'lucide-react';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { toast } from 'sonner';
+import { Seo } from '@/components/Seo';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -110,6 +111,12 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-background p-4">
+      <Seo
+        title="Anmelden – Uetliberg Ultras"
+        description="Verbinde dein Strava-Konto oder melde dich per E-Mail an und starte deinen Uetliberg-Pass."
+        path="/auth"
+        noindex
+      />
       <Card className="w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">

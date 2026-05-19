@@ -15,6 +15,7 @@ import { de } from 'date-fns/locale';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Seo } from '@/components/Seo';
 
 interface CheckIn {
   id: string;
