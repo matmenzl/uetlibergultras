@@ -912,6 +912,60 @@ export default function Admin() {
             </div>
           </Card>
 
+          {/* Sitemap Resubmission */}
+          <Card className="p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <Send className="w-5 h-5" />
+              Sitemap → Google
+              {sitemapState?.last_status === 'ok' && (
+                <Badge variant="secondary" className="bg-green-500/20 text-green-700 dark:text-green-400">
+                  OK
+                </Badge>
+              )}
+              {sitemapState?.last_status && sitemapState.last_status !== 'ok' && (
+                <Badge variant="secondary" className="bg-red-500/20 text-red-700 dark:text-red-400">
+                  {sitemapState.last_status}
+                </Badge>
+              )}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Pingt Google Search Console automatisch alle 6 Stunden und immer dann,
+              wenn sich der Inhalt von <code>/sitemap.xml</code> ändert (Hash-Vergleich).
+              {sitemapState?.last_submitted_at && (
+                <>
+                  <br />
+                  <span className="text-xs">
+                    Letzter Versuch: {new Date(sitemapState.last_submitted_at).toLocaleString('de-CH')}
+                    {sitemapState.last_trigger ? ` · ${sitemapState.last_trigger}` : ''}
+                  </span>
+                </>
+              )}
+              {sitemapState?.last_error && (
+                <>
+                  <br />
+                  <span className="text-xs text-destructive">{sitemapState.last_error}</span>
+                </>
+              )}
+            </p>
+            <div className="flex gap-2">
+              <Button onClick={() => handleResubmitSitemap(false)} disabled={isSubmittingSitemap}>
+                {isSubmittingSitemap ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4 mr-2" />
+                )}
+                Jetzt prüfen & senden
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleResubmitSitemap(true)}
+                disabled={isSubmittingSitemap}
+              >
+                Erzwingen
+              </Button>
+            </div>
+          </Card>
+
           {/* Segment Re-Sync */}
           <Card className="p-6 mb-6">
             <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
