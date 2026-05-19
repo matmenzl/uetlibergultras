@@ -12,7 +12,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { AdminEmailContacts } from '@/components/AdminEmailContacts';
-import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award, RotateCcw, Bell, BellOff } from 'lucide-react';
+import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, ExternalLink, Camera, Power, PowerOff, Award, RotateCcw, Bell, BellOff, Send } from 'lucide-react';
 import { z } from 'zod';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Seo } from '@/components/Seo';
@@ -36,6 +36,7 @@ export default function Admin() {
   const [isTogglingCron, setIsTogglingCron] = useState(false);
   const [isResyncing, setIsResyncing] = useState(false);
   const [resyncSegmentId, setResyncSegmentId] = useState<string>('all');
+  const [isSubmittingSitemap, setIsSubmittingSitemap] = useState(false);
 
   // Fetch webcam cron status
   const { data: cronStatus, refetch: refetchCronStatus } = useQuery({
