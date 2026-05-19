@@ -2,8 +2,14 @@ import NavBar from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/Seo";
 const Privacy = () => {
   return <div className="min-h-screen bg-background">
+      <Seo
+        title="Datenschutzerklärung – Uetliberg Ultras"
+        description="Wie Uetliberg Ultras deine Strava- und Profildaten gemäss Schweizer Datenschutzgesetz bearbeitet."
+        path="/privacy"
+      />
       <NavBar />
       
       <main className="container mx-auto px-4 py-12 max-w-4xl">

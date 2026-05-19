@@ -267,6 +267,13 @@ export default function PublicProfile() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title={`${profile?.display_name || 'Läufer'} – Uetliberg Ultras Profil`}
+        description={`Öffentliches Profil von ${profile?.display_name || 'einem Uetliberg-Ultra'} mit Runs, Badges und Statistiken am Uetliberg.`}
+        path={`/runner/${userId}`}
+        ogType="profile"
+        noindex
+      />
       <NavBar />
       
       <main className="container mx-auto px-4 py-8 max-w-2xl">
