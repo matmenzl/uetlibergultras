@@ -1,0 +1,13 @@
+# Uetliberg Ultras
+
+> Trail Running Community am Uetliberg in Zürich. Verbinde Strava, sammle Stempel auf deinem digitalen Stempelbuch und verdiene Badges für deine Läufe am Hausberg von Zürich.
+
+Uetliberg Ultras ist eine kostenlose Community-Plattform für Läuferinnen und Läufer am Uetliberg. Die App trackt Strava-Aktivitäten automatisch über definierte Uetliberg-Segmente, vergibt Badges und Achievements und führt Leaderboards für das Jahr, den Monat sowie 365-Tage-Challenges. Die Inhalte sind auf Deutsch / Schweizerdeutsch verfasst.
+
+## Pages
+
+- [Startseite](/): Übersicht, aktuelle Monats-Challenge, Leaderboard-Teaser und Onboarding.
+- [Uetliberg Segmente](/segments): Liste und Karte aller offiziellen Uetliberg-Segmente mit Distanz, Höhenmeter und Schwierigkeit.
+- [Support & FAQ](/support): Antworten zu Strava-Verbindung, Check-ins, Badges, Streaks und Leaderboards.
+- [Datenschutz](/privacy): Schweizer DSG-konforme Datenschutzerklärung.
+- [AGB](/terms): Allgemeine Geschäftsbedingungen der Plattform.

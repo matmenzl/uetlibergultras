@@ -18,6 +18,7 @@ import {
   Users,
   Stamp
 } from 'lucide-react';
+import { Seo } from '@/components/Seo';
 
 const faqs = [
   {
@@ -182,6 +183,25 @@ export default function Support() {
   }, []);
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Seo
+        title="Support & FAQ – Uetliberg Ultras"
+        description="Antworten auf häufige Fragen zu Strava-Verbindung, Check-ins, Badges, Streaks und Leaderboards bei Uetliberg Ultras."
+        path="/support"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.flatMap((section) =>
+            section.questions.map((qa) => ({
+              "@type": "Question",
+              name: qa.q,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: qa.a,
+              },
+            }))
+          ),
+        }}
+      />
       <NavBar />
       
       <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
