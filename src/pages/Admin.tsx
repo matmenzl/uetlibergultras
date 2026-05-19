@@ -56,6 +56,53 @@ export default function Admin() {
     enabled: isAdmin,
     refetchInterval: 30000,
   });
+
+  // Fetch sitemap submission state
+  const { data: sitemapState, refetch: refetchSitemapState } = useQuery({
+    queryKey: ['sitemap-submission-state'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sitemap_submission_state')
+        .select('*')
+        .eq('id', 'default')
+        .maybeSingle();
+      if (error) throw error;
+      return data as {
+        last_hash: string | null;
+        last_submitted_at: string | null;
+        last_status: string | null;
+        last_error: string | null;
+        last_trigger: string | null;
+      } | null;
+    },
+    enabled: isAdmin,
+  });
+
+  const handleResubmitSitemap = async (force = false) => {
+    setIsSubmittingSitemap(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('resubmit-sitemap', {
+        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+        body: { force, trigger: force ? 'admin-force' : 'admin' },
+      });
+      if (error) throw error;
+      if ((data as any)?.submitted) {
+        toast({ title: 'Sitemap eingereicht', description: 'Google Search Console wurde aktualisiert.' });
+      } else {
+        toast({ title: 'Keine Änderung', description: 'Sitemap-Hash unverändert – nichts gesendet.' });
+      }
+      await refetchSitemapState();
+    } catch (e) {
+      toast({
+        title: 'Fehler',
+        description: e instanceof Error ? e.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmittingSitemap(false);
+    }
+  };
   
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
