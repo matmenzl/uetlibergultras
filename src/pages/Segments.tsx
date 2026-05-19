@@ -211,8 +211,8 @@ export default function Segments() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Seo
-        title="Uetliberg Segmente – Trail Strecken am Zürcher Hausberg"
-        description="Alle offiziellen Uetliberg-Segmente mit Distanz, Höhenmeter und Schwierigkeit. Finde deine nächste Strava-Challenge am Uetliberg."
+        title="Uetliberg Trail Segmente – Strecken, Distanz & Höhenmeter Zürich"
+        description="Alle Uetliberg-Trails als Strava-Segmente: Distanz, Höhenmeter und Schwierigkeit. Finde deinen nächsten Trail Run am Hausberg von Zürich."
         path="/segments"
       />
       <NavBar />
@@ -221,9 +221,9 @@ export default function Segments() {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
             <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
-            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Uetliberg Segmente</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Uetliberg Trail Segmente</h1>
           </div>
-          <p className="text-muted-foreground mb-6">Alle getrackten Segmente rund um den Uetliberg</p>
+          <p className="text-muted-foreground mb-6">Alle Strava-Segmente und Trail Running Strecken rund um den Uetliberg in Zürich</p>
 
           {/* Segment Suggestion Accordion */}
           <Accordion type="single" collapsible className="mb-6">

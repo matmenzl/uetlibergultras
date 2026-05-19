@@ -399,8 +399,8 @@ export default function Index() {
   });
   return <div className="min-h-screen flex flex-col bg-background">
       <Seo
-        title="Uetliberg Ultras – Trail Running Community Zürich"
-        description="Verbinde Strava, sammle Stempel für deine Uetliberg-Läufe und verdiene Achievements. Die kostenlose Trail Running Community am Zürcher Hausberg."
+        title="Uetliberg Trail Running Community – Strava Challenge & Badges"
+        description="Verbinde Strava, tracke deine Uetliberg-Trails und sammle Badges. Die kostenlose Trail Running Community am Hausberg von Zürich – jetzt mitmachen."
         path="/"
       />
       <NavBar />
