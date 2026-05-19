@@ -230,6 +230,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sitemap_submission_state: {
+        Row: {
+          id: string
+          last_error: string | null
+          last_hash: string | null
+          last_status: string | null
+          last_submitted_at: string | null
+          last_trigger: string | null
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          last_error?: string | null
+          last_hash?: string | null
+          last_status?: string | null
+          last_submitted_at?: string | null
+          last_trigger?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          last_error?: string | null
+          last_hash?: string | null
+          last_status?: string | null
+          last_submitted_at?: string | null
+          last_trigger?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       strava_credentials: {
         Row: {
           auth_password_hash: string | null
@@ -426,6 +456,19 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      sitemap_cron_set_enabled: {
+        Args: { _enabled: boolean }
+        Returns: undefined
+      }
+      sitemap_cron_status: {
+        Args: never
+        Returns: {
+          active: boolean
+          jobid: number
+          jobname: string
+          schedule: string
+        }[]
       }
       upsert_strava_credentials:
         | {
