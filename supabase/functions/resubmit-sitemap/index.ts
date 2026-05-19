@@ -121,15 +121,17 @@ async function log(
   error: string | null,
   trigger: string,
 ) {
-  await admin.from("sitemap_submission_state").upsert(
-    {
-      id: "default",
-      last_hash: hash ?? undefined,
-      last_submitted_at: new Date().toISOString(),
-      last_status: status,
-      last_error: error,
-      last_trigger: trigger,
-    },
-    { onConflict: "id" },
-  );
+  const payload: Record<string, unknown> = {
+    id: "default",
+    last_submitted_at: new Date().toISOString(),
+    last_status: status,
+    last_error: error,
+    last_trigger: trigger,
+  };
+  // Only overwrite hash on a successful submission so a failed retry
+  // doesn't clear the last-known-good fingerprint.
+  if (status === "ok" && hash) payload.last_hash = hash;
+  await admin
+    .from("sitemap_submission_state")
+    .upsert(payload, { onConflict: "id" });
 }
