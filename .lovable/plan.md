@@ -1,29 +1,44 @@
+# Install-to-Homescreen für Mobile
+
 ## Ziel
+Mobile Besucher sehen eine fixed Box am unteren Bildschirmrand, die zum Speichern der App auf dem Homescreen einlädt. Android nutzt den nativen Install-Dialog, iOS bekommt eine kurze Anleitung.
 
-Die Leaderboards zeigen aktuell nur die Top 10. Du willst **alle Läufer** sehen — konsistent über alle Boards hinweg.
+## Was wir bauen
 
-## Was geändert wird
+### 1. Web-App-Manifest (`public/manifest.json`)
+- `name`: "Uetliberg Ultras"
+- `short_name`: "Ultras"
+- `start_url`: "/"
+- `display`: "standalone"
+- `theme_color` & `background_color` passend zum Design-Token
+- Icons: bestehende `apple-touch-icon.png` + `favicon.svg` referenzieren (192/512 falls vorhanden, sonst eine 512er generieren)
 
-**1. `src/components/Leaderboard.tsx` (365-Tage Challenge)**
-- `.limit(10)` aus der Supabase-Query entfernen → alle Einträge laden.
-- Container scrollbar machen (`max-h-[600px] overflow-y-auto`), damit lange Listen die Seite nicht sprengen.
-- Verhalten für Gäste bleibt: Top 3 klar sichtbar, danach 4 geblurrte Zeilen als Teaser mit Login-CTA (Memory: "Guests show top 3, blur the rest").
+In `index.html` einbinden via `<link rel="manifest" href="/manifest.json">`.
 
-**2. `src/components/MonthlyChallenge.tsx` (Monats-Challenge)**
-- `.slice(0, 10)` entfernen → alle Teilnehmer des Monats anzeigen.
-- Gleiche scrollbare Container-Lösung wie oben.
-- Gast-Teaser-Logik bleibt unverändert.
+### 2. Komponente `InstallPrompt.tsx`
+Fixed Box unten (`bottom-4 inset-x-4`, `z-40`), nur auf Mobile (`useIsMobile`).
 
-**3. Nicht geändert**
-- `CurrentMonthChallengeBox.tsx` zeigt bewusst nur Gold/Silber/Bronze (Top 3 Sieger des Vormonats) — das ist ein kompaktes Box-Format, kein vollständiges Ranking. Bleibt wie es ist.
-- Andere Treffer (`Achievements`, `StreakCounter`, `PublicProfile`, `ManualCheckInButton`, `UetlibergPass`, `BadgeShowcase`) nutzen `check_ins`/`leaderboard_stats` für persönliche Stats, nicht für Ranglisten — keine Änderung nötig.
+Verhalten:
+- **Android/Chrome**: Fängt `beforeinstallprompt`-Event ab, zeigt Button "App installieren" → ruft `prompt()` auf.
+- **iOS Safari** (UA-Detection): Zeigt Text "Tippe auf ⎘ und 'Zum Home-Bildschirm'" mit Share-Icon.
+- **Bereits installiert** (`display-mode: standalone` oder `navigator.standalone`): Box wird nicht gezeigt.
+- **Dismiss**: X-Button speichert `install-prompt-dismissed` in localStorage → erscheint nicht mehr.
+
+Design: Card mit Logo links, kurzem Text, CTA-Button rechts, X zum Schliessen. Verwendet semantische Tokens (`bg-card`, `border-border`, `shadow-lg`).
+
+### 3. Einbinden
+In `App.tsx` global rendern (innerhalb `BrowserRouter`, ausserhalb `Routes`), damit es auf jeder Seite verfügbar ist.
+
+## Wichtige Hinweise
+- **Kein Service Worker** → keine Offline-Funktion, dafür keine Caching-Probleme im Lovable-Editor-Preview.
+- **iOS-Limit**: Apple bietet keine API um den "Add to Homescreen"-Dialog programmatisch zu öffnen – wir können dort nur eine Anleitung anzeigen. Das ist eine OS-Beschränkung, nicht behebbar.
+- Box erscheint nicht in der nativen Capacitor-App (dort ist sie schon installiert).
 
 ## Technische Details
+- Detection: `window.matchMedia('(display-mode: standalone)').matches` + `(navigator as any).standalone` für iOS-PWA-Mode.
+- iOS-UA: `/iPhone|iPad|iPod/.test(navigator.userAgent) && !(window as any).MSStream`.
+- Capacitor: `import { Capacitor } from '@capacitor/core'; Capacitor.isNativePlatform()` → Box ausblenden.
 
-- Supabase Default-Limit ist 1000 Zeilen pro Query. Bei aktueller Community-Grösse (wenige hundert User) reicht das problemlos. Falls die App später >1000 aktive Teilnehmer hat, müssten wir paginieren — heute nicht relevant.
-- Sortierung bleibt: `total_runs DESC, achievement_count DESC` (Tie-Breaker laut Memory).
-- Performance: Listen-Rendering bleibt günstig, da jede Zeile leichtgewichtig ist (Avatar + Text).
-
-## Resultat
-
-Eingeloggte Nutzer sehen die komplette Community-Rangliste (scrollbar). Gäste sehen weiterhin Top 3 + geblurrten Teaser, um zur Anmeldung zu motivieren.
+## Dateien
+- Neu: `public/manifest.json`, `src/components/InstallPrompt.tsx`
+- Edit: `index.html` (Manifest-Link), `src/App.tsx` (Komponente einbinden)
