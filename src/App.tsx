@@ -19,6 +19,7 @@ import Pass from "./pages/Pass";
 import Profile from "./pages/Profile";
 import BadgeDemo from "./pages/BadgeDemo";
 import PublicProfile from "./pages/PublicProfile";
+import InstallPrompt from "./components/InstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <DeepLinkHandler />
+        <InstallPrompt />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/pass" element={<Pass />} />
