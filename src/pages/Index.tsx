@@ -437,7 +437,7 @@ export default function Index() {
               </h2>
               {!user ? <>
                   <p className="text-white/95 mb-5 text-lg sm:text-xl font-semibold max-w-xl mx-auto [text-shadow:_0_1px_6px_rgb(0_0_0_/_45%)]">
-                    Verwandle deine Uetliberg-Runs in Badges, Ränge & Ruhm.
+                    Erweitere deine Uetliberg-Runs zu einem digitalen Community-Erlebnis.
                   </p>
                   <ul className="text-white/90 mb-8 text-sm sm:text-base max-w-md mx-auto space-y-1.5 [text-shadow:_0_1px_6px_rgb(0_0_0_/_45%)]">
                     <li className="flex items-center justify-center gap-2">
