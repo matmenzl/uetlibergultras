@@ -38,6 +38,27 @@ export default function Admin() {
   const [resyncSegmentId, setResyncSegmentId] = useState<string>('all');
   const [isSubmittingSitemap, setIsSubmittingSitemap] = useState(false);
 
+  // Poll active resync job (only when admin)
+  const { data: activeResyncJob, refetch: refetchResyncJob } = useQuery({
+    queryKey: ['active-resync-job'],
+    enabled: !!user && !!isAdmin,
+    refetchInterval: 5000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('resync_jobs')
+        .select('*')
+        .in('status', ['queued', 'running', 'paused'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) {
+        console.error('Resync job query error:', error);
+        return null;
+      }
+      return data;
+    },
+  });
+
   // Fetch webcam cron status
   const { data: cronStatus, refetch: refetchCronStatus } = useQuery({
     queryKey: ['webcam-cron-status'],
