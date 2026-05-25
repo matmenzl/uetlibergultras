@@ -214,8 +214,11 @@ export function BadgeCard({
           {/* How to earn */}
           <div className="text-sm">
             <p className="text-muted-foreground">
-              {isMonthly && isEarned && monthLabel
-                ? badge.howToEarn.replace(/in einer Monats-Challenge|einer Monats-Challenge/i, `in der Monats-Challenge ${monthLabel}`)
+              {isMonthly && isEarned
+                ? badge.howToEarn
+                    .replace(/^Erreiche\b/, 'Erreichte')
+                    .replace(/^Werde\b/, 'Wurde')
+                    .replace(/in einer Monats-Challenge|einer Monats-Challenge/i, monthLabel ? `in der Monats-Challenge ${monthLabel}` : 'in einer Monats-Challenge')
                 : badge.howToEarn}
             </p>
           </div>
