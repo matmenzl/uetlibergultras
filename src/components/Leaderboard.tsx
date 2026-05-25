@@ -71,8 +71,7 @@ export function Leaderboard() {
         .from('leaderboard_stats')
         .select('*')
         .order('total_runs', { ascending: false })
-        .order('achievement_count', { ascending: false })
-        .limit(10);
+        .order('achievement_count', { ascending: false });
       
       if (error) throw error;
       return data as LeaderboardEntry[];
@@ -216,8 +215,12 @@ export function Leaderboard() {
       
       <div className="space-y-2">
         {/* Show top entries clearly */}
-        {leaderboard.slice(0, user ? leaderboard.length : TEASER_COUNT).map((entry, index) => 
-          renderEntry(entry, index)
+        {user ? (
+          <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+            {leaderboard.map((entry, index) => renderEntry(entry, index))}
+          </div>
+        ) : (
+          leaderboard.slice(0, TEASER_COUNT).map((entry, index) => renderEntry(entry, index))
         )}
         
         {/* Blurred teaser for non-logged-in users */}
