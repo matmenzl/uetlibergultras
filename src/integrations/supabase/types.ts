@@ -191,6 +191,69 @@ export type Database = {
         }
         Relationships: []
       }
+      resync_jobs: {
+        Row: {
+          check_ins_created: number
+          created_at: string
+          created_by: string | null
+          current_user_id: string | null
+          finished_at: string | null
+          id: string
+          last_error: string | null
+          last_heartbeat_at: string | null
+          processed_user_ids: string[]
+          rate_limit_long: number | null
+          rate_limit_long_max: number | null
+          rate_limit_short: number | null
+          rate_limit_short_max: number | null
+          resume_after: string | null
+          segment_id: number | null
+          started_at: string | null
+          status: string
+          total_users: number
+        }
+        Insert: {
+          check_ins_created?: number
+          created_at?: string
+          created_by?: string | null
+          current_user_id?: string | null
+          finished_at?: string | null
+          id?: string
+          last_error?: string | null
+          last_heartbeat_at?: string | null
+          processed_user_ids?: string[]
+          rate_limit_long?: number | null
+          rate_limit_long_max?: number | null
+          rate_limit_short?: number | null
+          rate_limit_short_max?: number | null
+          resume_after?: string | null
+          segment_id?: number | null
+          started_at?: string | null
+          status?: string
+          total_users?: number
+        }
+        Update: {
+          check_ins_created?: number
+          created_at?: string
+          created_by?: string | null
+          current_user_id?: string | null
+          finished_at?: string | null
+          id?: string
+          last_error?: string | null
+          last_heartbeat_at?: string | null
+          processed_user_ids?: string[]
+          rate_limit_long?: number | null
+          rate_limit_long_max?: number | null
+          rate_limit_short?: number | null
+          rate_limit_short_max?: number | null
+          resume_after?: string | null
+          segment_id?: number | null
+          started_at?: string | null
+          status?: string
+          total_users?: number
+        }
+        Relationships: []
+      }
       segment_suggestions: {
         Row: {
           admin_notes: string | null
