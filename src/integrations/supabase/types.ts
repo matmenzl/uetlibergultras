@@ -532,6 +532,7 @@ export type Database = {
         | "monthly_silver"
         | "monthly_bronze"
         | "jolly_jumper"
+        | "seven_up"
       app_role: "admin" | "user"
       suggestion_status: "pending" | "approved" | "rejected"
     }
@@ -688,6 +689,7 @@ export const Constants = {
         "monthly_silver",
         "monthly_bronze",
         "jolly_jumper",
+        "seven_up",
       ],
       app_role: ["admin", "user"],
       suggestion_status: ["pending", "approved", "rejected"],
