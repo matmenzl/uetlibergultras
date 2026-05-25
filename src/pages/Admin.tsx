@@ -498,6 +498,7 @@ export default function Admin() {
         title: 'Re-Sync gestartet',
         description: data.message,
       });
+      refetchResyncJob();
     } catch (error) {
       console.error('Re-sync error:', error);
       toast({
@@ -507,6 +508,26 @@ export default function Admin() {
       });
     } finally {
       setIsResyncing(false);
+    }
+  };
+
+  const handleCancelResync = async (jobId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return;
+    try {
+      const { error } = await supabase.functions.invoke('admin-resync-segment', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { cancel_job_id: jobId },
+      });
+      if (error) throw error;
+      toast({ title: 'Resync abgebrochen' });
+      refetchResyncJob();
+    } catch (error) {
+      toast({
+        title: 'Abbruch fehlgeschlagen',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
     }
   };
 
