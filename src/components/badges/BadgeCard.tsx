@@ -6,6 +6,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const MONTHS_DE = [
   'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -44,6 +48,7 @@ export function BadgeCard({
   isNewlyEarned = false,
 }: BadgeCardProps) {
   const [showAnimation, setShowAnimation] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const Symbol = getSymbol(badge.symbolId);
   const categoryStyle = categoryStyles[badge.category];
 
@@ -62,9 +67,43 @@ export function BadgeCard({
     ? Math.min(100, Math.round((progress.current / progress.target) * 100)) 
     : 0;
 
+  const { data: earners, isLoading: earnersLoading } = useQuery({
+    queryKey: ['badge-earners', badge.id],
+    enabled: popoverOpen,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data: achievementRows, error: aErr } = await supabase
+        .from('user_achievements')
+        .select('user_id, earned_at')
+        .eq('achievement', badge.id as any)
+        .order('earned_at', { ascending: true });
+      if (aErr) throw aErr;
+      if (!achievementRows || achievementRows.length === 0) return [];
+      const userIds = achievementRows.map((r) => r.user_id);
+      const { data: profiles, error: pErr } = await supabase
+        .from('public_profiles')
+        .select('id, display_name, profile_picture')
+        .in('id', userIds);
+      if (pErr) throw pErr;
+      const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
+      return achievementRows
+        .map((r) => {
+          const p = profileMap.get(r.user_id);
+          if (!p) return null;
+          return {
+            id: p.id,
+            display_name: p.display_name ?? 'Läufer:in',
+            profile_picture: p.profile_picture,
+            earned_at: r.earned_at,
+          };
+        })
+        .filter(Boolean) as Array<{ id: string; display_name: string; profile_picture: string | null; earned_at: string }>;
+    },
+  });
+
   return (
     <div className="flex flex-col items-center">
-    <Popover>
+    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
         <button
           className={cn(
