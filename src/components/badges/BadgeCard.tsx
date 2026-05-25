@@ -281,6 +281,40 @@ export function BadgeCard({
               <Progress value={progressPercent} className="h-2" />
             </div>
           ) : null}
+
+          {/* Earners list */}
+          <div className="pt-2 border-t border-border space-y-2">
+            <p className="text-xs font-semibold text-foreground">
+              {earnersLoading
+                ? 'Lade Läufer:innen...'
+                : `Bereits erreicht von ${earners?.length ?? 0} Läufer:in${(earners?.length ?? 0) === 1 ? '' : 'nen'}`}
+            </p>
+            {!earnersLoading && earners && earners.length > 0 && (
+              <div className="max-h-40 overflow-y-auto -mr-2 pr-2 space-y-1.5">
+                {earners.map((e) => (
+                  <Link
+                    key={e.id}
+                    to={`/runner/${e.id}`}
+                    onClick={() => setPopoverOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-muted transition-colors"
+                  >
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={e.profile_picture ?? undefined} alt={e.display_name} />
+                      <AvatarFallback className="text-[10px]">
+                        {e.display_name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs text-foreground truncate">{e.display_name}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+            {!earnersLoading && (!earners || earners.length === 0) && (
+              <p className="text-xs text-muted-foreground italic">
+                Noch niemand hat diesen Badge erreicht.
+              </p>
+            )}
+          </div>
         </div>
       </PopoverContent>
     </Popover>
