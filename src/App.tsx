@@ -20,6 +20,7 @@ import Profile from "./pages/Profile";
 import BadgeDemo from "./pages/BadgeDemo";
 import PublicProfile from "./pages/PublicProfile";
 import InstallPrompt from "./components/InstallPrompt";
+import BadgeNotifier from "./components/BadgeNotifier";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
       <BrowserRouter>
         <DeepLinkHandler />
         <InstallPrompt />
+        <BadgeNotifier />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/pass" element={<Pass />} />

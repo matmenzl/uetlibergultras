@@ -1,40 +1,51 @@
 ## Ziel
-Text im Hero bleibt unabhängig vom Webcam-Bild (Schnee/Sonne/Nebel/Nacht) gut lesbar, indem ein **transparentes Backdrop-Layer** dynamisch an die Bildhelligkeit angepasst wird.
 
-## Vorgehen
+Eingeloggte User sollen bei jedem Besuch (und live während einer Session) sehen, welche Badges neu freigeschaltet wurden – via Sonner-Toast, app-weit, unabhängig von der aktuellen Seite.
 
-### 1. Helligkeit messen (`WebcamBackground.tsx`)
-- Beim `onLoad` des Webcam-Bilds das Bild in einen kleinen Offscreen-`<canvas>` (z. B. 32×32 px) zeichnen.
-- `crossOrigin="anonymous"` setzen, damit Pixel ausgelesen werden dürfen (Supabase Storage liefert passende CORS-Header).
-- Über alle Pixel die Luminanz berechnen: `L = 0.299·R + 0.587·G + 0.114·B`, dann Durchschnitt (0–255).
-- Ergebnis als `brightness`-State (0–1) speichern.
+## Aktueller Stand
 
-### 2. Backdrop-Element rendern
-Zusätzlich zum bestehenden Bild ein Overlay-`<div>` über dem Webcam-Bild, unter dem Content (`z-10`, Content liegt schon auf `z-20`):
+- Sonner ist bereits in `App.tsx` gemountet.
+- `UetlibergPass.tsx` erkennt zwar "newlyEarned" für die Animation auf der Pass-Seite, zeigt aber **keinen** Toast und funktioniert nur, wenn der User die Pass-Seite öffnet.
+- Es gibt keinen globalen Listener auf `user_achievements`.
+- `mem://features/badge-notification-strategy` sieht In-App-Toast + Resend-Mail vor. E-Mail-Versand ist nicht Teil dieses Requests.
 
-```text
-[ Webcam-Bild   z-0 ]
-[ Adaptive Scrim z-10 ]  ← neu
-[ Info-Bar oben  z-20 ]
-[ Logo / Text   z-20 ]
-```
+## Neuer Mechanismus
 
-- Hell (z. B. Schneetag): dunkler Scrim, `bg-black/35` bis `bg-black/55`
-- Mittel: leichter Scrim, `bg-black/20`
-- Dunkel (Nacht): minimal oder gar nicht, evtl. leichter Aufheller `bg-white/5`
-- Sanfter vertikaler Verlauf (oben/unten etwas dunkler) für bessere Lesbarkeit der Info-Bar und des CTA-Buttons.
-- Opacity wird per Inline-Style aus `brightness` interpoliert (smooth Transition 500 ms).
+Neue Komponente `BadgeNotifier` – wird einmalig in `App.tsx` innerhalb des `QueryClientProvider`/Router gemountet und macht keine UI sichtbar, sondern feuert nur Toasts.
 
-### 3. Fallbacks
-- Falls Canvas-Auslesen scheitert (CORS / Fehler): Default-Scrim `bg-black/25` aktivieren – nie schlechter als heute.
-- Beim Bildwechsel (neuer Screenshot) Helligkeit neu berechnen.
+### Logik
 
-### 4. Cleanup
-- Bestehende `[text-shadow:...]`-Utilities am Text bleiben als zweite Sicherheit erhalten.
-- Keine Änderung an Layout, Inhalten oder anderen Komponenten.
+1. **Auth-Listener** – `supabase.auth.getSession()` + `onAuthStateChange` ermitteln die aktuelle `userId`. Bei Logout: Cleanup, keine Toasts.
+2. **Initial-Fetch nach Login/Reload**:
+   - Lade alle `user_achievements` des Users (id, achievement, earned_at).
+   - Vergleich gegen `localStorage["seen_achievements:<userId>"]` (Set von `achievement`-IDs).
+   - Beim **allerersten Mal** (kein Eintrag im LocalStorage) → alle als "gesehen" markieren, **keinen** Toast feuern (sonst kriegt jeder Bestandsnutzer beim Rollout 16 Toasts).
+   - Danach: für jede unbekannte Achievement-ID einen Toast feuern (max. ein Toast pro Badge, gestaffelt mit 400 ms Delay damit Sonner sie stapelt statt überschreibt).
+   - Set in LocalStorage aktualisieren.
+3. **Realtime-Subscription** auf `user_achievements WHERE user_id=eq.<userId>` (INSERT). Bei jedem neuen Insert während offener Session: Toast + LocalStorage-Update. Channel beim Unmount/Logout sauber abmelden.
 
-## Geänderte Dateien
-- `src/components/WebcamBackground.tsx` – Helligkeitsmessung + adaptives Overlay
+### Toast-Inhalt
 
-## Verifikation
-- Manuell im Preview: Screenshot bei hellem Tageslicht und (falls verfügbar) abends – Konsole prüft `brightness`, Overlay-Opacity passt sich sichtbar an.
+- `toast.success` mit:
+  - **Title:** Badge-Name aus `badgeDefinitions` (Fallback: rohe ID).
+  - **Description:** `description` des Badges (kurz).
+  - **Action-Button** "Anschauen" → navigiert zu `/pass`.
+  - **Duration:** 8000 ms (etwas länger als Default).
+- Unbekannte Achievement-IDs (z. B. neue Server-Badges, die das Frontend noch nicht kennt): generischer Text "Neues Badge freigeschaltet!".
+
+### LocalStorage-Schlüssel
+
+`uu:seen_achievements:<userId>` (JSON-Array). User-spezifisch, damit Geräte-Sharing / Account-Wechsel kein Cross-Talk erzeugen.
+
+## Zu ändernde Dateien
+
+- **Neu:** `src/components/BadgeNotifier.tsx` – die oben beschriebene Logik.
+- **Bearbeiten:** `src/App.tsx` – `<BadgeNotifier />` einmal mounten (im authentifizierten Tree, neben `<Sonner />`).
+
+Keine Backend-, RLS- oder Migrationsänderungen nötig. `user_achievements` hat bereits eine SELECT-Policy für authentifizierte User. Realtime für die Tabelle muss eventuell via `ALTER PUBLICATION supabase_realtime ADD TABLE public.user_achievements;` aktiviert werden – das wird im Build-Step geprüft und ggf. per Migration ergänzt.
+
+## Nicht Teil dieses Plans
+
+- E-Mail-Benachrichtigungen (Resend) – separater Request.
+- Push-Notifications.
+- Anpassung des Pass-Animation-Flows in `UetlibergPass.tsx` (bleibt wie ist).
