@@ -29,7 +29,8 @@ type AchievementType =
   | 'alternativliga'
   | 'wasserratte'
   | 'founding_member'
-  | 'jolly_jumper';
+  | 'jolly_jumper'
+  | 'seven_up';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
@@ -346,6 +347,39 @@ serve(async (req) => {
       const jollyRuns = checkIns.filter(c => c.segment_id === JOLLY_JUMPER_SEGMENT_ID);
       if (jollyRuns.length >= 1) {
         newAchievements.push('jolly_jumper');
+      }
+    }
+
+    // 7 Up: 7 runs within 7 consecutive days (any rolling window)
+    if (!existingSet.has('seven_up')) {
+      // Collect unique activity dates (UTC day strings)
+      const dayStrings = new Set<string>();
+      const dayByActivity = new Map<string, string>();
+      checkIns.forEach(c => {
+        const d = new Date(c.checked_in_at);
+        const dayStr = `${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`;
+        dayStrings.add(dayStr);
+        dayByActivity.set(String(c.activity_id), dayStr);
+      });
+      // Get sorted unique days (as timestamps)
+      const uniqueDays = Array.from(dayStrings)
+        .map(s => {
+          const [y, m, d] = s.split('-').map(Number);
+          return Date.UTC(y, m, d);
+        })
+        .sort((a, b) => a - b);
+
+      // Check if there's any 7-day rolling window covering 7 distinct activity days
+      const DAY_MS = 86400000;
+      let earned = false;
+      for (let i = 0; i + 6 < uniqueDays.length; i++) {
+        if (uniqueDays[i + 6] - uniqueDays[i] <= 6 * DAY_MS) {
+          earned = true;
+          break;
+        }
+      }
+      if (earned) {
+        newAchievements.push('seven_up');
       }
     }
 
