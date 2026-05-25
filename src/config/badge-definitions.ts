@@ -417,7 +417,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
     category: "legend",
     title: "Jolly Jumper",
     description: "Auf den Spuren von Lucky Luke",
-    howToEarn: "Laufe das Segment «Grat to Laternen-Trail» mindestens ein Mal",
+    howToEarn: "Laufe das Segment «Grat to Laternen-Trail» und durchquere damit die Rossweidliegg mindestens ein Mal.",
     symbolId: "compass",
     imageUrl: jollyJumperHybrid,
     colors: {
