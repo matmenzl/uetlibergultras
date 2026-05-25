@@ -25,6 +25,7 @@ import denzlerwegKingHybrid from "@/assets/badges/denzlerweg-king-3d.png";
 import coiffeurHybrid from "@/assets/badges/coiffeur-hybrid.png";
 import alternativligaHybrid from "@/assets/badges/alternativliga-hybrid.png";
 import jollyJumperHybrid from "@/assets/badges/jolly-jumper-hybrid.png";
+import sevenUpHybrid from "@/assets/badges/7-up-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
@@ -236,6 +237,22 @@ export const badgeDefinitions: BadgeDefinition[] = [
       background: "40 20% 95%",
     },
     progressType: "segments",
+  },
+  {
+    id: "seven_up",
+    category: "endurance",
+    title: "7 Up",
+    description: "7 Tage, 7 Runs - non-stop",
+    howToEarn: "Renne 7 Mal innert 7 aufeinanderfolgenden Tagen auf den Uetliberg",
+    symbolId: "flame-quad",
+    imageUrl: sevenUpHybrid,
+    colors: {
+      primary: "142 71% 40%",
+      secondary: "0 84% 55%",
+      background: "40 20% 95%",
+    },
+    target: 7,
+    progressType: "streak",
   },
 
   // === WEATHER BADGES ===
