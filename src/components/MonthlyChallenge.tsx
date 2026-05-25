@@ -107,8 +107,7 @@ export function MonthlyChallenge() {
 
       const sorted = Array.from(userActivities.entries())
         .map(([user_id, activities]) => ({ user_id, total_runs: activities.size }))
-        .sort((a, b) => b.total_runs - a.total_runs)
-        .slice(0, 10);
+        .sort((a, b) => b.total_runs - a.total_runs);
 
       if (sorted.length === 0) return [];
 
@@ -280,8 +279,14 @@ export function MonthlyChallenge() {
       {selectedMonth === currentMonthKey && (
         <div className="space-y-2">
           {/* Show top entries */}
-          {monthlyLeaderboard.slice(0, user ? monthlyLeaderboard.length : TEASER_COUNT).map((entry, index) => 
-            renderEntry(entry, index + 1)
+          {user ? (
+            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+              {monthlyLeaderboard.map((entry, index) => renderEntry(entry, index + 1))}
+            </div>
+          ) : (
+            monthlyLeaderboard.slice(0, TEASER_COUNT).map((entry, index) =>
+              renderEntry(entry, index + 1)
+            )
           )}
           
           {/* Blurred teaser for non-logged-in */}
