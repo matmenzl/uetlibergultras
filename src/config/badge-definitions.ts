@@ -24,6 +24,7 @@ import monthlyBronzeHybrid from "@/assets/badges/monthly-bronze-hybrid.png";
 import denzlerwegKingHybrid from "@/assets/badges/denzlerweg-king-3d.png";
 import coiffeurHybrid from "@/assets/badges/coiffeur-hybrid.png";
 import alternativligaHybrid from "@/assets/badges/alternativliga-hybrid.png";
+import jollyJumperHybrid from "@/assets/badges/jolly-jumper-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
