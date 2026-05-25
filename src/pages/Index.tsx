@@ -450,7 +450,7 @@ export default function Index() {
                     </li>
                     <li className="flex items-center justify-center gap-2">
                       <span className="text-primary text-base">✓</span>
-                      <span>Tritt der Uetliberg-Community bei</span>
+                      <span>Wir rennen nicht am schnellsten, aber am häufigsten 😁</span>
                     </li>
                   </ul>
                   <Button onClick={() => navigate("/auth")} size="lg" className="text-sm sm:text-base px-4 sm:px-8 py-4 sm:py-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105">
