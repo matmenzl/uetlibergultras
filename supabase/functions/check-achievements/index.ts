@@ -28,10 +28,12 @@ type AchievementType =
   | 'frosty'
   | 'alternativliga'
   | 'wasserratte'
-  | 'founding_member';
+  | 'founding_member'
+  | 'jolly_jumper';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
+const JOLLY_JUMPER_SEGMENT_ID = 21907618;
 
 // WMO weather codes for snow conditions
 const SNOW_CODES = [71, 73, 75, 77, 85, 86];
@@ -337,6 +339,14 @@ serve(async (req) => {
     // Check Founding Member achievement
     if (profile?.is_founding_member === true && !existingSet.has('founding_member')) {
       newAchievements.push('founding_member');
+    }
+
+    // Jolly Jumper: at least one run on segment 21907618
+    if (!existingSet.has('jolly_jumper')) {
+      const jollyRuns = checkIns.filter(c => c.segment_id === JOLLY_JUMPER_SEGMENT_ID);
+      if (jollyRuns.length >= 1) {
+        newAchievements.push('jolly_jumper');
+      }
     }
 
     // Insert new achievements
