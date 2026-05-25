@@ -26,6 +26,28 @@ Deno.serve(async (req) => {
     // Initialize Supabase client early for rate limit check
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Require either (a) the service-role key (used by the internal pg_cron
+    // job) or (b) a valid authenticated user. This prevents unauthenticated
+    // callers from burning paid ScreenshotOne quota or storage.
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+    const isServiceRoleCall = bearer && bearer === supabaseServiceKey;
+    if (!isServiceRoleCall) {
+      if (!bearer) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      const { data: userData, error: userErr } = await supabase.auth.getUser(bearer);
+      if (userErr || !userData?.user) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     // Check rate limit by looking at the file's last modified time
     const { data: files } = await supabase.storage
       .from('webcam-screenshots')

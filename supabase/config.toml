@@ -1,8 +1,5 @@
 project_id = "arsetehgavxmkwkieedm"
 
-[functions.strava-oauth-callback]
-verify_jwt = false
-
 [functions.strava-auth-exchange]
 verify_jwt = false
 
