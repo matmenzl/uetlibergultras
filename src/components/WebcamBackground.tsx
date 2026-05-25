@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -12,12 +12,23 @@ export function WebcamBackground() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   // 0 = sehr dunkel, 1 = sehr hell. null = noch nicht gemessen → Default-Scrim
   const [brightness, setBrightness] = useState<number | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: weatherData } = useWeather();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthenticated(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Fetch the latest webcam screenshot URL with cache busting
   const { data: webcamData, refetch } = useQuery({
@@ -235,6 +246,7 @@ export function WebcamBackground() {
                   )}
                 </span>
               </div>
+              {isAuthenticated && (
               <Button
                 size="sm"
                 onClick={captureScreenshot}
@@ -252,6 +264,7 @@ export function WebcamBackground() {
                   <RefreshCw className="w-3.5 h-3.5" />
                 )}
               </Button>
+              )}
             </div>
 
             {/* Mobile: two lines */}
@@ -272,6 +285,7 @@ export function WebcamBackground() {
                     <span>{formatTime(screenshotMeta)}</span>
                   )}
                 </div>
+                {isAuthenticated && (
                 <Button
                   size="sm"
                   onClick={captureScreenshot}
@@ -286,6 +300,7 @@ export function WebcamBackground() {
                     <RefreshCw className="w-3 h-3" />
                   )}
                 </Button>
+                )}
               </div>
             </div>
           </div>

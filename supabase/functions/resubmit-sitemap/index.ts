@@ -51,6 +51,23 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
+  // Require an authenticated admin user to trigger sitemap resubmission.
+  // Cron jobs (pg_net) call this with the service-role key as the bearer
+  // token; allow that path through.
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const bearer = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const isServiceRoleCall = bearer && bearer === SERVICE_ROLE;
+  if (!isServiceRoleCall) {
+    if (!bearer) return json({ error: "Unauthorized" }, 401);
+    const { data: userData, error: userErr } = await admin.auth.getUser(bearer);
+    if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
+    const { data: isAdmin } = await admin.rpc("has_role", {
+      _user_id: userData.user.id,
+      _role: "admin",
+    });
+    if (!isAdmin) return json({ error: "Forbidden" }, 403);
+  }
+
   try {
     // 1. Fetch live sitemap
     const res = await fetch(SITEMAP_URL, {
