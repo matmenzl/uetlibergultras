@@ -38,6 +38,27 @@ export default function Admin() {
   const [resyncSegmentId, setResyncSegmentId] = useState<string>('all');
   const [isSubmittingSitemap, setIsSubmittingSitemap] = useState(false);
 
+  // Poll active resync job (only when admin)
+  const { data: activeResyncJob, refetch: refetchResyncJob } = useQuery({
+    queryKey: ['active-resync-job'],
+    enabled: !!user && !!isAdmin,
+    refetchInterval: 5000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('resync_jobs')
+        .select('*')
+        .in('status', ['queued', 'running', 'paused'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) {
+        console.error('Resync job query error:', error);
+        return null;
+      }
+      return data;
+    },
+  });
+
   // Fetch webcam cron status
   const { data: cronStatus, refetch: refetchCronStatus } = useQuery({
     queryKey: ['webcam-cron-status'],
@@ -477,6 +498,7 @@ export default function Admin() {
         title: 'Re-Sync gestartet',
         description: data.message,
       });
+      refetchResyncJob();
     } catch (error) {
       console.error('Re-sync error:', error);
       toast({
@@ -486,6 +508,26 @@ export default function Admin() {
       });
     } finally {
       setIsResyncing(false);
+    }
+  };
+
+  const handleCancelResync = async (jobId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return;
+    try {
+      const { error } = await supabase.functions.invoke('admin-resync-segment', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { cancel_job_id: jobId },
+      });
+      if (error) throw error;
+      toast({ title: 'Resync abgebrochen' });
+      refetchResyncJob();
+    } catch (error) {
+      toast({
+        title: 'Abbruch fehlgeschlagen',
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -976,6 +1018,35 @@ export default function Admin() {
               Prüft alle User-Aktivitäten erneut auf das gewählte Segment und erstellt fehlende Check-ins.
               Nützlich wenn ein neues Segment hinzugefügt wurde.
             </p>
+            {activeResyncJob && (
+              <div className="mb-4 p-3 rounded-md border bg-muted/40 text-sm space-y-1">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <Badge variant={activeResyncJob.status === 'paused' ? 'secondary' : 'default'}>
+                      {activeResyncJob.status}
+                    </Badge>{' '}
+                    <span className="font-medium">
+                      {(activeResyncJob.processed_user_ids?.length ?? 0)} / {activeResyncJob.total_users || '?'} User
+                    </span>
+                    {' · '}
+                    <span>{activeResyncJob.check_ins_created ?? 0} Check-ins</span>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => handleCancelResync(activeResyncJob.id)}>
+                    <X className="w-4 h-4 mr-1" /> Abbrechen
+                  </Button>
+                </div>
+                <div className="text-muted-foreground">
+                  Strava-Limit: short {activeResyncJob.rate_limit_short ?? 0}/{activeResyncJob.rate_limit_short_max ?? 100}
+                  {' · '} long {activeResyncJob.rate_limit_long ?? 0}/{activeResyncJob.rate_limit_long_max ?? 1000}
+                  {activeResyncJob.resume_after && new Date(activeResyncJob.resume_after) > new Date() && (
+                    <> · pausiert bis {new Date(activeResyncJob.resume_after).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' })}</>
+                  )}
+                </div>
+                {activeResyncJob.last_error && (
+                  <div className="text-xs text-muted-foreground">{activeResyncJob.last_error}</div>
+                )}
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row gap-3">
               <Select value={resyncSegmentId} onValueChange={setResyncSegmentId}>
                 <SelectTrigger className="w-full sm:w-[280px]">
@@ -990,8 +1061,8 @@ export default function Admin() {
                   ))}
                 </SelectContent>
               </Select>
-              <Button onClick={handleResync} disabled={isResyncing}>
-                {isResyncing ? (
+              <Button onClick={handleResync} disabled={isResyncing || !!activeResyncJob}>
+                {isResyncing || activeResyncJob ? (
                   <>
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                     Re-Sync läuft...

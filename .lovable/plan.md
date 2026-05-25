@@ -1,51 +1,77 @@
 ## Ziel
 
-Eingeloggte User sollen bei jedem Besuch (und live während einer Session) sehen, welche Badges neu freigeschaltet wurden – via Sonner-Toast, app-weit, unabhängig von der aktuellen Seite.
+Den Admin-Resync so umbauen, dass er Stravas Limits (100 Requests / 15 Min, 1000 / Tag pro App) zuverlässig einhält, **nie ein 429 provoziert** und auch über den Edge-Function-Timeout (~150 s) hinweg sauber weiterläuft – statt wie heute mitten im 4. User abzubrechen.
 
-## Aktueller Stand
+## Was heute schiefgeht
 
-- Sonner ist bereits in `App.tsx` gemountet.
-- `UetlibergPass.tsx` erkennt zwar "newlyEarned" für die Animation auf der Pass-Seite, zeigt aber **keinen** Toast und funktioniert nur, wenn der User die Pass-Seite öffnet.
-- Es gibt keinen globalen Listener auf `user_achievements`.
-- `mem://features/badge-notification-strategy` sieht In-App-Toast + Resend-Mail vor. E-Mail-Versand ist nicht Teil dieses Requests.
+- Der Resync läuft alle 14 User in einer einzigen Function-Instanz.
+- Nur reaktive 60 s-Wartezeit bei 429 – das Limit-Budget wird vorher schon aufgebraucht.
+- Bei Timeout (oder Crash) ist der Fortschritt weg, weil pro User nichts persistiert wird.
 
-## Neuer Mechanismus
+## Lösung in 3 Bausteinen
 
-Neue Komponente `BadgeNotifier` – wird einmalig in `App.tsx` innerhalb des `QueryClientProvider`/Router gemountet und macht keine UI sichtbar, sondern feuert nur Toasts.
+### 1) Strava-Limit-Header lesen (proaktiv statt reaktiv)
 
-### Logik
+Strava liefert in **jeder** Antwort:
+- `X-RateLimit-Usage: short,long` (z. B. `87,432`)
+- `X-RateLimit-Limit: 100,1000`
+- `X-ReadRateLimit-Usage/Limit` (read-spezifisch)
 
-1. **Auth-Listener** – `supabase.auth.getSession()` + `onAuthStateChange` ermitteln die aktuelle `userId`. Bei Logout: Cleanup, keine Toasts.
-2. **Initial-Fetch nach Login/Reload**:
-   - Lade alle `user_achievements` des Users (id, achievement, earned_at).
-   - Vergleich gegen `localStorage["seen_achievements:<userId>"]` (Set von `achievement`-IDs).
-   - Beim **allerersten Mal** (kein Eintrag im LocalStorage) → alle als "gesehen" markieren, **keinen** Toast feuern (sonst kriegt jeder Bestandsnutzer beim Rollout 16 Toasts).
-   - Danach: für jede unbekannte Achievement-ID einen Toast feuern (max. ein Toast pro Badge, gestaffelt mit 400 ms Delay damit Sonner sie stapelt statt überschreibt).
-   - Set in LocalStorage aktualisieren.
-3. **Realtime-Subscription** auf `user_achievements WHERE user_id=eq.<userId>` (INSERT). Bei jedem neuen Insert während offener Session: Toast + LocalStorage-Update. Channel beim Unmount/Logout sauber abmelden.
+Wir bauen einen kleinen `stravaFetch(url, token)`-Wrapper, der:
+- die Header nach jedem Call ausliest,
+- ein gemeinsames In-Memory-Budget aktualisiert,
+- **vor** dem nächsten Call prüft: bei `short_usage ≥ 90` → bis zum nächsten 15-Min-Slot (`:00 / :15 / :30 / :45`) schlafen,
+- bei `long_usage ≥ 950` → Sync sauber abbrechen und für den nächsten Tag vormerken,
+- 429 weiterhin als Fallback abfängt.
 
-### Toast-Inhalt
+### 2) Persistenter Resync-State (resumierbar)
 
-- `toast.success` mit:
-  - **Title:** Badge-Name aus `badgeDefinitions` (Fallback: rohe ID).
-  - **Description:** `description` des Badges (kurz).
-  - **Action-Button** "Anschauen" → navigiert zu `/pass`.
-  - **Duration:** 8000 ms (etwas länger als Default).
-- Unbekannte Achievement-IDs (z. B. neue Server-Badges, die das Frontend noch nicht kennt): generischer Text "Neues Badge freigeschaltet!".
+Neue Tabelle `resync_jobs`:
 
-### LocalStorage-Schlüssel
+```text
+id, segment_id (nullable), status (queued|running|paused|done|failed),
+current_user_id, processed_user_ids[], total_users,
+check_ins_created, rate_limit_short, rate_limit_long,
+last_heartbeat_at, resume_after, created_by, created_at, finished_at
+```
 
-`uu:seen_achievements:<userId>` (JSON-Array). User-spezifisch, damit Geräte-Sharing / Account-Wechsel kein Cross-Talk erzeugen.
+Im Lauf:
+- Job wird angelegt → User-Liste eingefroren.
+- Pro verarbeitetem User: `processed_user_ids` + `check_ins_created` + Heartbeat updaten.
+- Pro User: nach erfolgreichem Monat den Fortschritt in `profiles.initial_sync_months_done` schreiben (nutzen wir schon).
 
-## Zu ändernde Dateien
+### 3) Selbst-fortsetzender Lauf (gegen Timeout)
 
-- **Neu:** `src/components/BadgeNotifier.tsx` – die oben beschriebene Logik.
-- **Bearbeiten:** `src/App.tsx` – `<BadgeNotifier />` einmal mounten (im authentifizierten Tree, neben `<Sonner />`).
+In der Function:
+- Job laden, dort weitermachen wo `processed_user_ids` aufhört.
+- **Zeit-Budget** pro Invocation (z. B. 120 s). Wenn überschritten → Status `paused`, `resume_after = now()` setzen, sauber returnen.
+- Direkt vor dem Return einen **Self-Trigger** absetzen: `fetch(SUPABASE_URL/functions/v1/admin-resync-segment, { body: { job_id } })` mit Service-Role-Key.
+- Ebenso bei Rate-Limit-Pause: `resume_after = nächster 15-Min-Slot` setzen und einen **pg_cron-One-Shot** registrieren, der den Job zur passenden Zeit wieder anstösst (oder ein bestehender 1-Minuten-Cron picked queued/paused Jobs mit `resume_after <= now()`).
 
-Keine Backend-, RLS- oder Migrationsänderungen nötig. `user_achievements` hat bereits eine SELECT-Policy für authentifizierte User. Realtime für die Tabelle muss eventuell via `ALTER PUBLICATION supabase_realtime ADD TABLE public.user_achievements;` aktiviert werden – das wird im Build-Step geprüft und ggf. per Migration ergänzt.
+So läuft der Sync in vielen kleinen, limit-konformen Häppchen weiter, ohne dass ein Admin manuell neu starten muss.
 
-## Nicht Teil dieses Plans
+## Admin-UI (minimal)
 
-- E-Mail-Benachrichtigungen (Resend) – separater Request.
-- Push-Notifications.
-- Anpassung des Pass-Animation-Flows in `UetlibergPass.tsx` (bleibt wie ist).
+Im Admin-Panel beim Resync-Button:
+- Status-Badge: `running 5/14 · short 73/100 · pausiert bis 15:45`.
+- Button „Resync starten" (legt Job an), „Abbrechen" (setzt Status `failed`).
+- Polling alle 5 s auf `resync_jobs`.
+
+## Was sich **nicht** ändert
+
+- Kein neuer Provider, kein neuer Secret.
+- Logik welche Aktivitäten in Check-ins werden, bleibt 1:1.
+- Cutoff 1.1.2026 bleibt.
+- Manuelle Check-ins und Webhook bleiben unberührt.
+
+## Technische Details
+
+- Neue Datei `supabase/functions/_shared/stravaRateLimit.ts` mit `stravaFetch` + Budget-Singleton (pro Invocation, plus Persistenz im Job-Record).
+- Migration: Tabelle `resync_jobs` mit RLS „nur Admins lesen/schreiben" + Index auf `(status, resume_after)`.
+- `admin-resync-segment` umbauen auf job-basiertes Modell; alter „one-shot start"-Modus bleibt als POST-Einstieg, legt aber jetzt nur den Job an.
+- Optionaler 1-Minuten-Cron `resync-job-runner`, der `paused/queued`-Jobs mit fälligem `resume_after` anstösst (per `pg_net.http_post`).
+- Heartbeat-Watchdog: Jobs ohne Heartbeat > 5 Min → automatisch auf `paused` zurückgesetzt, damit ein gecrashter Lauf nicht hängen bleibt.
+
+## Offene Frage
+
+Möchtest du den Self-Trigger lieber **rein per pg_cron** (sauber, etwas träger) oder **Function ruft sich selbst auf** (schneller, braucht Service-Role-Call)? Default-Vorschlag: **beides** – Self-Call für schnelle Fortsetzung nach Timeout, Cron als Sicherheitsnetz für Rate-Limit-Pausen > 1 Min.
