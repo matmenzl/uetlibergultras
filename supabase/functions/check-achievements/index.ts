@@ -341,6 +341,14 @@ serve(async (req) => {
       newAchievements.push('founding_member');
     }
 
+    // Jolly Jumper: at least one run on segment 21907618
+    if (!existingSet.has('jolly_jumper')) {
+      const jollyRuns = checkIns.filter(c => c.segment_id === JOLLY_JUMPER_SEGMENT_ID);
+      if (jollyRuns.length >= 1) {
+        newAchievements.push('jolly_jumper');
+      }
+    }
+
     // Insert new achievements
     if (newAchievements.length > 0) {
       const achievementsToInsert = newAchievements.map(achievement => ({
