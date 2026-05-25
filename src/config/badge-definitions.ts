@@ -412,6 +412,20 @@ export const badgeDefinitions: BadgeDefinition[] = [
       background: "40 20% 95%",
     },
   },
+  {
+    id: "jolly_jumper",
+    category: "legend",
+    title: "Jolly Jumper",
+    description: "Auf den Spuren von Lucky Luke",
+    howToEarn: "Laufe das Segment mindestens ein Mal",
+    symbolId: "compass",
+    imageUrl: jollyJumperHybrid,
+    colors: {
+      primary: "142 71% 45%",
+      secondary: "45 93% 47%",
+      background: "40 20% 95%",
+    },
+  },
 
   // === MONTHLY CHALLENGE BADGES ===
   {
