@@ -1,44 +1,40 @@
-# Install-to-Homescreen für Mobile
-
 ## Ziel
-Mobile Besucher sehen eine fixed Box am unteren Bildschirmrand, die zum Speichern der App auf dem Homescreen einlädt. Android nutzt den nativen Install-Dialog, iOS bekommt eine kurze Anleitung.
+Text im Hero bleibt unabhängig vom Webcam-Bild (Schnee/Sonne/Nebel/Nacht) gut lesbar, indem ein **transparentes Backdrop-Layer** dynamisch an die Bildhelligkeit angepasst wird.
 
-## Was wir bauen
+## Vorgehen
 
-### 1. Web-App-Manifest (`public/manifest.json`)
-- `name`: "Uetliberg Ultras"
-- `short_name`: "Ultras"
-- `start_url`: "/"
-- `display`: "standalone"
-- `theme_color` & `background_color` passend zum Design-Token
-- Icons: bestehende `apple-touch-icon.png` + `favicon.svg` referenzieren (192/512 falls vorhanden, sonst eine 512er generieren)
+### 1. Helligkeit messen (`WebcamBackground.tsx`)
+- Beim `onLoad` des Webcam-Bilds das Bild in einen kleinen Offscreen-`<canvas>` (z. B. 32×32 px) zeichnen.
+- `crossOrigin="anonymous"` setzen, damit Pixel ausgelesen werden dürfen (Supabase Storage liefert passende CORS-Header).
+- Über alle Pixel die Luminanz berechnen: `L = 0.299·R + 0.587·G + 0.114·B`, dann Durchschnitt (0–255).
+- Ergebnis als `brightness`-State (0–1) speichern.
 
-In `index.html` einbinden via `<link rel="manifest" href="/manifest.json">`.
+### 2. Backdrop-Element rendern
+Zusätzlich zum bestehenden Bild ein Overlay-`<div>` über dem Webcam-Bild, unter dem Content (`z-10`, Content liegt schon auf `z-20`):
 
-### 2. Komponente `InstallPrompt.tsx`
-Fixed Box unten (`bottom-4 inset-x-4`, `z-40`), nur auf Mobile (`useIsMobile`).
+```text
+[ Webcam-Bild   z-0 ]
+[ Adaptive Scrim z-10 ]  ← neu
+[ Info-Bar oben  z-20 ]
+[ Logo / Text   z-20 ]
+```
 
-Verhalten:
-- **Android/Chrome**: Fängt `beforeinstallprompt`-Event ab, zeigt Button "App installieren" → ruft `prompt()` auf.
-- **iOS Safari** (UA-Detection): Zeigt Text "Tippe auf ⎘ und 'Zum Home-Bildschirm'" mit Share-Icon.
-- **Bereits installiert** (`display-mode: standalone` oder `navigator.standalone`): Box wird nicht gezeigt.
-- **Dismiss**: X-Button speichert `install-prompt-dismissed` in localStorage → erscheint nicht mehr.
+- Hell (z. B. Schneetag): dunkler Scrim, `bg-black/35` bis `bg-black/55`
+- Mittel: leichter Scrim, `bg-black/20`
+- Dunkel (Nacht): minimal oder gar nicht, evtl. leichter Aufheller `bg-white/5`
+- Sanfter vertikaler Verlauf (oben/unten etwas dunkler) für bessere Lesbarkeit der Info-Bar und des CTA-Buttons.
+- Opacity wird per Inline-Style aus `brightness` interpoliert (smooth Transition 500 ms).
 
-Design: Card mit Logo links, kurzem Text, CTA-Button rechts, X zum Schliessen. Verwendet semantische Tokens (`bg-card`, `border-border`, `shadow-lg`).
+### 3. Fallbacks
+- Falls Canvas-Auslesen scheitert (CORS / Fehler): Default-Scrim `bg-black/25` aktivieren – nie schlechter als heute.
+- Beim Bildwechsel (neuer Screenshot) Helligkeit neu berechnen.
 
-### 3. Einbinden
-In `App.tsx` global rendern (innerhalb `BrowserRouter`, ausserhalb `Routes`), damit es auf jeder Seite verfügbar ist.
+### 4. Cleanup
+- Bestehende `[text-shadow:...]`-Utilities am Text bleiben als zweite Sicherheit erhalten.
+- Keine Änderung an Layout, Inhalten oder anderen Komponenten.
 
-## Wichtige Hinweise
-- **Kein Service Worker** → keine Offline-Funktion, dafür keine Caching-Probleme im Lovable-Editor-Preview.
-- **iOS-Limit**: Apple bietet keine API um den "Add to Homescreen"-Dialog programmatisch zu öffnen – wir können dort nur eine Anleitung anzeigen. Das ist eine OS-Beschränkung, nicht behebbar.
-- Box erscheint nicht in der nativen Capacitor-App (dort ist sie schon installiert).
+## Geänderte Dateien
+- `src/components/WebcamBackground.tsx` – Helligkeitsmessung + adaptives Overlay
 
-## Technische Details
-- Detection: `window.matchMedia('(display-mode: standalone)').matches` + `(navigator as any).standalone` für iOS-PWA-Mode.
-- iOS-UA: `/iPhone|iPad|iPod/.test(navigator.userAgent) && !(window as any).MSStream`.
-- Capacitor: `import { Capacitor } from '@capacitor/core'; Capacitor.isNativePlatform()` → Box ausblenden.
-
-## Dateien
-- Neu: `public/manifest.json`, `src/components/InstallPrompt.tsx`
-- Edit: `index.html` (Manifest-Link), `src/App.tsx` (Komponente einbinden)
+## Verifikation
+- Manuell im Preview: Screenshot bei hellem Tageslicht und (falls verfügbar) abends – Konsole prüft `brightness`, Overlay-Opacity passt sich sichtbar an.
