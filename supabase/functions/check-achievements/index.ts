@@ -28,10 +28,12 @@ type AchievementType =
   | 'frosty'
   | 'alternativliga'
   | 'wasserratte'
-  | 'founding_member';
+  | 'founding_member'
+  | 'jolly_jumper';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
+const JOLLY_JUMPER_SEGMENT_ID = 21907618;
 
 // WMO weather codes for snow conditions
 const SNOW_CODES = [71, 73, 75, 77, 85, 86];
