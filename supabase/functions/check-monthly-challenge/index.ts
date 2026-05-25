@@ -146,6 +146,15 @@ Deno.serve(async (req) => {
     }
 
     if (winners.length > 0) {
+      // Clean up any stale monthly_* achievements for this evaluation month
+      // (in case a previous run awarded medals based on different data).
+      const lastDayCleanup = new Date(Date.UTC(year, month, 0, 23, 0, 0)).toISOString();
+      await supabase
+        .from("user_achievements")
+        .delete()
+        .in("achievement", ["monthly_gold", "monthly_silver", "monthly_bronze"])
+        .eq("earned_at", lastDayCleanup);
+
       const { error: insertError } = await supabase
         .from("monthly_challenge_winners")
         .insert(winners);
