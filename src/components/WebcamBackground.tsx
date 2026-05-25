@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,9 @@ export function WebcamBackground() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  // 0 = sehr dunkel, 1 = sehr hell. null = noch nicht gemessen → Default-Scrim
+  const [brightness, setBrightness] = useState<number | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: weatherData } = useWeather();
@@ -127,6 +130,37 @@ export function WebcamBackground() {
     }
   };
 
+  const measureBrightness = (img: HTMLImageElement) => {
+    try {
+      const size = 32;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0, size, size);
+      const { data } = ctx.getImageData(0, 0, size, size);
+      let total = 0;
+      const pixels = data.length / 4;
+      for (let i = 0; i < data.length; i += 4) {
+        total += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      }
+      const avg = total / pixels / 255; // 0..1
+      setBrightness(avg);
+    } catch (err) {
+      console.warn('Brightness measurement failed (CORS?)', err);
+      setBrightness(null);
+    }
+  };
+
+  // Scrim-Opacity an Helligkeit koppeln:
+  // hell (1.0) → ~0.55, mittel (0.5) → ~0.25, dunkel (0.0) → ~0.05
+  const scrimOpacity = useMemo(() => {
+    if (brightness === null) return 0.3; // Fallback
+    const clamped = Math.max(0, Math.min(1, brightness));
+    return 0.05 + clamped * 0.5;
+  }, [brightness]);
+
   const formatTime = (date: Date | null | undefined) => {
     if (!date) return '';
     return date.toLocaleString('de-CH', {
@@ -142,15 +176,18 @@ export function WebcamBackground() {
       
       {webcamData?.url && !imageError && (
         <img
+          ref={imgRef}
+          crossOrigin="anonymous"
           src={webcamData.url}
           alt="Uetliberg Webcam"
           className={`absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-500 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
-          onLoad={() => {
+          onLoad={(e) => {
             console.log('Webcam image loaded successfully');
             setImageLoaded(true);
             setImageError(false);
+            measureBrightness(e.currentTarget);
           }}
           onError={(e) => {
             console.error('Webcam image failed to load:', e);
@@ -159,7 +196,18 @@ export function WebcamBackground() {
           }}
         />
       )}
-      
+
+      {/* Adaptiver Scrim für Lesbarkeit – Opacity passt sich der Bildhelligkeit an */}
+      {imageLoaded && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-10 pointer-events-none transition-opacity duration-500"
+          style={{
+            background: `linear-gradient(to bottom, rgba(0,0,0,${(scrimOpacity * 0.9).toFixed(3)}) 0%, rgba(0,0,0,${scrimOpacity.toFixed(3)}) 40%, rgba(0,0,0,${(scrimOpacity * 1.1).toFixed(3)}) 100%)`,
+          }}
+        />
+      )}
+
       {/* Webcam Info Bar - Bottom */}
       {imageLoaded && (
         <div className="absolute top-0 left-0 right-0 z-20">
