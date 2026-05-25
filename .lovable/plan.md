@@ -1,35 +1,29 @@
+## Ziel
 
+Die Leaderboards zeigen aktuell nur die Top 10. Du willst **alle Läufer** sehen — konsistent über alle Boards hinweg.
 
-## Profilbild automatisch aktualisieren
+## Was geändert wird
 
-### Problem
-Strava-Profilbild-URLs laufen nach einiger Zeit ab. Aktuell wird das Bild nur beim Login (strava-auth-exchange) aktualisiert. Nutzer, die sich selten neu anmelden, haben veraltete URLs.
+**1. `src/components/Leaderboard.tsx` (365-Tage Challenge)**
+- `.limit(10)` aus der Supabase-Query entfernen → alle Einträge laden.
+- Container scrollbar machen (`max-h-[600px] overflow-y-auto`), damit lange Listen die Seite nicht sprengen.
+- Verhalten für Gäste bleibt: Top 3 klar sichtbar, danach 4 geblurrte Zeilen als Teaser mit Login-CTA (Memory: "Guests show top 3, blur the rest").
 
-### Loesung
-Das Profilbild wird zusaetzlich bei jeder Webhook-Aktivitaet (neue Runs) automatisch aktualisiert, da wir dort bereits einen gueltig authentifizierten API-Zugang haben.
+**2. `src/components/MonthlyChallenge.tsx` (Monats-Challenge)**
+- `.slice(0, 10)` entfernen → alle Teilnehmer des Monats anzeigen.
+- Gleiche scrollbare Container-Lösung wie oben.
+- Gast-Teaser-Logik bleibt unverändert.
 
-### Aenderungen
+**3. Nicht geändert**
+- `CurrentMonthChallengeBox.tsx` zeigt bewusst nur Gold/Silber/Bronze (Top 3 Sieger des Vormonats) — das ist ein kompaktes Box-Format, kein vollständiges Ranking. Bleibt wie es ist.
+- Andere Treffer (`Achievements`, `StreakCounter`, `PublicProfile`, `ManualCheckInButton`, `UetlibergPass`, `BadgeShowcase`) nutzen `check_ins`/`leaderboard_stats` für persönliche Stats, nicht für Ranglisten — keine Änderung nötig.
 
-**1. strava-webhook/index.ts erweitern**
-- Nach dem Abrufen der Aktivitaetsdetails wird zusaetzlich der Strava-Athleten-Endpunkt (`/api/v3/athlete`) aufgerufen
-- Das Profilbild (`athlete.profile`) wird in der `profiles`-Tabelle aktualisiert
-- Dies geschieht nur bei `create`/`update` Events (nicht bei `delete`)
-- Ein einzelner zusaetzlicher API-Call pro Webhook-Event
+## Technische Details
 
-**2. Ablauf**
+- Supabase Default-Limit ist 1000 Zeilen pro Query. Bei aktueller Community-Grösse (wenige hundert User) reicht das problemlos. Falls die App später >1000 aktive Teilnehmer hat, müssten wir paginieren — heute nicht relevant.
+- Sortierung bleibt: `total_runs DESC, achievement_count DESC` (Tie-Breaker laut Memory).
+- Performance: Listen-Rendering bleibt günstig, da jede Zeile leichtgewichtig ist (Avatar + Text).
 
-```text
-Strava Webhook (neue Aktivitaet)
-  |
-  +-> Aktivitaet abrufen (bestehend)
-  +-> Athleten-Profil abrufen (NEU)
-  +-> Profilbild in DB aktualisieren (NEU)
-  +-> Check-Ins erstellen (bestehend)
-```
+## Resultat
 
-### Technische Details
-
-- In der `processActivityEvent` Funktion wird nach dem Token-Refresh ein zusaetzlicher Fetch auf `https://www.strava.com/api/v3/athlete` durchgefuehrt
-- Das Ergebnis wird per `supabaseAdmin.from('profiles').update({ profile_picture: athlete.profile })` gespeichert
-- Fehler beim Bild-Update sind nicht-fatal (werden geloggt, blockieren aber nicht die Verarbeitung)
-
+Eingeloggte Nutzer sehen die komplette Community-Rangliste (scrollbar). Gäste sehen weiterhin Top 3 + geblurrten Teaser, um zur Anmeldung zu motivieren.
