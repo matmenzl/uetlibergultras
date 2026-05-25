@@ -1018,6 +1018,35 @@ export default function Admin() {
               Prüft alle User-Aktivitäten erneut auf das gewählte Segment und erstellt fehlende Check-ins.
               Nützlich wenn ein neues Segment hinzugefügt wurde.
             </p>
+            {activeResyncJob && (
+              <div className="mb-4 p-3 rounded-md border bg-muted/40 text-sm space-y-1">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <Badge variant={activeResyncJob.status === 'paused' ? 'secondary' : 'default'}>
+                      {activeResyncJob.status}
+                    </Badge>{' '}
+                    <span className="font-medium">
+                      {(activeResyncJob.processed_user_ids?.length ?? 0)} / {activeResyncJob.total_users || '?'} User
+                    </span>
+                    {' · '}
+                    <span>{activeResyncJob.check_ins_created ?? 0} Check-ins</span>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => handleCancelResync(activeResyncJob.id)}>
+                    <X className="w-4 h-4 mr-1" /> Abbrechen
+                  </Button>
+                </div>
+                <div className="text-muted-foreground">
+                  Strava-Limit: short {activeResyncJob.rate_limit_short ?? 0}/{activeResyncJob.rate_limit_short_max ?? 100}
+                  {' · '} long {activeResyncJob.rate_limit_long ?? 0}/{activeResyncJob.rate_limit_long_max ?? 1000}
+                  {activeResyncJob.resume_after && new Date(activeResyncJob.resume_after) > new Date() && (
+                    <> · pausiert bis {new Date(activeResyncJob.resume_after).toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' })}</>
+                  )}
+                </div>
+                {activeResyncJob.last_error && (
+                  <div className="text-xs text-muted-foreground">{activeResyncJob.last_error}</div>
+                )}
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row gap-3">
               <Select value={resyncSegmentId} onValueChange={setResyncSegmentId}>
                 <SelectTrigger className="w-full sm:w-[280px]">
@@ -1032,8 +1061,8 @@ export default function Admin() {
                   ))}
                 </SelectContent>
               </Select>
-              <Button onClick={handleResync} disabled={isResyncing}>
-                {isResyncing ? (
+              <Button onClick={handleResync} disabled={isResyncing || !!activeResyncJob}>
+                {isResyncing || activeResyncJob ? (
                   <>
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                     Re-Sync läuft...
