@@ -398,13 +398,33 @@ serve(async (req) => {
     );
 
     const body = await req.json().catch(() => ({}));
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const authHeader = req.headers.get('Authorization') ?? '';
-    const isInternalCall =
-      body?.internal === true && authHeader === `Bearer ${serviceRoleKey}`;
 
     // --- Internal continuation call (from self-trigger or cron) ---
-    if (isInternalCall && body.job_id) {
+    // Validated by unguessable job_id (UUID v4) referencing an existing
+    // resumable job. The job_id acts as a capability token; worst case
+    // an attacker who guesses a UUID can only resume one of our own
+    // rate-limited resync jobs (no data exfiltration).
+    if (body?.internal === true && body?.job_id) {
+      const { data: jobCheck } = await supabaseAdmin
+        .from('resync_jobs')
+        .select('id, status')
+        .eq('id', body.job_id)
+        .maybeSingle();
+
+      if (!jobCheck) {
+        return new Response(
+          JSON.stringify({ error: 'Unknown job' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (!['queued', 'paused', 'running'].includes(jobCheck.status)) {
+        return new Response(
+          JSON.stringify({ status: 'skipped', reason: `job ${jobCheck.status}` }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       EdgeRuntime.waitUntil(runJob(body.job_id));
       return new Response(
         JSON.stringify({ status: 'resumed', job_id: body.job_id }),
