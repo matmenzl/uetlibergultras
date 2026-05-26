@@ -16,6 +16,17 @@ import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, 
 import { z } from 'zod';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Seo } from '@/components/Seo';
+import { Progress } from '@/components/ui/progress';
+
+function formatDuration(seconds: number): string {
+  if (!isFinite(seconds) || seconds < 0) return '–';
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const mins = Math.round(seconds / 60);
+  if (mins < 60) return `~${mins} Min`;
+  const hours = Math.floor(mins / 60);
+  const rem = mins % 60;
+  return rem === 0 ? `~${hours} Std` : `~${hours} Std ${rem} Min`;
+}
 
 const segmentIdSchema = z.string()
   .trim()
@@ -1035,6 +1046,41 @@ export default function Admin() {
                     <X className="w-4 h-4 mr-1" /> Abbrechen
                   </Button>
                 </div>
+                {(() => {
+                  const processed = activeResyncJob.processed_user_ids?.length ?? 0;
+                  const total = activeResyncJob.total_users ?? 0;
+                  const pct = total > 0 ? Math.round((processed / total) * 100) : 0;
+                  const remaining = Math.max(0, total - processed);
+                  const startedAt = activeResyncJob.started_at ? new Date(activeResyncJob.started_at).getTime() : null;
+                  const pauseSecLeft = activeResyncJob.resume_after
+                    ? Math.max(0, (new Date(activeResyncJob.resume_after).getTime() - Date.now()) / 1000)
+                    : 0;
+                  let etaText: string;
+                  if (remaining === 0) {
+                    etaText = 'Fertig in Kürze';
+                  } else if (processed > 0 && startedAt) {
+                    const elapsedActive = Math.max(1, (Date.now() - startedAt) / 1000 - pauseSecLeft);
+                    const perUser = elapsedActive / processed;
+                    // Strava-Limit: ~100 Req / 15 Min. Pro User mehrere Requests → grobe Schätzung
+                    // dass alle ~25 User eine 15-Min-Pause folgt.
+                    const expectedPauses = Math.max(0, Math.floor(remaining / 25));
+                    const eta = remaining * perUser + expectedPauses * 15 * 60 + pauseSecLeft;
+                    etaText = `Restzeit ${formatDuration(eta)}`;
+                  } else if (pauseSecLeft > 0) {
+                    etaText = `Wartet auf Strava (noch ${formatDuration(pauseSecLeft)})`;
+                  } else {
+                    etaText = 'Schätzung folgt nach ersten Usern';
+                  }
+                  return (
+                    <div className="space-y-1 pt-1">
+                      <Progress value={pct} className="h-2" />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>{pct}%</span>
+                        <span>{etaText}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
                 <div className="text-muted-foreground">
                   Strava-Limit: short {activeResyncJob.rate_limit_short ?? 0}/{activeResyncJob.rate_limit_short_max ?? 100}
                   {' · '} long {activeResyncJob.rate_limit_long ?? 0}/{activeResyncJob.rate_limit_long_max ?? 1000}
