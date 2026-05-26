@@ -95,8 +95,8 @@ async function processUser(
   const now = new Date();
   const currentYear = now.getUTCFullYear();
   const currentMonth = now.getUTCMonth();
-  const monthsSinceJan2026 = (currentYear - 2026) * 12 + currentMonth + 1;
-  const monthsToSync = Math.max(1, monthsSinceJan2026);
+  // Strava-Limit-freundlich: nur letzten Monat scannen.
+  const monthsToSync = 1;
 
   let userCheckIns = 0;
 

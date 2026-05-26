@@ -1026,8 +1026,9 @@ export default function Admin() {
               Segment Re-Sync
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Prüft alle User-Aktivitäten erneut auf das gewählte Segment und erstellt fehlende Check-ins.
-              Nützlich wenn ein neues Segment hinzugefügt wurde.
+              Prüft die User-Aktivitäten des letzten Monats auf das gewählte Segment und erstellt
+              fehlende Check-ins. Nützlich wenn ein neues Segment hinzugefügt wurde.
+              Strava-Limits: läuft pro User mit ~30-Tage-Fenster, um 429-Fehler zu vermeiden.
             </p>
             {activeResyncJob && (
               <div className="mb-4 p-3 rounded-md border bg-muted/40 text-sm space-y-1">

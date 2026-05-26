@@ -293,14 +293,12 @@ async function performBackgroundSync(userId: string, token: string) {
     // Sync cutoff: 1. Januar 2026
     const SYNC_CUTOFF = new Date(Date.UTC(2026, 0, 1));
     const now = new Date();
-    
-    // Calculate months to sync (from current month back to Jan 2026)
-    const currentYear = now.getUTCFullYear();
-    const currentMonth = now.getUTCMonth(); // 0-indexed
-    const monthsSinceJan2026 = (currentYear - 2026) * 12 + currentMonth + 1;
-    const monthsToSync = Math.max(1, monthsSinceJan2026);
-    
-    console.log(`Syncing ${monthsToSync} months back to Jan 2026`);
+
+    // Strava-Limit-freundlich: nur den letzten Monat backfillen.
+    // Alles Ältere kommt via Webhook (neue Aktivitäten) oder Manual Check-in.
+    const monthsToSync = 1;
+
+    console.log(`Syncing last ${monthsToSync} month(s) (Strava-limit friendly)`);
     
     let totalRuns = 0;
     let monthsDone = 0;
