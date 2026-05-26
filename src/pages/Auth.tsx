@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Award, Mail, Loader2, CheckCircle, User } from 'lucide-react';
+import { Award, Mail, Loader2, User, KeyRound, ArrowLeft } from 'lucide-react';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { toast } from 'sonner';
 import { Seo } from '@/components/Seo';
@@ -18,7 +18,8 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [runnerName, setRunnerName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
 
   useEffect(() => {
     // Check if already logged in
@@ -75,7 +76,7 @@ export default function Auth() {
     }
   };
 
-  const handleMagicLink = async () => {
+  const handleSendCode = async () => {
     if (!runnerName.trim()) {
       toast.error('Bitte gib einen Läufernamen ein');
       return;
@@ -90,7 +91,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: window.location.origin,
+          shouldCreateUser: true,
           data: {
             runner_name: runnerName.trim(),
           },
@@ -99,11 +100,34 @@ export default function Auth() {
 
       if (error) throw error;
 
-      setMagicLinkSent(true);
-      toast.success('Magic Link gesendet! Schau in dein E-Mail-Postfach.');
+      setCodeSent(true);
+      toast.success('Code gesendet! Schau in dein E-Mail-Postfach.');
     } catch (error) {
-      console.error('Magic link error:', error);
-      toast.error('Fehler beim Senden des Magic Links');
+      console.error('OTP send error:', error);
+      toast.error('Fehler beim Senden des Codes');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    const token = otpCode.trim();
+    if (token.length < 6) {
+      toast.error('Bitte gib den 6-stelligen Code ein');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
+      });
+      if (error) throw error;
+      // onAuthStateChange handles navigation + profile creation
+    } catch (error) {
+      console.error('OTP verify error:', error);
+      toast.error('Code ungültig oder abgelaufen');
     } finally {
       setIsLoading(false);
     }
@@ -156,14 +180,69 @@ export default function Auth() {
           </TabsContent>
 
           <TabsContent value="alternativliga" className="space-y-4">
-            {magicLinkSent ? (
-              <div className="text-center py-6">
-                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                <p className="font-medium mb-2">E-Mail gesendet!</p>
-                <p className="text-sm text-muted-foreground">
-                  Klicke auf den Link in deiner E-Mail, um dich anzumelden.
+            {codeSent ? (
+              <>
+                <div className="text-center text-sm text-muted-foreground mb-4">
+                  <p className="font-medium text-foreground mb-1">Code gesendet!</p>
+                  <p>
+                    Wir haben dir einen 6-stelligen Code an
+                    <br />
+                    <span className="font-medium text-foreground">{email}</span> geschickt.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="otpCode">Code aus E-Mail</Label>
+                    <div className="relative">
+                      <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="otpCode"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        placeholder="123456"
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        onKeyDown={(e) => e.key === 'Enter' && handleVerifyCode()}
+                        className="pl-10 tracking-widest text-center text-lg"
+                        maxLength={6}
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleVerifyCode}
+                    disabled={isLoading || otpCode.length < 6}
+                    className="w-full gap-2"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <KeyRound className="h-4 w-4" />
+                    )}
+                    Anmelden
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setCodeSent(false);
+                      setOtpCode('');
+                    }}
+                    className="w-full gap-2 text-sm"
+                    disabled={isLoading}
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Andere E-Mail verwenden
+                  </Button>
+                </div>
+
+                <p className="text-xs text-center text-muted-foreground mt-4">
+                  Der Code ist 1 Stunde gültig. Schau auch im Spam-Ordner.
                 </p>
-              </div>
+              </>
             ) : (
               <>
                 <div className="text-center text-sm text-muted-foreground mb-4">
@@ -201,14 +280,14 @@ export default function Auth() {
                         placeholder="deine@email.ch"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleMagicLink()}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendCode()}
                         className="pl-10"
                       />
                     </div>
                   </div>
 
                   <Button
-                    onClick={handleMagicLink}
+                  onClick={handleSendCode}
                     disabled={isLoading || !runnerName.trim() || !email}
                     className="w-full gap-2"
                   >
@@ -217,12 +296,12 @@ export default function Auth() {
                     ) : (
                       <Mail className="h-4 w-4" />
                     )}
-                    Magic Link senden
+                  Code senden
                   </Button>
                 </div>
 
                 <p className="text-xs text-center text-muted-foreground mt-4">
-                  Du erhältst einen Link per E-Mail, um dich ohne Passwort anzumelden.
+                  Du erhältst einen 6-stelligen Code per E-Mail, um dich ohne Passwort anzumelden.
                 </p>
               </>
             )}
