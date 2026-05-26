@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Award, Mail, Loader2, CheckCircle, User } from 'lucide-react';
+import { Award, Mail, Loader2, User, KeyRound, ArrowLeft } from 'lucide-react';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { toast } from 'sonner';
 import { Seo } from '@/components/Seo';
@@ -18,7 +18,8 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [runnerName, setRunnerName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
 
   useEffect(() => {
     // Check if already logged in
@@ -75,7 +76,7 @@ export default function Auth() {
     }
   };
 
-  const handleMagicLink = async () => {
+  const handleSendCode = async () => {
     if (!runnerName.trim()) {
       toast.error('Bitte gib einen Läufernamen ein');
       return;
@@ -90,7 +91,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: window.location.origin,
+          shouldCreateUser: true,
           data: {
             runner_name: runnerName.trim(),
           },
@@ -99,11 +100,34 @@ export default function Auth() {
 
       if (error) throw error;
 
-      setMagicLinkSent(true);
-      toast.success('Magic Link gesendet! Schau in dein E-Mail-Postfach.');
+      setCodeSent(true);
+      toast.success('Code gesendet! Schau in dein E-Mail-Postfach.');
     } catch (error) {
-      console.error('Magic link error:', error);
-      toast.error('Fehler beim Senden des Magic Links');
+      console.error('OTP send error:', error);
+      toast.error('Fehler beim Senden des Codes');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    const token = otpCode.trim();
+    if (token.length < 6) {
+      toast.error('Bitte gib den 6-stelligen Code ein');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
+      });
+      if (error) throw error;
+      // onAuthStateChange handles navigation + profile creation
+    } catch (error) {
+      console.error('OTP verify error:', error);
+      toast.error('Code ungültig oder abgelaufen');
     } finally {
       setIsLoading(false);
     }
