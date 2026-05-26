@@ -16,6 +16,17 @@ import { Shield, Plus, RefreshCw, AlertTriangle, Calendar, Lightbulb, Check, X, 
 import { z } from 'zod';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Seo } from '@/components/Seo';
+import { Progress } from '@/components/ui/progress';
+
+function formatDuration(seconds: number): string {
+  if (!isFinite(seconds) || seconds < 0) return '–';
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const mins = Math.round(seconds / 60);
+  if (mins < 60) return `~${mins} Min`;
+  const hours = Math.floor(mins / 60);
+  const rem = mins % 60;
+  return rem === 0 ? `~${hours} Std` : `~${hours} Std ${rem} Min`;
+}
 
 const segmentIdSchema = z.string()
   .trim()
