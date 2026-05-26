@@ -8,19 +8,15 @@ interface SyncStatus {
   isLoading: boolean;
 }
 
-// Calculate months since Jan 2026 (sync cutoff date)
-const calculateMonthsSinceJan2026 = (): number => {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth(); // 0-indexed
-  return Math.max(1, (currentYear - 2026) * 12 + currentMonth + 1);
-};
+// Initial-Sync deckt nur den letzten Monat ab (Strava-Limit-freundlich).
+// Ältere Runs landen via Webhook (neu) oder Manual Check-in (Historie).
+const INITIAL_SYNC_MONTHS = 1;
 
 export function useSyncStatus(userId: string | undefined) {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({
     isComplete: true,
     monthsDone: 0,
-    totalMonths: calculateMonthsSinceJan2026(),
+    totalMonths: INITIAL_SYNC_MONTHS,
     isLoading: true,
   });
 
@@ -45,7 +41,7 @@ export function useSyncStatus(userId: string | undefined) {
     setSyncStatus({
       isComplete: data?.initial_sync_completed ?? true,
       monthsDone: data?.initial_sync_months_done ?? 0,
-      totalMonths: calculateMonthsSinceJan2026(),
+      totalMonths: INITIAL_SYNC_MONTHS,
       isLoading: false,
     });
   }, [userId]);

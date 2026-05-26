@@ -17,19 +17,19 @@ export function SyncProgress({ userId }: SyncProgressProps) {
     return null;
   }
 
-  const progress = (monthsDone / totalMonths) * 100;
+  const progress = Math.min(100, (monthsDone / Math.max(1, totalMonths)) * 100);
 
   return (
     <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-4">
       <div className="flex items-center gap-3 mb-2">
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
         <span className="font-medium text-sm">
-          Synchronisiere deine Runs der letzten 12 Monate...
+          Synchronisiere deine Runs der letzten 30 Tage...
         </span>
       </div>
       <Progress value={progress} className="h-2" />
       <p className="text-xs text-muted-foreground mt-2">
-        {monthsDone} von {totalMonths} Monaten synchronisiert
+        Ältere Uetliberg-Runs kannst du jederzeit über „Manueller Check-in" nachtragen.
       </p>
     </div>
   );
