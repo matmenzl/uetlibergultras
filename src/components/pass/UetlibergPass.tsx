@@ -198,6 +198,16 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
         return { current: Math.min(rainRuns, target), target };
       case 'coiffeur_runs':
         return { current: Math.min(coiffeurRuns, target), target };
+      case 'segment_runs': {
+        const badge = badgeDefinitions.find(b => b.id === badgeId);
+        const segId = badge?.segmentId;
+        if (!segId) return { current: 0, target };
+        const count = new Set(
+          checkIns?.filter(c => c.segment_id === segId)
+            .map(c => String(c.activity_id)) || []
+        ).size;
+        return { current: Math.min(count, target), target };
+      }
       default:
         return null;
     }
