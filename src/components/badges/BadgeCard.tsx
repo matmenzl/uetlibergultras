@@ -209,33 +209,33 @@ export function BadgeCard({
         </button>
       </PopoverTrigger>
 
-      <PopoverContent 
-        className="w-64 p-4" 
+      <PopoverContent
+        className="w-80 sm:w-96 p-5"
         side="top"
         sideOffset={8}
       >
-        <div className="space-y-3">
-          {/* Header */}
-          <div className="flex items-start gap-3">
-            <div 
-              className="w-10 h-14 flex-shrink-0 rounded overflow-hidden"
+        <div className="space-y-4">
+          {/* Large centered badge image */}
+          <div className="flex flex-col items-center gap-3">
+            <div
+              className="w-24 h-32 sm:w-28 sm:h-36 rounded-lg overflow-hidden flex items-center justify-center shadow-lg"
               style={{ backgroundColor: `hsl(${badge.colors.background})` }}
             >
               {badge.imageUrl ? (
-                <img src={badge.imageUrl} alt={badge.title} className="w-full h-full object-contain p-0.5" />
+                <img src={badge.imageUrl} alt={badge.title} className="w-full h-full object-contain p-2" />
               ) : Symbol && (
                 <Symbol
-                  className="w-full h-full p-1"
+                  className="w-full h-full p-3"
                   primaryColor={`hsl(${badge.colors.primary})`}
                   secondaryColor={badge.colors.secondary ? `hsl(${badge.colors.secondary})` : undefined}
                 />
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-foreground leading-tight">
+            <div className="text-center">
+              <h4 className="font-bold text-foreground text-base sm:text-lg leading-tight">
                 {badge.title}{isMonthly && monthLabel ? ` – ${monthLabel}` : ''}
               </h4>
-              <p className="text-xs text-muted-foreground mt-0.5">{badge.description}</p>
+              <p className="text-sm text-muted-foreground mt-1">{badge.description}</p>
             </div>
           </div>
 
