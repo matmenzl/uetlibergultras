@@ -31,12 +31,14 @@ type AchievementType =
   | 'founding_member'
   | 'jolly_jumper'
   | 'seven_up'
-  | 'rote_laterne';
+  | 'rote_laterne'
+  | 'led_head';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
 const JOLLY_JUMPER_SEGMENT_ID = 21907618;
 const LATERNENWEG_SEGMENT_ID = 2803527;
+const STAIRWAY_SEGMENT_ID = 17439781;
 
 // WMO weather codes for snow conditions
 const SNOW_CODES = [71, 73, 75, 77, 85, 86];
@@ -384,6 +386,15 @@ serve(async (req) => {
       const jollyRuns = checkIns.filter(c => c.segment_id === JOLLY_JUMPER_SEGMENT_ID);
       if (jollyRuns.length >= 1) {
         newAchievements.push('jolly_jumper');
+      }
+    }
+
+    // Led Head: 10 unique runs on Stairway to Heaven segment
+    if (!existingSet.has('led_head')) {
+      const stairwayRuns = checkIns.filter(c => c.segment_id === STAIRWAY_SEGMENT_ID);
+      const uniqueStairwayActivities = new Set(stairwayRuns.map(c => c.activity_id));
+      if (uniqueStairwayActivities.size >= 10) {
+        newAchievements.push('led_head');
       }
     }
 
