@@ -28,6 +28,7 @@ import jollyJumperHybrid from "@/assets/badges/jolly-jumper-hybrid.png";
 import sevenUpHybrid from "@/assets/badges/7-up-hybrid.png";
 import roteLaterneHybrid from "@/assets/badges/rote-laterne-hybrid.png";
 import ledHeadHybrid from "@/assets/badges/led-head-hybrid.png";
+import uetliXivHybrid from "@/assets/badges/uetli-xiv-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
@@ -471,6 +472,22 @@ export const badgeDefinitions: BadgeDefinition[] = [
       primary: "0 0% 60%",
       secondary: "0 84% 55%",
       background: "0 0% 95%",
+    },
+    target: 10,
+    progressType: "runs",
+  },
+  {
+    id: "uetli_xiv",
+    category: "legend",
+    title: "Uetli XIV.",
+    description: "Der Sonnenkönig vom Sun-Tower",
+    howToEarn: "Laufe das Segment «Uetliberg Sun-Tower Sprint» mindestens 10 Mal",
+    symbolId: "crown",
+    imageUrl: uetliXivHybrid,
+    colors: {
+      primary: "45 93% 47%",
+      secondary: "220 70% 35%",
+      background: "45 30% 95%",
     },
     target: 10,
     progressType: "runs",
