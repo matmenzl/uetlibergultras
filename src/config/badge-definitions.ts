@@ -29,6 +29,7 @@ import sevenUpHybrid from "@/assets/badges/7-up-hybrid.png";
 import roteLaterneHybrid from "@/assets/badges/rote-laterne-hybrid.png";
 import ledHeadHybrid from "@/assets/badges/led-head-hybrid.png";
 import uetliXivHybrid from "@/assets/badges/uetli-xiv-hybrid.png";
+import fadegradHybrid from "@/assets/badges/fadegrad-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
@@ -488,6 +489,22 @@ export const badgeDefinitions: BadgeDefinition[] = [
       primary: "45 93% 47%",
       secondary: "220 70% 35%",
       background: "45 30% 95%",
+    },
+    target: 10,
+    progressType: "runs",
+  },
+  {
+    id: "fadegrad",
+    category: "legend",
+    title: "Fadegrad",
+    description: "Schnurgerade durch die zweite Hälfte",
+    howToEarn: "Laufe das Segment «Zweiti Hälfti Fadegrad» mindestens 10 Mal",
+    symbolId: "crown",
+    imageUrl: fadegradHybrid,
+    colors: {
+      primary: "30 45% 45%",
+      secondary: "35 60% 55%",
+      background: "35 30% 95%",
     },
     target: 10,
     progressType: "runs",
