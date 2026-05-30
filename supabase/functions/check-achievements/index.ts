@@ -290,6 +290,41 @@ serve(async (req) => {
       }
     }
 
+    // Check Rote Laterne - competitive achievement on Laternenweg segment
+    const { data: laternenwegLeader } = await supabaseAdmin
+      .from('check_ins')
+      .select('user_id')
+      .eq('segment_id', LATERNENWEG_SEGMENT_ID);
+
+    if (laternenwegLeader && laternenwegLeader.length > 0) {
+      const runsByUser: Record<string, number> = {};
+      laternenwegLeader.forEach(run => {
+        runsByUser[run.user_id] = (runsByUser[run.user_id] || 0) + 1;
+      });
+
+      let maxRuns = 0;
+      let leaderId: string | null = null;
+      Object.entries(runsByUser).forEach(([uid, count]) => {
+        if (count > maxRuns) {
+          maxRuns = count;
+          leaderId = uid;
+        }
+      });
+
+      if (leaderId === userId && maxRuns >= 1) {
+        if (!existingSet.has('rote_laterne')) {
+          newAchievements.push('rote_laterne');
+        }
+      } else if (existingSet.has('rote_laterne') && leaderId !== userId) {
+        await supabaseAdmin
+          .from('user_achievements')
+          .delete()
+          .eq('user_id', userId)
+          .eq('achievement', 'rote_laterne');
+        console.log(`Rote Laterne achievement removed from user ${userId}, new leader is ${leaderId}`);
+      }
+    }
+
     // Check Coiffeur achievement - 10 runs per year on specific segments
     if (!existingSet.has('coiffeur')) {
       const currentYear = new Date().getFullYear();
