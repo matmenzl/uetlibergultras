@@ -16,9 +16,25 @@ import {
   Link as LinkIcon,
   CheckCircle,
   Users,
-  Stamp
+  Stamp,
+  Calendar,
+  Shield
 } from 'lucide-react';
 import { Seo } from '@/components/Seo';
+import { badgeDefinitions, categoryStyles, type BadgeCategory } from '@/config/badge-definitions';
+
+// Build live badge list from the single source of truth so the FAQ never drifts.
+const categoryOrder: BadgeCategory[] = ['milestone', 'endurance', 'weather', 'community', 'legend'];
+const badgeListText = categoryOrder
+  .map((cat) => {
+    const items = badgeDefinitions.filter((b) => b.category === cat);
+    if (items.length === 0) return '';
+    const lines = items.map((b) => `• ${b.title} – ${b.howToEarn}`).join('\n');
+    return `${categoryStyles[cat].label}:\n${lines}`;
+  })
+  .filter(Boolean)
+  .join('\n\n');
+const totalBadgeCount = badgeDefinitions.length;
 
 const faqs = [
   {
@@ -27,7 +43,7 @@ const faqs = [
     questions: [
       {
         q: 'Was ist Uetliberg Ultras?',
-        a: 'Uetliberg Ultras ist eine Community für alle, die gerne auf den Uetliberg laufen. Wir tracken deine Läufe über Strava-Segmente und belohnen dich mit Badges in deiner persönlichen Sammlung.'
+        a: 'Uetliberg Ultras ist eine Community für alle, die gerne auf den Uetliberg laufen. Wir tracken deine Läufe über Strava-Segmente und belohnen dich mit Badges, Leaderboard-Plätzen und Monats-Challenges.'
       },
       {
         q: 'Wie verbinde ich mein Strava-Konto?',
@@ -36,6 +52,10 @@ const faqs = [
       {
         q: 'Welche Strava-Berechtigungen braucht die App?',
         a: 'Wir benötigen nur Lesezugriff auf deine Aktivitäten. Wir können keine Aktivitäten in deinem Namen erstellen oder ändern.'
+      },
+      {
+        q: 'Ab wann zählen meine Läufe?',
+        a: 'Die Gamification (Badges, Streaks, Leaderboards, Monats-Challenge) startet am 1. Januar 2026. Ältere Aktivitäten werden nicht gewertet.'
       }
     ]
   },
@@ -49,7 +69,11 @@ const faqs = [
       },
       {
         q: 'Wie funktioniert ein Check-in?',
-        a: 'Sobald du dein Strava-Konto verbunden hast, werden deine Läufe automatisch erfasst. Immer wenn du eine Aktivität auf Strava speicherst, erkennt unsere App automatisch, ob du Uetliberg-Segmente gelaufen bist, und checkt dich ein – ohne dass du etwas tun musst. Die Verbindung bleibt aktiv, bis du sie in deinen Strava-Einstellungen unter "Apps" widerrufst.'
+        a: 'Sobald du dein Strava-Konto verbunden hast, werden deine Läufe automatisch erfasst. Immer wenn du eine Aktivität auf Strava speicherst, erkennt unsere App automatisch, ob du Uetliberg-Segmente gelaufen bist, und checkt dich ein – ohne dass du etwas tun musst. Eine Aktivität zählt dabei als ein Run, egal über wie viele Segmente sie führt. Die Verbindung bleibt aktiv, bis du sie in deinen Strava-Einstellungen unter "Apps" widerrufst.'
+      },
+      {
+        q: 'Gibt es auch einen manuellen Check-in?',
+        a: 'Ja. Wenn du ohne Strava unterwegs warst (z.B. ohne GPS oder mit anderer App), kannst du im Profil einen manuellen Check-in machen und die gelaufenen Segmente auswählen. Dafür gibt es auch das Badge "Alternativliga".'
       },
       {
         q: 'Warum wird mein Lauf nicht angezeigt?',
@@ -63,44 +87,23 @@ const faqs = [
     questions: [
       {
         q: 'Was sind die Badges?',
-        a: 'Badges sind Auszeichnungen, die du durch deine Läufe verdienst. Sie sind in vier Kategorien unterteilt: Meilensteine, Ausdauer, Spezial und Lokal-Legenden.'
+        a: 'Badges sind Auszeichnungen, die du durch deine Läufe verdienst. Sie sind in fünf Kategorien unterteilt: Meilensteine, Ausdauer, Wetter, Community und Legenden.'
       },
       {
         q: 'Welche Badges gibt es?',
-        a: `Es gibt 17 Badges in vier Kategorien:
-
-Meilensteine (Anzahl Runs):
-• Erstbesteigung ⭐ – Erster Uetli Run
-• Bergfreund 🏔️ – 5 Runs
-• Bergläufer 🔥 – 10 Runs
-• Uetli-Veteran ⚡ – 25 Runs
-• Gipfelstürmer 🏆 – 50 Runs
-• Uetli-Legende 🎖️ – 100 Runs
-
-Ausdauer (Konsistenz):
-• Dranbleiber ⏰ – 2 Wochen Streak
-• Durchhalter 🔥 – 4 Wochen Streak
-• Unaufhaltsam 🔥 – 8 Wochen Streak
-• Segmentjäger 🎯 – Alle Segmente gelaufen
-
-Spezial (Besondere Bedingungen):
-• Frühaufsteher ☀️ – Run vor 7 Uhr
-• Nachteule 🌙 – Run nach 20 Uhr
-• Leaderboard Top 10 🏆 – Platz in den Top 10
-• Snow-Bunny 🐰❄️ – 3 Runs bei Schnee
-• Frosty 🥶 – 5 Runs unter 0°C
-
-Lokal-Legenden:
-• S'Brot isch no warm 🍞 – Meiste Runs auf dem Denzlerweg
-• Zum Coiffeur 💇 – 10x Coiffeurweg pro Jahr`
+        a: `Aktuell gibt es ${totalBadgeCount} Badges in fünf Kategorien:\n\n${badgeListText}`
       },
       {
         q: 'Was ist ein Streak?',
-        a: 'Ein Streak zählt aufeinanderfolgende Wochen, in denen du mindestens einen Uetliberg-Run absolviert hast. Der Streak bricht ab, wenn eine Woche ohne Run vergeht.'
+        a: 'Ein Streak zählt aufeinanderfolgende Kalenderwochen (Montag bis Sonntag), in denen du mindestens einen Uetliberg-Run absolviert hast. Lässt du eine Woche aus, wird der Streak auf 0 zurückgesetzt.'
       },
       {
         q: 'Wie sehe ich meinen Fortschritt?',
         a: 'Bei den Badges siehst du bei jedem Badge einen Fortschrittsbalken, der anzeigt, wie weit du vom Ziel entfernt bist. Verdiente Badges werden farbig und mit Datum angezeigt.'
+      },
+      {
+        q: 'Werde ich benachrichtigt, wenn ich ein Badge bekomme?',
+        a: 'Ja. Du erhältst eine In-App-Benachrichtigung, und falls du eine E-Mail hinterlegt hast, zusätzlich eine kurze Mail.'
       }
     ]
   },
@@ -110,29 +113,29 @@ Lokal-Legenden:
     questions: [
       {
         q: 'Welche Leaderboards gibt es?',
-        a: `Es gibt zwei Leaderboards:
-
-1. 365-Tage Challenge: Zeigt die Top 10 Läufer nach Anzahl Runs im aktuellen Kalenderjahr. Hier zählt jede Aktivität mit einem Uetliberg-Segment.
-
-2. Uetliberg-Ultras unterwegs: Zeigt Läufer sortiert nach Anzahl unterschiedlicher Segmente. Du kannst nach Zeitraum filtern (Heute, Woche, Monat, Jahr).`
+        a: `Es gibt drei Leaderboards, alle sortiert nach Anzahl Runs. Bei Gleichstand teilen sich Läufer denselben Rang.\n\n1. 365-Tage Challenge: rollendes 365-Tage-Fenster ab heute zurück. Jede Aktivität mit einem Uetliberg-Segment zählt als ein Run.\n\n2. Monats-Challenge: Runs im aktuellen Kalendermonat. Die Top 3 erhalten am Monatsende automatisch das Gold-, Silber- oder Bronze-Badge.\n\n3. Uetliberg-Ultras unterwegs: gefiltert nach Zeitraum (Heute, Woche, Monat, Jahr).`
       },
       {
         q: 'Wie kann ich im Leaderboard aufsteigen?',
-        a: 'Laufe regelmässig Uetliberg-Segmente! In der 365-Tage Challenge zählt jeder Check-in. Bei "Uetliberg-Ultras unterwegs" zählt die Anzahl verschiedener Segmente.'
+        a: 'Laufe regelmässig Uetliberg-Segmente! Jede Aktivität mit mindestens einem Uetliberg-Segment zählt als ein Run – egal wie viele Segmente sie enthält.'
+      },
+      {
+        q: 'Warum sehe ich als Gast nur die Top 3?',
+        a: 'Um die Privatsphäre der Community zu schützen, zeigen wir Gästen nur die Top 3 jedes Leaderboards. Logge dich ein, um alle Plätze zu sehen.'
       }
     ]
   },
   {
-    category: 'Streaks',
-    icon: <Flame className="w-5 h-5" />,
+    category: 'Monats-Challenge',
+    icon: <Calendar className="w-5 h-5" />,
     questions: [
       {
-        q: 'Wie wird mein Streak berechnet?',
-        a: 'Ein Streak zählt aufeinanderfolgende Kalenderwochen (Montag bis Sonntag), in denen du mindestens einen Uetliberg-Run absolviert hast. Der Streak gilt nur für das aktuelle Jahr.'
+        q: 'Wie funktioniert die Monats-Challenge?',
+        a: 'Jeden Monat startet eine neue Challenge bei 0. Wer am Ende des Monats (UTC) die meisten Runs hat, wird Monats-Champion. Bei Gleichstand teilen sich Läufer den Rang.'
       },
       {
-        q: 'Was passiert, wenn ich eine Woche auslasse?',
-        a: 'Dein Streak wird auf 0 zurückgesetzt. Aber keine Sorge – du kannst jederzeit einen neuen Streak starten!'
+        q: 'Wann werden die Monats-Badges vergeben?',
+        a: 'Automatisch am Ende jedes Monats (00:00 UTC). Platz 1 erhält "Monats-Champion" (Gold), Platz 2 "Silber-Läufer", Platz 3 "Bronze-Läufer".'
       }
     ]
   },
@@ -145,8 +148,26 @@ Lokal-Legenden:
         a: 'Ja! Wenn du eingeloggt bist, findest du auf der Segmente-Seite ein Formular, um neue Strava-Segmente vorzuschlagen. Admins prüfen den Vorschlag und entscheiden, ob das Segment aufgenommen wird.'
       },
       {
+        q: 'Werde ich informiert, wenn mein Vorschlag angenommen wird?',
+        a: 'Wenn du beim Vorschlag deine E-Mail-Adresse hinterlässt, benachrichtigen wir dich, sobald wir über deinen Vorschlag entschieden haben.'
+      },
+      {
         q: 'Welche Segmente werden akzeptiert?',
         a: 'Segmente sollten auf oder um den Uetliberg führen und für Trail-/Bergläufer interessant sein. Reine Strassen-Segmente oder Segmente weit vom Uetliberg entfernt werden in der Regel abgelehnt.'
+      }
+    ]
+  },
+  {
+    category: 'Privatsphäre',
+    icon: <Shield className="w-5 h-5" />,
+    questions: [
+      {
+        q: 'Wer sieht meine Daten?',
+        a: 'Persönliche Daten (E-Mail, Strava-Token) sind privat und nur für dich sichtbar. In Leaderboards und öffentlichen Profilen zeigen wir nur Anzeigename, Profilbild und aggregierte Run-Statistiken.'
+      },
+      {
+        q: 'Kann ich mich abmelden?',
+        a: 'Ja, jederzeit. Du kannst die Strava-Verbindung in deinen Strava-Einstellungen unter "Apps" widerrufen. Nach dem Logout wirst du auf die Startseite zurückgeleitet.'
       }
     ]
   },
