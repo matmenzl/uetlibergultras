@@ -64,6 +64,30 @@ function calculateStreak(checkIns: { checked_in_at: string }[]): number {
   return streak;
 }
 
+// Calculate the maximum number of distinct activity days within any rolling 7-day window.
+function calculateRollingDays(checkIns: { checked_in_at: string }[]): number {
+  if (!checkIns?.length) return 0;
+  const DAY_MS = 86400000;
+  const dayStrings = new Set<string>();
+  checkIns.forEach(c => {
+    const d = new Date(c.checked_in_at);
+    dayStrings.add(`${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`);
+  });
+  const days = Array.from(dayStrings)
+    .map(s => {
+      const [y, m, d] = s.split('-').map(Number);
+      return Date.UTC(y, m, d);
+    })
+    .sort((a, b) => a - b);
+  let best = 0;
+  let left = 0;
+  for (let right = 0; right < days.length; right++) {
+    while (days[right] - days[left] > 6 * DAY_MS) left++;
+    best = Math.max(best, right - left + 1);
+  }
+  return best;
+}
+
 interface BadgeShowcaseProps {
   userId?: string;
 }
@@ -121,6 +145,7 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
   
   const uniqueSegments = checkIns ? new Set(checkIns.map(c => c.segment_id)).size : 0;
   const currentStreak = calculateStreak(checkIns || []);
+  const rollingDays = calculateRollingDays(checkIns || []);
   
   // Weather-based runs - count UNIQUE activities, not check-ins
   const snowCodes = [71, 73, 75, 77, 85, 86];
@@ -178,6 +203,9 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
         break;
       case 'coiffeur_runs':
         current = coiffeurRuns;
+        break;
+      case 'rolling_days':
+        current = rollingDays;
         break;
       case 'segment_runs': {
         const badge = badgeDefinitions.find(b => b.id === badgeId);
