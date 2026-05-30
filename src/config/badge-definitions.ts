@@ -249,8 +249,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
     id: "seven_up",
     category: "endurance",
     title: "7 Up",
-    description: "7 Tage, 7 Runs - non-stop",
-    howToEarn: "Renne 7 Mal innert 7 aufeinanderfolgenden Tagen auf den Uetliberg",
+    description: "7 verschiedene Lauftage innerhalb von 7 Tagen",
+    howToEarn: "Renne an 7 verschiedenen Tagen innerhalb eines 7-Tage-Fensters auf den Uetliberg",
     symbolId: "flame-quad",
     imageUrl: sevenUpHybrid,
     colors: {
