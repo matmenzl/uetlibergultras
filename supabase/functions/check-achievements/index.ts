@@ -34,7 +34,8 @@ type AchievementType =
   | 'rote_laterne'
   | 'led_head'
   | 'uetli_xiv'
-  | 'fadegrad';
+  | 'fadegrad'
+  | 'staminal';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
@@ -196,6 +197,21 @@ serve(async (req) => {
     }
     if (streak >= 8 && !existingSet.has('streak_8')) {
       newAchievements.push('streak_8');
+    }
+
+    // Staminal: 40 distinct ISO weeks with activity in the current calendar year
+    if (!existingSet.has('staminal')) {
+      const currentYearForWeeks = new Date().getFullYear();
+      const weeksThisYear = new Set<string>();
+      checkIns.forEach(c => {
+        const d = new Date(c.checked_in_at);
+        if (d.getFullYear() === currentYearForWeeks) {
+          weeksThisYear.add(getWeekNumber(d));
+        }
+      });
+      if (weeksThisYear.size >= 40) {
+        newAchievements.push('staminal');
+      }
     }
 
     // Check all segments (need to know total segment count)
