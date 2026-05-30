@@ -30,6 +30,7 @@ import roteLaterneHybrid from "@/assets/badges/rote-laterne-hybrid.png";
 import ledHeadHybrid from "@/assets/badges/led-head-hybrid.png";
 import uetliXivHybrid from "@/assets/badges/uetli-xiv-hybrid.png";
 import fadegradHybrid from "@/assets/badges/fadegrad-hybrid.png";
+import staminalHybrid from "@/assets/badges/staminal-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
@@ -47,7 +48,7 @@ export interface BadgeDefinition {
     background: string; // Shield fill
   };
   target?: number;
-  progressType?: "runs" | "streak" | "segments" | "snow_runs" | "frost_runs" | "rain_runs" | "coiffeur_runs" | "segment_runs" | "rolling_days";
+  progressType?: "runs" | "streak" | "segments" | "snow_runs" | "frost_runs" | "rain_runs" | "coiffeur_runs" | "segment_runs" | "rolling_days" | "weeks_in_year";
   /** For progressType "segment_runs": Strava segment id whose unique activities are counted. */
   segmentId?: number;
 }
@@ -259,6 +260,22 @@ export const badgeDefinitions: BadgeDefinition[] = [
     },
     target: 7,
     progressType: "rolling_days",
+  },
+  {
+    id: "staminal",
+    category: "endurance",
+    title: "Staminal",
+    description: "40 Wochen Uetliberg in einem Jahr",
+    howToEarn: "Renne in 40 verschiedenen Wochen eines Jahres mindestens einmal auf den Uetliberg",
+    symbolId: "flame-eight",
+    imageUrl: staminalHybrid,
+    colors: {
+      primary: "12 76% 61%",
+      secondary: "0 0% 45%",
+      background: "40 20% 95%",
+    },
+    target: 40,
+    progressType: "weeks_in_year",
   },
 
   // === WEATHER BADGES ===
