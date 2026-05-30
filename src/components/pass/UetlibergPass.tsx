@@ -100,6 +100,7 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
       activeTrigger.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
   }, [activeTab]);
+
   // Fetch earned achievements
   const { data: earnedAchievements } = useQuery({
     queryKey: ['achievements', userId],
