@@ -281,11 +281,13 @@ export function MonthlyChallenge() {
           {/* Show top entries */}
           {user ? (
             <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-              {monthlyLeaderboard.map((entry, index) => renderEntry(entry, index + 1))}
+              {monthlyLeaderboard.map((entry, index) =>
+                renderEntry(entry, computeSharedRank(monthlyLeaderboard, index))
+              )}
             </div>
           ) : (
             monthlyLeaderboard.slice(0, TEASER_COUNT).map((entry, index) =>
-              renderEntry(entry, index + 1)
+              renderEntry(entry, computeSharedRank(monthlyLeaderboard, index))
             )
           )}
           
@@ -293,8 +295,8 @@ export function MonthlyChallenge() {
           {!user && monthlyLeaderboard.length > TEASER_COUNT && (
             <div className="relative">
               <div className="blur-[6px] pointer-events-none select-none space-y-2">
-                {monthlyLeaderboard.slice(TEASER_COUNT, Math.min(monthlyLeaderboard.length, 7)).map((entry, index) => 
-                  renderEntry(entry, index + TEASER_COUNT + 1)
+                {monthlyLeaderboard.slice(TEASER_COUNT, Math.min(monthlyLeaderboard.length, 7)).map((entry, idx) => 
+                  renderEntry(entry, computeSharedRank(monthlyLeaderboard, idx + TEASER_COUNT))
                 )}
               </div>
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-card/90 via-card/60 to-transparent rounded-lg">
