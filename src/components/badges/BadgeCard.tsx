@@ -211,10 +211,17 @@ export function BadgeCard({
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-80 sm:w-96 p-5"
+        className="w-80 sm:w-96 p-5 relative"
         side="top"
         sideOffset={8}
       >
+        <button
+          onClick={() => setPopoverOpen(false)}
+          className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+          aria-label="Schliessen"
+        >
+          <X className="w-4 h-4" />
+        </button>
         <div className="space-y-4">
           {/* Large centered badge image */}
           <div className="flex flex-col items-center gap-3">
