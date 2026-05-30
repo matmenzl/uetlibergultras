@@ -33,7 +33,8 @@ type AchievementType =
   | 'seven_up'
   | 'rote_laterne'
   | 'led_head'
-  | 'uetli_xiv';
+  | 'uetli_xiv'
+  | 'fadegrad';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
@@ -41,6 +42,7 @@ const JOLLY_JUMPER_SEGMENT_ID = 21907618;
 const LATERNENWEG_SEGMENT_ID = 2803527;
 const STAIRWAY_SEGMENT_ID = 17439781;
 const SUN_TOWER_SEGMENT_ID = 9474208;
+const FADEGRAD_SEGMENT_ID = 10851285;
 
 // WMO weather codes for snow conditions
 const SNOW_CODES = [71, 73, 75, 77, 85, 86];
@@ -406,6 +408,15 @@ serve(async (req) => {
       const uniqueSunTowerActivities = new Set(sunTowerRuns.map(c => c.activity_id));
       if (uniqueSunTowerActivities.size >= 10) {
         newAchievements.push('uetli_xiv');
+      }
+    }
+
+    // Fadegrad: 10 unique runs on Zweiti Hälfti Fadegrad segment
+    if (!existingSet.has('fadegrad')) {
+      const fadegradRuns = checkIns.filter(c => c.segment_id === FADEGRAD_SEGMENT_ID);
+      const uniqueFadegradActivities = new Set(fadegradRuns.map(c => c.activity_id));
+      if (uniqueFadegradActivities.size >= 10) {
+        newAchievements.push('fadegrad');
       }
     }
 

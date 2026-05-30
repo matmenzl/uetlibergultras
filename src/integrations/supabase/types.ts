@@ -602,6 +602,7 @@ export type Database = {
         | "rote_laterne"
         | "led_head"
         | "uetli_xiv"
+        | "fadegrad"
       app_role: "admin" | "user"
       suggestion_status: "pending" | "approved" | "rejected"
     }
@@ -762,6 +763,7 @@ export const Constants = {
         "rote_laterne",
         "led_head",
         "uetli_xiv",
+        "fadegrad",
       ],
       app_role: ["admin", "user"],
       suggestion_status: ["pending", "approved", "rejected"],
