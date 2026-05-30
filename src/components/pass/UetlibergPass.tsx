@@ -204,6 +204,12 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
       .map(c => String(c.activity_id)) || []
   ).size;
 
+  // Distinct ISO weeks with activity in the current calendar year
+  const weeksThisYear = new Set(
+    checkIns?.filter(c => new Date(c.checked_in_at).getFullYear() === currentYear)
+      .map(c => getWeekNumber(new Date(c.checked_in_at))) || []
+  ).size;
+
   // Get progress for an achievement
   const getProgress = (badgeId: string, target?: number, progressType?: string): { current: number; target: number } | null => {
     if (!progressType || !target) return null;
@@ -225,6 +231,8 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
         return { current: Math.min(coiffeurRuns, target), target };
       case 'rolling_days':
         return { current: Math.min(rollingDays, target), target };
+      case 'weeks_in_year':
+        return { current: Math.min(weeksThisYear, target), target };
       case 'segment_runs': {
         const badge = badgeDefinitions.find(b => b.id === badgeId);
         const segId = badge?.segmentId;
