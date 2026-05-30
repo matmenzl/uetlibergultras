@@ -146,6 +146,13 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
   const uniqueSegments = checkIns ? new Set(checkIns.map(c => c.segment_id)).size : 0;
   const currentStreak = calculateStreak(checkIns || []);
   const rollingDays = calculateRollingDays(checkIns || []);
+
+  // Distinct ISO weeks with activity in the current calendar year
+  const currentYearForWeeks = new Date().getFullYear();
+  const weeksThisYear = new Set(
+    checkIns?.filter(c => new Date(c.checked_in_at).getFullYear() === currentYearForWeeks)
+      .map(c => getWeekNumber(new Date(c.checked_in_at))) || []
+  ).size;
   
   // Weather-based runs - count UNIQUE activities, not check-ins
   const snowCodes = [71, 73, 75, 77, 85, 86];
@@ -206,6 +213,9 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
         break;
       case 'rolling_days':
         current = rollingDays;
+        break;
+      case 'weeks_in_year':
+        current = weeksThisYear;
         break;
       case 'segment_runs': {
         const badge = badgeDefinitions.find(b => b.id === badgeId);
