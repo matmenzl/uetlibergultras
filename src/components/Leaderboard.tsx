@@ -70,8 +70,7 @@ export function Leaderboard() {
       const { data, error } = await supabase
         .from('leaderboard_stats')
         .select('*')
-        .order('total_runs', { ascending: false })
-        .order('achievement_count', { ascending: false });
+        .order('total_runs', { ascending: false });
       
       if (error) throw error;
       return data as LeaderboardEntry[];
@@ -146,7 +145,7 @@ export function Leaderboard() {
 
   const renderEntry = (entry: LeaderboardEntry, index: number) => {
     const rank = leaderboard.findIndex(
-      (e) => e.total_runs === entry.total_runs && e.achievement_count === entry.achievement_count
+      (e) => e.total_runs === entry.total_runs
     ) + 1;
 
     const content = (
