@@ -26,6 +26,7 @@ import coiffeurHybrid from "@/assets/badges/coiffeur-hybrid.png";
 import alternativligaHybrid from "@/assets/badges/alternativliga-hybrid.png";
 import jollyJumperHybrid from "@/assets/badges/jolly-jumper-hybrid.png";
 import sevenUpHybrid from "@/assets/badges/7-up-hybrid.png";
+import roteLaterneHybrid from "@/assets/badges/rote-laterne-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
@@ -441,6 +442,20 @@ export const badgeDefinitions: BadgeDefinition[] = [
       primary: "142 71% 45%",
       secondary: "45 93% 47%",
       background: "40 20% 95%",
+    },
+  },
+  {
+    id: "rote_laterne",
+    category: "legend",
+    title: "Rote Laterne",
+    description: "König des Laternenwegs",
+    howToEarn: "Sei der Läufer mit den meisten Runs auf dem Laternenweg-Segment",
+    symbolId: "crown",
+    imageUrl: roteLaterneHybrid,
+    colors: {
+      primary: "0 84% 55%",
+      secondary: "45 93% 47%",
+      background: "0 30% 15%",
     },
   },
 

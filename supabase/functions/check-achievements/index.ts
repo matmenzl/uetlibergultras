@@ -30,11 +30,13 @@ type AchievementType =
   | 'wasserratte'
   | 'founding_member'
   | 'jolly_jumper'
-  | 'seven_up';
+  | 'seven_up'
+  | 'rote_laterne';
 
 const DENZLERWEG_SEGMENT_ID = 5762702;
 const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
 const JOLLY_JUMPER_SEGMENT_ID = 21907618;
+const LATERNENWEG_SEGMENT_ID = 2803527;
 
 // WMO weather codes for snow conditions
 const SNOW_CODES = [71, 73, 75, 77, 85, 86];
@@ -285,6 +287,41 @@ serve(async (req) => {
           .eq('user_id', userId)
           .eq('achievement', 'denzlerweg_king');
         console.log(`Denzlerweg King achievement removed from user ${userId}, new leader is ${leaderId}`);
+      }
+    }
+
+    // Check Rote Laterne - competitive achievement on Laternenweg segment
+    const { data: laternenwegLeader } = await supabaseAdmin
+      .from('check_ins')
+      .select('user_id')
+      .eq('segment_id', LATERNENWEG_SEGMENT_ID);
+
+    if (laternenwegLeader && laternenwegLeader.length > 0) {
+      const runsByUser: Record<string, number> = {};
+      laternenwegLeader.forEach(run => {
+        runsByUser[run.user_id] = (runsByUser[run.user_id] || 0) + 1;
+      });
+
+      let maxRuns = 0;
+      let leaderId: string | null = null;
+      Object.entries(runsByUser).forEach(([uid, count]) => {
+        if (count > maxRuns) {
+          maxRuns = count;
+          leaderId = uid;
+        }
+      });
+
+      if (leaderId === userId && maxRuns >= 1) {
+        if (!existingSet.has('rote_laterne')) {
+          newAchievements.push('rote_laterne');
+        }
+      } else if (existingSet.has('rote_laterne') && leaderId !== userId) {
+        await supabaseAdmin
+          .from('user_achievements')
+          .delete()
+          .eq('user_id', userId)
+          .eq('achievement', 'rote_laterne');
+        console.log(`Rote Laterne achievement removed from user ${userId}, new leader is ${leaderId}`);
       }
     }
 
