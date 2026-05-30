@@ -272,23 +272,25 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
         ) : (
           // Full view with tabs
           <Tabs defaultValue="milestone" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-transparent">
-              <TabsTrigger value="milestone" className="text-xs sm:text-sm data-[state=active]:bg-stamp-milestone/20 data-[state=active]:text-stamp-milestone">
-                Meilensteine
-              </TabsTrigger>
-              <TabsTrigger value="endurance" className="text-xs sm:text-sm data-[state=active]:bg-stamp-endurance/20 data-[state=active]:text-stamp-endurance">
-                Ausdauer
-              </TabsTrigger>
-              <TabsTrigger value="weather" className="text-xs sm:text-sm data-[state=active]:bg-stamp-special/20 data-[state=active]:text-stamp-special">
-                Wetter
-              </TabsTrigger>
-              <TabsTrigger value="community" className="text-xs sm:text-sm data-[state=active]:bg-green-500/20 data-[state=active]:text-green-500">
-                Community
-              </TabsTrigger>
-              <TabsTrigger value="legend" className="text-xs sm:text-sm data-[state=active]:bg-stamp-legend/20 data-[state=active]:text-stamp-legend">
-                Legenden
-              </TabsTrigger>
-            </TabsList>
+            <div className="-mx-4 sm:mx-0 overflow-x-auto scrollbar-none">
+              <TabsList className="inline-flex h-auto w-max sm:w-full sm:grid sm:grid-cols-5 gap-1 px-4 sm:px-1 bg-transparent">
+                <TabsTrigger value="milestone" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-milestone/20 data-[state=active]:text-stamp-milestone">
+                  Meilensteine
+                </TabsTrigger>
+                <TabsTrigger value="endurance" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-endurance/20 data-[state=active]:text-stamp-endurance">
+                  Ausdauer
+                </TabsTrigger>
+                <TabsTrigger value="weather" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-special/20 data-[state=active]:text-stamp-special">
+                  Wetter
+                </TabsTrigger>
+                <TabsTrigger value="community" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-green-500/20 data-[state=active]:text-green-500">
+                  Community
+                </TabsTrigger>
+                <TabsTrigger value="legend" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-legend/20 data-[state=active]:text-stamp-legend">
+                  Legenden
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="milestone" className="mt-4">
               <PassPage 
