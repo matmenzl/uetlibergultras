@@ -284,7 +284,7 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
           </div>
         ) : (
           // Full view with tabs
-          <Tabs defaultValue="milestone" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="relative -mx-4 sm:mx-0">
               {/* Scroll fade indicator (mobile only) */}
               <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-pass-paper dark:from-card to-transparent z-10 pointer-events-none sm:hidden" />
@@ -294,7 +294,7 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
                 <ChevronRight className="w-4 h-4 text-muted-foreground/60" />
               </div>
 
-              <div className="overflow-x-auto scrollbar-none scroll-smooth" id="pass-tab-scroll">
+              <div ref={tabScrollRef} className="overflow-x-auto scrollbar-none scroll-smooth" id="pass-tab-scroll">
                 <TabsList className="inline-flex h-auto w-max sm:w-full sm:grid sm:grid-cols-5 gap-1 px-4 sm:px-1 bg-transparent">
                   <TabsTrigger value="milestone" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-milestone/20 data-[state=active]:text-stamp-milestone data-[state=active]:shadow-sm data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-stamp-milestone relative after:absolute after:bottom-0 after:left-1/4 after:right-1/4 after:h-0.5 after:rounded-full after:bg-stamp-milestone after:opacity-0 data-[state=active]:after:opacity-100 after:transition-opacity">
                     Meilensteine
