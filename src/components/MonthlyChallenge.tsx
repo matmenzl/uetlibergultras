@@ -26,13 +26,8 @@ const TEASER_COUNT = 3;
 
 // Standard competition ranking: ties share the same rank (e.g. 1, 1, 3).
 const computeSharedRank = (list: { total_runs: number }[], index: number) => {
-  let rank = 1;
-  for (let i = 0; i < index; i++) {
-    if (list[i].total_runs !== list[index].total_runs) {
-      rank = i + 2;
-    }
-  }
-  return rank;
+  const runs = list[index].total_runs;
+  return list.filter((e) => e.total_runs > runs).length + 1;
 };
 
 const getRankIcon = (rank: number) => {
