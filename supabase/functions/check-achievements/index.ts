@@ -389,6 +389,15 @@ serve(async (req) => {
       }
     }
 
+    // Led Head: 10 unique runs on Stairway to Heaven segment
+    if (!existingSet.has('led_head')) {
+      const stairwayRuns = checkIns.filter(c => c.segment_id === STAIRWAY_SEGMENT_ID);
+      const uniqueStairwayActivities = new Set(stairwayRuns.map(c => c.activity_id));
+      if (uniqueStairwayActivities.size >= 10) {
+        newAchievements.push('led_head');
+      }
+    }
+
     // 7 Up: 7 runs within 7 consecutive days (any rolling window)
     if (!existingSet.has('seven_up')) {
       // Collect unique activity dates (UTC day strings)
