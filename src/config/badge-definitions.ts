@@ -47,7 +47,9 @@ export interface BadgeDefinition {
     background: string; // Shield fill
   };
   target?: number;
-  progressType?: "runs" | "streak" | "segments" | "snow_runs" | "frost_runs" | "rain_runs" | "coiffeur_runs";
+  progressType?: "runs" | "streak" | "segments" | "snow_runs" | "frost_runs" | "rain_runs" | "coiffeur_runs" | "segment_runs";
+  /** For progressType "segment_runs": Strava segment id whose unique activities are counted. */
+  segmentId?: number;
 }
 
 // Category styling configuration
@@ -475,7 +477,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
       background: "0 0% 95%",
     },
     target: 10,
-    progressType: "runs",
+    progressType: "segment_runs",
+    segmentId: 17439781,
   },
   {
     id: "uetli_xiv",
@@ -491,7 +494,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
       background: "45 30% 95%",
     },
     target: 10,
-    progressType: "runs",
+    progressType: "segment_runs",
+    segmentId: 9474208,
   },
   {
     id: "fadegrad",
@@ -507,7 +511,8 @@ export const badgeDefinitions: BadgeDefinition[] = [
       background: "35 30% 95%",
     },
     target: 10,
-    progressType: "runs",
+    progressType: "segment_runs",
+    segmentId: 10851285,
   },
 
   // === MONTHLY CHALLENGE BADGES ===

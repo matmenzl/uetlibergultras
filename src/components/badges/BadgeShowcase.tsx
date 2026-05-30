@@ -179,6 +179,16 @@ export function BadgeShowcase({ userId }: BadgeShowcaseProps) {
       case 'coiffeur_runs':
         current = coiffeurRuns;
         break;
+      case 'segment_runs': {
+        const badge = badgeDefinitions.find(b => b.id === badgeId);
+        const segId = badge?.segmentId;
+        if (!segId) return { current: 0, target };
+        current = new Set(
+          checkIns?.filter(c => c.segment_id === segId)
+            .map(c => String(c.activity_id)) || []
+        ).size;
+        break;
+      }
     }
     
     return { current, target };
