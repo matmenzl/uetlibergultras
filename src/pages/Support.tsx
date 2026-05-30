@@ -21,20 +21,10 @@ import {
   Shield
 } from 'lucide-react';
 import { Seo } from '@/components/Seo';
-import { badgeDefinitions, categoryStyles, type BadgeCategory } from '@/config/badge-definitions';
-
-// Build live badge list from the single source of truth so the FAQ never drifts.
-const categoryOrder: BadgeCategory[] = ['milestone', 'endurance', 'weather', 'community', 'legend'];
-const badgeListText = categoryOrder
-  .map((cat) => {
-    const items = badgeDefinitions.filter((b) => b.category === cat);
-    if (items.length === 0) return '';
-    const lines = items.map((b) => `• ${b.title} – ${b.howToEarn}`).join('\n');
-    return `${categoryStyles[cat].label}:\n${lines}`;
-  })
-  .filter(Boolean)
-  .join('\n\n');
-const totalBadgeCount = badgeDefinitions.length;
+import {
+  supportBadgeListText as badgeListText,
+  supportTotalBadgeCount as totalBadgeCount,
+} from './support-badge-list';
 
 const faqs = [
   {
