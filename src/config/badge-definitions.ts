@@ -27,6 +27,7 @@ import alternativligaHybrid from "@/assets/badges/alternativliga-hybrid.png";
 import jollyJumperHybrid from "@/assets/badges/jolly-jumper-hybrid.png";
 import sevenUpHybrid from "@/assets/badges/7-up-hybrid.png";
 import roteLaterneHybrid from "@/assets/badges/rote-laterne-hybrid.png";
+import ledHeadHybrid from "@/assets/badges/led-head-hybrid.png";
 
 export type BadgeCategory = "milestone" | "endurance" | "weather" | "community" | "legend";
 
@@ -457,6 +458,22 @@ export const badgeDefinitions: BadgeDefinition[] = [
       secondary: "45 93% 47%",
       background: "0 30% 15%",
     },
+  },
+  {
+    id: "led_head",
+    category: "legend",
+    title: "Led Head",
+    description: "Stairway to Heaven – 10 Mal erklommen",
+    howToEarn: "Laufe das Segment «Stairway to Heaven» mindestens 10 Mal",
+    symbolId: "crown",
+    imageUrl: ledHeadHybrid,
+    colors: {
+      primary: "0 0% 60%",
+      secondary: "0 84% 55%",
+      background: "0 0% 95%",
+    },
+    target: 10,
+    progressType: "runs",
   },
 
   // === MONTHLY CHALLENGE BADGES ===
