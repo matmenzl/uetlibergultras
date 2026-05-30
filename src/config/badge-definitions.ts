@@ -47,7 +47,7 @@ export interface BadgeDefinition {
     background: string; // Shield fill
   };
   target?: number;
-  progressType?: "runs" | "streak" | "segments" | "snow_runs" | "frost_runs" | "rain_runs" | "coiffeur_runs" | "segment_runs";
+  progressType?: "runs" | "streak" | "segments" | "snow_runs" | "frost_runs" | "rain_runs" | "coiffeur_runs" | "segment_runs" | "rolling_days";
   /** For progressType "segment_runs": Strava segment id whose unique activities are counted. */
   segmentId?: number;
 }
@@ -258,7 +258,7 @@ export const badgeDefinitions: BadgeDefinition[] = [
       background: "40 20% 95%",
     },
     target: 7,
-    progressType: "streak",
+    progressType: "rolling_days",
   },
 
   // === WEATHER BADGES ===

@@ -82,6 +82,30 @@ function calculateStreak(checkIns: { checked_in_at: string }[]): number {
   return streak;
 }
 
+// Maximum number of distinct activity days within any rolling 7-day window.
+function calculateRollingDays(checkIns: { checked_in_at: string }[]): number {
+  if (!checkIns?.length) return 0;
+  const DAY_MS = 86400000;
+  const dayStrings = new Set<string>();
+  checkIns.forEach(c => {
+    const d = new Date(c.checked_in_at);
+    dayStrings.add(`${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`);
+  });
+  const days = Array.from(dayStrings)
+    .map(s => {
+      const [y, m, d] = s.split('-').map(Number);
+      return Date.UTC(y, m, d);
+    })
+    .sort((a, b) => a - b);
+  let best = 0;
+  let left = 0;
+  for (let right = 0; right < days.length; right++) {
+    while (days[right] - days[left] > 6 * DAY_MS) left++;
+    best = Math.max(best, right - left + 1);
+  }
+  return best;
+}
+
 interface UetlibergPassProps {
   userId?: string;
   displayName?: string;
@@ -152,6 +176,7 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
   const totalRuns = uniqueActivities.size;
   const uniqueSegments = new Set(checkIns?.map(c => c.segment_id) || []).size;
   const currentStreak = calculateStreak(checkIns || []);
+  const rollingDays = calculateRollingDays(checkIns || []);
   
   // Coiffeur runs (unique activities on Coiffeur segments in current year)
   const COIFFEUR_SEGMENT_IDS = [4185072, 10683811];
@@ -198,6 +223,8 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
         return { current: Math.min(rainRuns, target), target };
       case 'coiffeur_runs':
         return { current: Math.min(coiffeurRuns, target), target };
+      case 'rolling_days':
+        return { current: Math.min(rollingDays, target), target };
       case 'segment_runs': {
         const badge = badgeDefinitions.find(b => b.id === badgeId);
         const segId = badge?.segmentId;
