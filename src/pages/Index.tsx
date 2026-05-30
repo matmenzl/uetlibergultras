@@ -22,6 +22,7 @@ import { BadgeShowcase } from "@/components/badges/BadgeShowcase";
 import { StreakCounter } from "@/components/StreakCounter";
 import { CommunityCounter } from "@/components/CommunityCounter";
 import { TodaysRunners } from "@/components/TodaysRunners";
+import { RecentAchievements } from "@/components/RecentAchievements";
 import { ManualCheckInButton } from "@/components/ManualCheckInButton";
 import { WebcamBackground } from "@/components/WebcamBackground";
 import { HeroStats } from "@/components/HeroStats";
@@ -523,6 +524,7 @@ export default function Index() {
             <div className="md:col-span-2 space-y-4 order-2 md:order-1">
               <Leaderboard />
               <MonthlyChallenge />
+              <RecentAchievements />
               <TodaysRunners />
             </div>
 
