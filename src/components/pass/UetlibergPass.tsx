@@ -273,24 +273,34 @@ export function UetlibergPass({ userId, displayName, compact = false }: Uetliber
         ) : (
           // Full view with tabs
           <Tabs defaultValue="milestone" className="w-full">
-            <div className="-mx-4 sm:mx-0 overflow-x-auto scrollbar-none">
-              <TabsList className="inline-flex h-auto w-max sm:w-full sm:grid sm:grid-cols-5 gap-1 px-4 sm:px-1 bg-transparent">
-                <TabsTrigger value="milestone" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-milestone/20 data-[state=active]:text-stamp-milestone">
-                  Meilensteine
-                </TabsTrigger>
-                <TabsTrigger value="endurance" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-endurance/20 data-[state=active]:text-stamp-endurance">
-                  Ausdauer
-                </TabsTrigger>
-                <TabsTrigger value="weather" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-special/20 data-[state=active]:text-stamp-special">
-                  Wetter
-                </TabsTrigger>
-                <TabsTrigger value="community" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-green-500/20 data-[state=active]:text-green-500">
-                  Community
-                </TabsTrigger>
-                <TabsTrigger value="legend" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-legend/20 data-[state=active]:text-stamp-legend">
-                  Legenden
-                </TabsTrigger>
-              </TabsList>
+            <div className="relative -mx-4 sm:mx-0">
+              {/* Scroll fade indicator (mobile only) */}
+              <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-pass-paper dark:from-card to-transparent z-10 pointer-events-none sm:hidden" />
+              
+              {/* Scroll hint chevron (mobile only) */}
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 z-10 pointer-events-none sm:hidden animate-pulse">
+                <ChevronRight className="w-4 h-4 text-muted-foreground/60" />
+              </div>
+
+              <div className="overflow-x-auto scrollbar-none scroll-smooth" id="pass-tab-scroll">
+                <TabsList className="inline-flex h-auto w-max sm:w-full sm:grid sm:grid-cols-5 gap-1 px-4 sm:px-1 bg-transparent">
+                  <TabsTrigger value="milestone" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-milestone/20 data-[state=active]:text-stamp-milestone data-[state=active]:shadow-sm data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-stamp-milestone relative after:absolute after:bottom-0 after:left-1/4 after:right-1/4 after:h-0.5 after:rounded-full after:bg-stamp-milestone after:opacity-0 data-[state=active]:after:opacity-100 after:transition-opacity">
+                    Meilensteine
+                  </TabsTrigger>
+                  <TabsTrigger value="endurance" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-endurance/20 data-[state=active]:text-stamp-endurance data-[state=active]:shadow-sm data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-stamp-endurance relative after:absolute after:bottom-0 after:left-1/4 after:right-1/4 after:h-0.5 after:rounded-full after:bg-stamp-endurance after:opacity-0 data-[state=active]:after:opacity-100 after:transition-opacity">
+                    Ausdauer
+                  </TabsTrigger>
+                  <TabsTrigger value="weather" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-special/20 data-[state=active]:text-stamp-special data-[state=active]:shadow-sm data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-stamp-special relative after:absolute after:bottom-0 after:left-1/4 after:right-1/4 after:h-0.5 after:rounded-full after:bg-stamp-special after:opacity-0 data-[state=active]:after:opacity-100 after:transition-opacity">
+                    Wetter
+                  </TabsTrigger>
+                  <TabsTrigger value="community" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-green-500/20 data-[state=active]:text-green-500 data-[state=active]:shadow-sm data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-green-500 relative after:absolute after:bottom-0 after:left-1/4 after:right-1/4 after:h-0.5 after:rounded-full after:bg-green-500 after:opacity-0 data-[state=active]:after:opacity-100 after:transition-opacity">
+                    Community
+                  </TabsTrigger>
+                  <TabsTrigger value="legend" className="flex-shrink-0 px-3 py-1.5 text-xs sm:text-sm data-[state=active]:bg-stamp-legend/20 data-[state=active]:text-stamp-legend data-[state=active]:shadow-sm data-[state=active]:font-semibold data-[state=active]:border-b-2 data-[state=active]:border-stamp-legend relative after:absolute after:bottom-0 after:left-1/4 after:right-1/4 after:h-0.5 after:rounded-full after:bg-stamp-legend after:opacity-0 data-[state=active]:after:opacity-100 after:transition-opacity">
+                    Legenden
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             </div>
 
             <TabsContent value="milestone" className="mt-4">
