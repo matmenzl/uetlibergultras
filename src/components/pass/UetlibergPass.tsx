@@ -89,6 +89,17 @@ interface UetlibergPassProps {
 }
 
 export function UetlibergPass({ userId, displayName, compact = false }: UetlibergPassProps) {
+  const [activeTab, setActiveTab] = useState('milestone');
+  const tabScrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll active tab into view on mobile
+  useEffect(() => {
+    if (!tabScrollRef.current) return;
+    const activeTrigger = tabScrollRef.current.querySelector('[data-state="active"]') as HTMLElement;
+    if (activeTrigger) {
+      activeTrigger.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [activeTab]);
   // Fetch earned achievements
   const { data: earnedAchievements } = useQuery({
     queryKey: ['achievements', userId],
