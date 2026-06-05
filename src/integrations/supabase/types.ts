@@ -73,7 +73,9 @@ export type Database = {
           id: string
           is_manual: boolean | null
           segment_id: number
+          source: string
           temperature: number | null
+          upload_id: string | null
           user_id: string
           weather_code: number | null
         }
@@ -90,7 +92,9 @@ export type Database = {
           id?: string
           is_manual?: boolean | null
           segment_id: number
+          source?: string
           temperature?: number | null
+          upload_id?: string | null
           user_id: string
           weather_code?: number | null
         }
@@ -107,9 +111,70 @@ export type Database = {
           id?: string
           is_manual?: boolean | null
           segment_id?: number
+          source?: string
           temperature?: number | null
+          upload_id?: string | null
           user_id?: string
           weather_code?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_ins_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "manual_run_uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manual_run_uploads: {
+        Row: {
+          check_ins_created: number
+          created_at: string
+          distance_m: number | null
+          elapsed_s: number | null
+          error: string | null
+          filename: string
+          format: string
+          id: string
+          segments_matched: number
+          started_at: string | null
+          status: string
+          trackpoint_count: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          check_ins_created?: number
+          created_at?: string
+          distance_m?: number | null
+          elapsed_s?: number | null
+          error?: string | null
+          filename: string
+          format: string
+          id?: string
+          segments_matched?: number
+          started_at?: string | null
+          status?: string
+          trackpoint_count?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          check_ins_created?: number
+          created_at?: string
+          distance_m?: number | null
+          elapsed_s?: number | null
+          error?: string | null
+          filename?: string
+          format?: string
+          id?: string
+          segments_matched?: number
+          started_at?: string | null
+          status?: string
+          trackpoint_count?: number | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
