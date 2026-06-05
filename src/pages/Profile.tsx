@@ -15,6 +15,7 @@ import { de } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { SegmentMultiSelect, useSegmentsLookup } from "@/components/SegmentMultiSelect";
 import { Seo } from "@/components/Seo";
+import { RunUploadCard } from "@/components/RunUploadCard";
 
 interface ManualCheckIn {
   id: string;
@@ -542,6 +543,9 @@ const Profile = () => {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Run Upload Section */}
+        <RunUploadCard onUploaded={() => user && fetchManualRuns(user.id)} />
 
         {/* Manual Runs Section */}
         <Card className="mt-6">
