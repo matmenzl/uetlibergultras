@@ -546,8 +546,6 @@ const Profile = () => {
 
         {/* Manual Runs Section */}
         <Card className="mt-6">
-        {/* placeholder anchor */}
-        
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mountain className="h-5 w-5" />
