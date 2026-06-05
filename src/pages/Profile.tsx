@@ -544,6 +544,9 @@ const Profile = () => {
           </CardContent>
         </Card>
 
+        {/* Run Upload Section */}
+        <RunUploadCard onUploaded={() => user && fetchManualRuns(user.id)} />
+
         {/* Manual Runs Section */}
         <Card className="mt-6">
           <CardHeader>
