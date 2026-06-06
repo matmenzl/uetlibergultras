@@ -162,6 +162,16 @@ const Privacy = () => {
               Wir verwenden nur technisch notwendige Cookies für die Authentifizierung 
               und Session-Verwaltung. Es werden keine Tracking- oder Werbe-Cookies eingesetzt.
             </p>
+            <p className="mt-4">
+              <strong>Produkt-Analytics (PostHog):</strong> Zur Verbesserung der App
+              setzen wir PostHog (EU-Hosting, Frankfurt) ein. Wir erfassen
+              pseudonymisierte Nutzungsereignisse (z. B. Seitenaufrufe,
+              Onboarding-Schritte), um zu verstehen, wo Nutzer im Strava-Login
+              abbrechen. Es werden keine Namen, E-Mail-Adressen oder
+              Aktivitätsdetails übermittelt; IP-Adressen werden nicht
+              gespeichert. Wenn Ihr Browser den Header «Do Not Track» sendet,
+              wird PostHog automatisch deaktiviert.
+            </p>
           </section>
 
           <section>

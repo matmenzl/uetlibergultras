@@ -32,6 +32,7 @@ import { useWeather } from "@/hooks/useWeather";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Seo } from "@/components/Seo";
 import { StravaRetentionInfo, isRunRedacted } from "@/components/StravaRetentionInfo";
+import { track } from "@/lib/posthog";
 const MONTHS_FULL_DE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 interface CheckIn {
   id: string;
@@ -122,6 +123,9 @@ export default function Index() {
       }
     }) => {
       setUser(session?.user ?? null);
+      if (!session?.user) {
+        track('onboarding_landing_viewed');
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
