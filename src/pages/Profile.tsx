@@ -8,6 +8,17 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Camera, Loader2, Trash2, User, Mountain, CalendarIcon, Pencil, X, Check, Route } from "lucide-react";
 import { format } from "date-fns";
@@ -73,6 +84,7 @@ const Profile = () => {
   }>({ activity_name: "", distance: "", elevation_gain: "", checked_in_at: new Date(), segment_ids: [] });
   const [savingRun, setSavingRun] = useState(false);
   const [deletingRun, setDeletingRun] = useState<number | null>(null); // activity_id
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   // Group runs by activity_id
   useEffect(() => {
@@ -413,6 +425,32 @@ const Profile = () => {
       .join(", ");
   };
 
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account");
+      if (error) throw error;
+
+      toast({
+        title: "Konto gelöscht",
+        description: data?.confirmation_email_sent
+          ? "Eine Bestätigung wurde per E-Mail an dich gesendet."
+          : "Dein Konto und alle Daten wurden entfernt.",
+      });
+
+      await supabase.auth.signOut();
+      navigate("/");
+    } catch (err) {
+      console.error("Delete account error:", err);
+      toast({
+        title: "Fehler",
+        description: "Konto konnte nicht gelöscht werden. Bitte später erneut versuchen.",
+        variant: "destructive",
+      });
+      setDeletingAccount(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -697,6 +735,61 @@ const Profile = () => {
                 ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Danger zone – account deletion (Strava API Policy 2.5 / 7.4) */}
+        <Card className="mt-6 border-destructive/40">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Konto löschen
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Löscht dein Profil, alle Check-ins, manuelle Runs, Badges,
+              Strava-Verknüpfung und Profilbild. Du erhältst eine
+              Bestätigung per E-Mail. Diese Aktion lässt sich nicht
+              rückgängig machen.
+            </p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={deletingAccount}>
+                  {deletingAccount ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Lösche...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Konto & alle Daten löschen
+                    </>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Wirklich alles löschen?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Dein Konto, alle deine Runs, Badges und die
+                    Strava-Verknüpfung werden unwiderruflich entfernt.
+                    Du wirst danach automatisch abgemeldet.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deletingAccount}>Abbrechen</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={deletingAccount}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Ja, alles löschen
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardContent>
         </Card>
       </div>

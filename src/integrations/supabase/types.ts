@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletions: {
+        Row: {
+          confirmation_sent: boolean
+          deleted_at: string
+          deleted_email: string | null
+          deleted_user_id: string
+          id: string
+          reason: string
+        }
+        Insert: {
+          confirmation_sent?: boolean
+          deleted_at?: string
+          deleted_email?: string | null
+          deleted_user_id: string
+          id?: string
+          reason?: string
+        }
+        Update: {
+          confirmation_sent?: boolean
+          deleted_at?: string
+          deleted_email?: string | null
+          deleted_user_id?: string
+          id?: string
+          reason?: string
+        }
+        Relationships: []
+      }
       achievement_suggestions: {
         Row: {
           admin_notes: string | null
@@ -424,6 +451,39 @@ export type Database = {
         }
         Relationships: []
       }
+      strava_retention_runs: {
+        Row: {
+          checkins_redacted: number
+          error: string | null
+          finished_at: string | null
+          id: string
+          segments_refreshed: number
+          started_at: string
+          status: string
+          triggered_by: string
+        }
+        Insert: {
+          checkins_redacted?: number
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          segments_refreshed?: number
+          started_at?: string
+          status?: string
+          triggered_by?: string
+        }
+        Update: {
+          checkins_redacted?: number
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          segments_refreshed?: number
+          started_at?: string
+          status?: string
+          triggered_by?: string
+        }
+        Relationships: []
+      }
       uetliberg_segments: {
         Row: {
           avg_grade: number
@@ -527,7 +587,6 @@ export type Database = {
     Views: {
       community_stats: {
         Row: {
-          total_distance_km: number | null
           total_runners: number | null
           total_runs: number | null
         }

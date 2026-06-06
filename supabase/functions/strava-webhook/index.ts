@@ -283,17 +283,34 @@ async function processAthleteEvent(
       return;
     }
 
-    // Delete Strava credentials
-    const { error: deleteError } = await supabaseAdmin
+    const userId = profile.id;
+
+    // Section 6.3 / 7.4: on deauthorize we must remove all Strava Data
+    // for this user within 48h. We delete tokens, all Strava-sourced
+    // check_ins, and clear the Strava avatar + strava_id on the profile.
+    // Aggregated/derived data (badges, founding member status, display
+    // name typed by the user) stay – they are not Strava Data.
+
+    const { error: credErr } = await supabaseAdmin
       .from('strava_credentials')
       .delete()
-      .eq('user_id', profile.id);
+      .eq('user_id', userId);
+    if (credErr) console.error('Failed to delete credentials:', credErr);
 
-    if (deleteError) {
-      console.error(`Failed to delete credentials for user ${profile.id}:`, deleteError);
-    } else {
-      console.log(`Deleted Strava credentials for user ${profile.id}`);
-    }
+    const { error: ciErr } = await supabaseAdmin
+      .from('check_ins')
+      .delete()
+      .eq('user_id', userId)
+      .eq('source', 'strava');
+    if (ciErr) console.error('Failed to delete strava check_ins:', ciErr);
+
+    const { error: profErr } = await supabaseAdmin
+      .from('profiles')
+      .update({ strava_id: null, profile_picture: null })
+      .eq('id', userId);
+    if (profErr) console.error('Failed to clear strava fields on profile:', profErr);
+
+    console.log(`Deauthorize cleanup complete for user ${userId}`);
   }
 }
 

@@ -353,9 +353,12 @@ export default function Index() {
   // Group current year check-ins by activity (for history display)
   const currentYearActivitiesMapForDisplay = currentYearCheckIns.reduce((groups, checkIn) => {
     if (!groups[checkIn.activity_id]) {
+      const checkedAt = new Date(checkIn.checked_in_at);
+      const fallbackName = checkIn.activity_name
+        || `Run vom ${checkedAt.toLocaleDateString("de-CH", { day: "2-digit", month: "long", year: "numeric" })}`;
       groups[checkIn.activity_id] = {
         activity_id: checkIn.activity_id,
-        activity_name: checkIn.activity_name || `Aktivität ${checkIn.activity_id}`,
+        activity_name: fallbackName,
         checked_in_at: checkIn.checked_in_at,
         segments: [],
         activityDistance: checkIn.activity_distance,
@@ -579,10 +582,12 @@ export default function Index() {
                                   <Mountain className="w-5 h-5 text-primary flex-shrink-0" />
                                   <div className="flex-1 min-w-0 text-left">
                                     <p className="font-medium truncate">{activity.activity_name}</p>
-                                    <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
-                                      <span>{formatDistance(activity.activityDistance)}</span>
-                                      <span>{formatTime(activity.activityElapsedTime)}</span>
-                                    </div>
+                                    {(activity.activityDistance || activity.activityElapsedTime) && (
+                                      <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+                                        {activity.activityDistance != null && <span>{formatDistance(activity.activityDistance)}</span>}
+                                        {activity.activityElapsedTime != null && <span>{formatTime(activity.activityElapsedTime)}</span>}
+                                      </div>
+                                    )}
                                   </div>
                                   <Badge variant="secondary" className="flex-shrink-0">
                                     {activity.segments.length} {activity.segments.length === 1 ? "Segment" : "Segmente"}
@@ -599,10 +604,12 @@ export default function Index() {
                                           {getSegmentName(checkIn.segment_id)}
                                         </p>
                                       </div>
-                                      <div className="flex gap-3 text-xs text-muted-foreground">
-                                        <span>{formatDistance(checkIn.distance)}</span>
-                                        <span>{formatTime(checkIn.elapsed_time)}</span>
-                                      </div>
+                                      {(checkIn.distance != null || checkIn.elapsed_time != null) && (
+                                        <div className="flex gap-3 text-xs text-muted-foreground">
+                                          {checkIn.distance != null && <span>{formatDistance(checkIn.distance)}</span>}
+                                          {checkIn.elapsed_time != null && <span>{formatTime(checkIn.elapsed_time)}</span>}
+                                        </div>
+                                      )}
                                     </div>)}
                                 </div>
                               </CollapsibleContent>
