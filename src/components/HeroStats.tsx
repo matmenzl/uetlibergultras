@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Mountain, Route } from "lucide-react";
+import { Users, Mountain } from "lucide-react";
 import { useEffect, useState } from "react";
 
 function AnimatedNumber({ target, decimals = 0, duration = 1200 }: { target: number; decimals?: number; duration?: number }) {
@@ -32,13 +32,12 @@ export function HeroStats() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("community_stats")
-        .select("total_runs, total_runners, total_distance_km")
+        .select("total_runs, total_runners")
         .single();
       if (error) throw error;
       return {
         totalRuns: data?.total_runs ?? 0,
         totalRunners: data?.total_runners ?? 0,
-        totalDistanceKm: Number(data?.total_distance_km ?? 0),
       };
     },
   });
@@ -63,14 +62,6 @@ export function HeroStats() {
               <AnimatedNumber target={stats.totalRuns} />
             </span>
             <span className="text-[10px] sm:text-sm text-white/70">Runs</span>
-          </div>
-          <div className="w-px h-5 sm:h-6 bg-white/20 shrink-0" />
-          <div className="flex items-center gap-1 sm:gap-2 text-white min-w-0">
-            <Route className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
-            <span className="text-base sm:text-xl font-bold">
-              <AnimatedNumber target={stats.totalDistanceKm} decimals={0} />
-            </span>
-            <span className="text-[10px] sm:text-sm text-white/70">km</span>
           </div>
         </div>
       </div>
