@@ -72,4 +72,13 @@ export function resetUser() {
   }
 }
 
+export function setGuestStatus(isGuest: boolean) {
+  if (!enabled()) return;
+  try {
+    posthog.register({ is_guest: isGuest });
+  } catch (err) {
+    console.warn("[posthog] register failed", err);
+  }
+}
+
 export { posthog };
