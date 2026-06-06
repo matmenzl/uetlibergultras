@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { track, identifyUser, resetUser } from "@/lib/posthog";
+import { track, identifyUser, resetUser, setGuestStatus } from "@/lib/posthog";
 
 /**
  * Sends $pageview on every route change and keeps the PostHog identity
@@ -25,6 +25,7 @@ export function usePostHogTracking() {
   // Identify / reset based on auth state
   useEffect(() => {
     const identifyFromSession = async (userId: string) => {
+      setGuestStatus(false);
       const { data } = await supabase
         .from("profiles")
         .select("strava_id, is_founding_member, user_number")
@@ -38,13 +39,18 @@ export function usePostHogTracking() {
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) identifyFromSession(session.user.id);
+      if (session?.user) {
+        identifyFromSession(session.user.id);
+      } else {
+        setGuestStatus(true);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === "SIGNED_OUT") {
           resetUser();
+          setGuestStatus(true);
         } else if (session?.user) {
           identifyFromSession(session.user.id);
         }
