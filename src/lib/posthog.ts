@@ -4,7 +4,9 @@ let initialized = false;
 
 export function initPostHog() {
   if (initialized) return;
-  const key = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
+  const key =
+    (import.meta.env.VITE_POSTHOG_KEY as string | undefined) ||
+    "phc_oZFrazSQSTzYQT6Sc9Hm7i487PDAiNTvexnibSDoPdsh";
   const host =
     (import.meta.env.VITE_POSTHOG_HOST as string | undefined) ||
     "https://eu.i.posthog.com";
