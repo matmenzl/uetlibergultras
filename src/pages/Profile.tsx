@@ -8,6 +8,17 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Camera, Loader2, Trash2, User, Mountain, CalendarIcon, Pencil, X, Check, Route } from "lucide-react";
 import { format } from "date-fns";
@@ -73,6 +84,7 @@ const Profile = () => {
   }>({ activity_name: "", distance: "", elevation_gain: "", checked_in_at: new Date(), segment_ids: [] });
   const [savingRun, setSavingRun] = useState(false);
   const [deletingRun, setDeletingRun] = useState<number | null>(null); // activity_id
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   // Group runs by activity_id
   useEffect(() => {
@@ -411,6 +423,32 @@ const Profile = () => {
       .map((id) => segmentsMap.get(id)?.name)
       .filter(Boolean)
       .join(", ");
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account");
+      if (error) throw error;
+
+      toast({
+        title: "Konto gelöscht",
+        description: data?.confirmation_email_sent
+          ? "Eine Bestätigung wurde per E-Mail an dich gesendet."
+          : "Dein Konto und alle Daten wurden entfernt.",
+      });
+
+      await supabase.auth.signOut();
+      navigate("/");
+    } catch (err) {
+      console.error("Delete account error:", err);
+      toast({
+        title: "Fehler",
+        description: "Konto konnte nicht gelöscht werden. Bitte später erneut versuchen.",
+        variant: "destructive",
+      });
+      setDeletingAccount(false);
+    }
   };
 
   if (loading) {
