@@ -9,7 +9,7 @@ export function initPostHog() {
     "phc_oZFrazSQSTzYQT6Sc9Hm7i487PDAiNTvexnibSDoPdsh";
   const host =
     (import.meta.env.VITE_POSTHOG_HOST as string | undefined) ||
-    "https://eu.i.posthog.com";
+    "https://us.i.posthog.com";
 
   if (!key) {
     // No key configured — analytics disabled, no-op.
