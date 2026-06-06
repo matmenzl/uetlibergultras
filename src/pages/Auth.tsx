@@ -12,6 +12,7 @@ import { Award, Mail, Loader2, CheckCircle, User } from 'lucide-react';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { toast } from 'sonner';
 import { Seo } from '@/components/Seo';
+import { track } from '@/lib/posthog';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function Auth() {
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   useEffect(() => {
+    track('onboarding_auth_page_viewed');
     // Check if already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -58,6 +60,9 @@ export default function Auth() {
   }, [navigate]);
 
   const handleStravaLogin = async () => {
+    track('onboarding_strava_connect_clicked', {
+      platform: Capacitor.isNativePlatform() ? 'native' : 'web',
+    });
     const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID || '186560';
     const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
     const redirectUri = `${appUrl}/auth/strava-callback`;
