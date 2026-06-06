@@ -23,7 +23,7 @@ const Privacy = () => {
         <div className="prose prose-lg max-w-none space-y-8 text-foreground/90">
           <section>
             <p className="text-muted-foreground">
-              Stand: Januar 2026
+              Stand: Juni 2026
             </p>
           </section>
 
@@ -95,9 +95,18 @@ const Privacy = () => {
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-2">
               <li>An Strava zur Authentifizierung und zum Abruf Ihrer Aktivitäten</li>
-              <li>An unseren Hosting-Anbieter (Supabase/Lovable) für den technischen Betrieb</li>
+              <li>An unseren Hosting-Anbieter (Lovable Cloud / Supabase) für den technischen Betrieb</li>
+              <li>An Resend (E-Mail-Versand) für Bestätigungs- und Benachrichtigungs-Mails</li>
+              <li>An Mapbox für die Karten-Darstellung (nur die Anzeige der Uetliberg-Segmente)</li>
+              <li>An ScreenshotOne für die Webcam-Anzeige (keine personenbezogenen Daten)</li>
               <li>Wenn wir gesetzlich dazu verpflichtet sind</li>
             </ul>
+            <p className="mt-4">
+              An keinen dieser Anbieter werden Strava-Aktivitätsdetails (Run-Name,
+              Distanz, Zeit) weitergegeben. Strava-Daten verlassen unseren Backend
+              nicht und werden gemäss Strava-API-Policy nie für Werbung,
+              KI-Training oder Datenverkauf verwendet.
+            </p>
             <p className="mt-4">
               Das öffentliche Leaderboard zeigt Ihren Anzeigenamen und Ihre Statistiken. 
               Ihr Profilbild und Ihre Platzierung sind für andere Nutzer sichtbar.
@@ -107,11 +116,30 @@ const Privacy = () => {
           <section>
             <h2 className="text-2xl font-semibold mb-4">7. Datenspeicherung und -löschung</h2>
             <p>
-              Ihre Daten werden gespeichert, solange Ihr Konto aktiv ist. 
-              Sie können jederzeit die Löschung Ihrer Daten verlangen, indem Sie uns kontaktieren.
+              <strong>Strava-Rohdaten (7-Tage-Regel):</strong> Aktivitätsname,
+              Distanz, Zeit und Höhenmeter werden gemäss Strava-API-Policy
+              (Section 6.2) spätestens nach 7 Tagen automatisch gelöscht.
+              Anonymisierte Aggregate wie Anzahl Runs und Badges bleiben als
+              eigene App-Daten erhalten.
             </p>
             <p className="mt-2">
-              Die Strava-Autorisierung können Sie jederzeit in Ihren Strava-Einstellungen widerrufen.
+              <strong>Löschung auf Strava:</strong> Wenn Sie eine Aktivität auf
+              Strava löschen oder die App-Autorisierung widerrufen, wird das
+              innerhalb von 48 Stunden bei uns gespiegelt.
+            </p>
+            <p className="mt-2">
+              <strong>Konto-Löschung auf Anfrage:</strong> Sie können Ihr Konto
+              und alle damit verbundenen Daten jederzeit selbst über das Profil
+              löschen («Konto & alle Daten löschen»). Sie erhalten eine
+              schriftliche Bestätigung per E-Mail.
+            </p>
+            <p className="mt-2">
+              Die Strava-Autorisierung können Sie zusätzlich jederzeit in Ihren
+              Strava-Einstellungen unter{" "}
+              <a href="https://www.strava.com/settings/apps" className="text-primary hover:underline">
+                strava.com/settings/apps
+              </a>{" "}
+              widerrufen.
             </p>
           </section>
 

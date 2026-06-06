@@ -146,11 +146,18 @@ export default function Auth() {
               />
             </button>
 
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-xs text-muted-foreground space-y-2 px-1">
+              <p className="font-medium text-foreground">Was wir von Strava lesen:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>Vorname, Nachname, Profilbild, Strava-ID</li>
+                <li>Aktivitäten (Name, Distanz, Zeit, GPS-Segmente, Datum)</li>
+              </ul>
               <p>
-                Melde dich mit deinem Strava-Account an,
-                <br />
-                um deine Segmente automatisch zu synchronisieren
+                Strava-Rohdaten älter als 7 Tage werden bei uns automatisch
+                gelöscht. Zugriff zurückziehen jederzeit in deinen
+                Strava-Einstellungen oder per «Konto löschen» im Profil.
+                Mehr in der{" "}
+                <a href="/privacy" className="underline">Datenschutzerklärung</a>.
               </p>
             </div>
           </TabsContent>
