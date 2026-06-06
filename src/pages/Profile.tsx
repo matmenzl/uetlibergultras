@@ -737,6 +737,61 @@ const Profile = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Danger zone – account deletion (Strava API Policy 2.5 / 7.4) */}
+        <Card className="mt-6 border-destructive/40">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Konto löschen
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Löscht dein Profil, alle Check-ins, manuelle Runs, Badges,
+              Strava-Verknüpfung und Profilbild. Du erhältst eine
+              Bestätigung per E-Mail. Diese Aktion lässt sich nicht
+              rückgängig machen.
+            </p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={deletingAccount}>
+                  {deletingAccount ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Lösche...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Konto & alle Daten löschen
+                    </>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Wirklich alles löschen?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Dein Konto, alle deine Runs, Badges und die
+                    Strava-Verknüpfung werden unwiderruflich entfernt.
+                    Du wirst danach automatisch abgemeldet.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deletingAccount}>Abbrechen</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={deletingAccount}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Ja, alles löschen
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
