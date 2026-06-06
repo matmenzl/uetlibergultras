@@ -21,6 +21,7 @@ import BadgeDemo from "./pages/BadgeDemo";
 import PublicProfile from "./pages/PublicProfile";
 import InstallPrompt from "./components/InstallPrompt";
 import BadgeNotifier from "./components/BadgeNotifier";
+import { usePostHogTracking } from "./hooks/usePostHogTracking";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,11 @@ function DeepLinkHandler() {
   return null;
 }
 
+function PostHogTracker() {
+  usePostHogTracking();
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -61,6 +67,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <DeepLinkHandler />
+        <PostHogTracker />
         <InstallPrompt />
         <BadgeNotifier />
         <Routes>

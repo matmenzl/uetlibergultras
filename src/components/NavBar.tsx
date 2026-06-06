@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import logo from '@/assets/uu_logo.svg';
+import { track } from '@/lib/posthog';
 export default function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -60,6 +61,7 @@ export default function NavBar() {
   }, [user]);
 
   const handleSignOut = async () => {
+    track('logout_clicked');
     await supabase.auth.signOut();
     navigate('/');
   };

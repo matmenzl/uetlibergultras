@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
+import { track } from '@/lib/posthog';
 
 export default function AuthStravaCallback() {
   const navigate = useNavigate();
@@ -20,7 +21,14 @@ export default function AuthStravaCallback() {
       const state = searchParams.get('state');
       const isNativeCallback = state === 'native';
 
+      track('onboarding_strava_callback_received', {
+        had_error: !!error,
+        has_code: !!code,
+        platform: isNativeCallback ? 'native' : 'web',
+      });
+
       if (error) {
+        track('onboarding_strava_auth_failed', { stage: 'denied', error_code: error });
         setStatus('error');
         setMessage('Strava-Autorisierung abgebrochen');
         toast.error('Strava-Autorisierung abgebrochen');
@@ -33,6 +41,7 @@ export default function AuthStravaCallback() {
       }
 
       if (!code) {
+        track('onboarding_strava_auth_failed', { stage: 'no_code' });
         setStatus('error');
         setMessage('Ungültige Callback-Parameter');
         toast.error('Ungültige Callback-Parameter');
@@ -51,6 +60,10 @@ export default function AuthStravaCallback() {
         });
 
         if (exchangeError || !data.success) {
+          track('onboarding_strava_auth_failed', {
+            stage: 'exchange_failed',
+            error_message: data?.error || exchangeError?.message,
+          });
           throw new Error(data?.error || 'Failed to authenticate with Strava');
         }
 
@@ -63,12 +76,17 @@ export default function AuthStravaCallback() {
           
           if (setError) {
             console.error('Error setting session:', setError);
+            track('onboarding_strava_auth_failed', {
+              stage: 'session_failed',
+              error_message: setError.message,
+            });
             throw new Error('Failed to set session');
           }
 
           // Check if initial sync is needed
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
+            track('onboarding_strava_auth_success', { user_id: user.id });
             const { data: profile } = await supabase
               .from('profiles')
               .select('initial_sync_completed')
@@ -76,6 +94,7 @@ export default function AuthStravaCallback() {
               .single();
 
             if (profile && !profile.initial_sync_completed) {
+              track('onboarding_initial_sync_started');
               setStatus('syncing');
               setMessage('Synchronisiere deine Runs...');
               
