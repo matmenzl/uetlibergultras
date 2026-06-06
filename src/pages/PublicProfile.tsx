@@ -454,7 +454,10 @@ export default function PublicProfile() {
                                     <Mountain className="w-5 h-5 text-primary" />
                                     <div className="text-left">
                                       <p className="font-medium">
-                                        {activity.activity_name || (activity.is_manual ? 'Manueller Check-in' : 'Unbenannte Aktivität')}
+                                        {activity.activity_name
+                                          || (activity.is_manual
+                                            ? 'Manueller Check-in'
+                                            : `Run vom ${new Date(activity.checked_in_at).toLocaleDateString('de-CH', { day: '2-digit', month: 'long', year: 'numeric' })}`)}
                                       </p>
                                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                         {activity.activity_distance && (
