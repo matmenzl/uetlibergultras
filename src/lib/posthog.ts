@@ -36,7 +36,7 @@ export function initPostHog() {
 }
 
 function enabled() {
-  return initialized && !!import.meta.env.VITE_POSTHOG_KEY;
+  return initialized;
 }
 
 export function track(
