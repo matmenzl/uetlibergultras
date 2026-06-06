@@ -16,6 +16,7 @@ import NavBar from '@/components/NavBar';
 import { Footer } from '@/components/Footer';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Seo } from '@/components/Seo';
+import { StravaRetentionInfo, isRunRedacted } from '@/components/StravaRetentionInfo';
 
 interface CheckIn {
   id: string;
@@ -453,12 +454,19 @@ export default function PublicProfile() {
                                   <div className="flex items-center gap-3">
                                     <Mountain className="w-5 h-5 text-primary" />
                                     <div className="text-left">
-                                      <p className="font-medium">
-                                        {activity.activity_name
-                                          || (activity.is_manual
-                                            ? 'Manueller Check-in'
-                                            : `Run vom ${new Date(activity.checked_in_at).toLocaleDateString('de-CH', { day: '2-digit', month: 'long', year: 'numeric' })}`)}
-                                      </p>
+                                      <div className="flex items-center gap-1.5">
+                                        <p className="font-medium">
+                                          {activity.activity_name
+                                            || (activity.is_manual
+                                              ? 'Manueller Check-in'
+                                              : `Run vom ${new Date(activity.checked_in_at).toLocaleDateString('de-CH', { day: '2-digit', month: 'long', year: 'numeric' })}`)}
+                                        </p>
+                                        {!activity.is_manual && isRunRedacted({
+                                          checkedInAt: activity.checked_in_at,
+                                          activityDistance: activity.activity_distance,
+                                          activityElapsedTime: activity.activity_elapsed_time,
+                                        }) && <StravaRetentionInfo className="flex-shrink-0" />}
+                                      </div>
                                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                         {activity.activity_distance && (
                                           <span>{(activity.activity_distance / 1000).toFixed(2)} km</span>

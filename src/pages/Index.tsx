@@ -31,6 +31,7 @@ import { triggerFirstCheckInConfetti, triggerConfetti } from "@/lib/confetti";
 import { useWeather } from "@/hooks/useWeather";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Seo } from "@/components/Seo";
+import { StravaRetentionInfo, isRunRedacted } from "@/components/StravaRetentionInfo";
 const MONTHS_FULL_DE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 interface CheckIn {
   id: string;
@@ -581,7 +582,14 @@ export default function Index() {
                                 <div className="p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors">
                                   <Mountain className="w-5 h-5 text-primary flex-shrink-0" />
                                   <div className="flex-1 min-w-0 text-left">
-                                    <p className="font-medium truncate">{activity.activity_name}</p>
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <p className="font-medium truncate">{activity.activity_name}</p>
+                                      {isRunRedacted({
+                                        checkedInAt: activity.checked_in_at,
+                                        activityDistance: activity.activityDistance,
+                                        activityElapsedTime: activity.activityElapsedTime,
+                                      }) && <StravaRetentionInfo className="flex-shrink-0" />}
+                                    </div>
                                     {(activity.activityDistance || activity.activityElapsedTime) && (
                                       <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
                                         {activity.activityDistance != null && <span>{formatDistance(activity.activityDistance)}</span>}
