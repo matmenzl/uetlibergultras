@@ -129,14 +129,14 @@ export default function Auth() {
           </div>
           <h1 className="text-3xl font-bold mb-2">Uetliberg Läufe</h1>
           <p className="text-muted-foreground">
-            Tracke deine persönlichen Rekorde und vergleiche deine Zeiten
+            Mach mit bei den Uetliberg Ultras. Entweder mit Strava oder erfasse deine Runs manuell hoch.
           </p>
         </div>
 
         <Tabs defaultValue="strava" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="strava">Mit Strava</TabsTrigger>
-            <TabsTrigger value="alternativliga">Alternativliga</TabsTrigger>
+            <TabsTrigger value="alternativliga">E-Mail</TabsTrigger>
           </TabsList>
 
           <TabsContent value="strava" className="space-y-4">
