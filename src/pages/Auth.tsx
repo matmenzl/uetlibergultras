@@ -136,7 +136,7 @@ export default function Auth() {
         <Tabs defaultValue="strava" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="strava">Mit Strava</TabsTrigger>
-            <TabsTrigger value="alternativliga">Alternativliga</TabsTrigger>
+            <TabsTrigger value="alternativliga">E-Mail</TabsTrigger>
           </TabsList>
 
           <TabsContent value="strava" className="space-y-4">
