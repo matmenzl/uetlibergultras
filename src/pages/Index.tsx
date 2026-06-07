@@ -119,19 +119,18 @@ export default function Index() {
     } catch {}
     track('onboarding_landing_viewed', { referral_type });
 
-    // Return Visitor Tracking
+    // Return Visitor & Visit Count Tracking
     const visits = parseInt(localStorage.getItem('lu_visits') || '0') + 1;
     localStorage.setItem('lu_visits', String(visits));
 
-    if (visits > 1) {
-      // Beide Varianten aufrufen – eine davon funktioniert je nach Setup
-      posthog.capture('$set', {
-        $set: { is_returning_visitor: true }
-      });
-      posthog.setPersonProperties?.({ is_returning_visitor: true });
-    }
+    posthog.capture('$set', {
+      $set: {
+        is_returning_visitor: visits > 1,
+        visit_count: visits
+      }
+    });
 
-    console.log('[PostHog] lu_visits:', visits); // Debug – kann danach entfernt werden
+    console.log('[PostHog] lu_visits:', visits);
 
     // Set up auth state listener FIRST
     const {
