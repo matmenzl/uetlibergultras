@@ -86,7 +86,30 @@ export default function AuthStravaCallback() {
           // Check if initial sync is needed
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
-            track('onboarding_strava_auth_success', { user_id: user.id });
+            let referral_type: string | undefined;
+            try { referral_type = sessionStorage.getItem('referral_type') || undefined; } catch {}
+
+            // Try to derive hours since most recent check-in (if any data already exists)
+            let hours_since_run: number | undefined;
+            try {
+              const { data: latest } = await supabase
+                .from('check_ins')
+                .select('checked_in_at')
+                .eq('user_id', user.id)
+                .order('checked_in_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+              if (latest?.checked_in_at) {
+                const diffMs = Date.now() - new Date(latest.checked_in_at).getTime();
+                hours_since_run = Math.max(0, Math.round((diffMs / 36e5) * 10) / 10);
+              }
+            } catch {}
+
+            track('onboarding_strava_auth_success', {
+              user_id: user.id,
+              referral_type,
+              hours_since_run,
+            });
             const { data: profile } = await supabase
               .from('profiles')
               .select('initial_sync_completed')

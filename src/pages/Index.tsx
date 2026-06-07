@@ -109,7 +109,15 @@ export default function Index() {
   useEffect(() => {
     // Fire landing view immediately on mount — no async/conditional gating.
     // Funnel filters by is_guest super-property instead.
-    track('onboarding_landing_viewed');
+    const params = new URLSearchParams(window.location.search);
+    const src = (params.get('src') || '').toLowerCase();
+    let referral_type: 'post_run' | 'recommendation' | 'unknown' = 'unknown';
+    if (src === 'run' || src === 'post_run') referral_type = 'post_run';
+    else if (src === 'share' || src === 'recommendation' || src === 'ref') referral_type = 'recommendation';
+    try {
+      sessionStorage.setItem('referral_type', referral_type);
+    } catch {}
+    track('onboarding_landing_viewed', { referral_type });
 
     // Set up auth state listener FIRST
     const {
