@@ -129,7 +129,7 @@ export default function Auth() {
           </div>
           <h1 className="text-3xl font-bold mb-2">Uetliberg Läufe</h1>
           <p className="text-muted-foreground">
-            Tracke deine persönlichen Rekorde und vergleiche deine Zeiten
+            Mach mit bei den Uetliberg Ultras. Entweder mit Strava oder erfasse deine Runs manuell hoch.
           </p>
         </div>
 
