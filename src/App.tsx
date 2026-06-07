@@ -19,7 +19,6 @@ import Pass from "./pages/Pass";
 import Profile from "./pages/Profile";
 import BadgeDemo from "./pages/BadgeDemo";
 import PublicProfile from "./pages/PublicProfile";
-import InstallPrompt from "./components/InstallPrompt";
 import BadgeNotifier from "./components/BadgeNotifier";
 import { usePostHogTracking } from "./hooks/usePostHogTracking";
 
@@ -68,7 +67,6 @@ const App = () => (
       <BrowserRouter>
         <DeepLinkHandler />
         <PostHogTracker />
-        <InstallPrompt />
         <BadgeNotifier />
         <Routes>
           <Route path="/" element={<Index />} />
