@@ -89,18 +89,18 @@ export default function AuthStravaCallback() {
             let referral_type: string | undefined;
             try { referral_type = sessionStorage.getItem('referral_type') || undefined; } catch {}
 
-            // Try to derive hours since most recent Strava run (if already synced)
+            // Try to derive hours since most recent check-in (if any data already exists)
             let hours_since_run: number | undefined;
             try {
               const { data: latest } = await supabase
-                .from('runs')
-                .select('start_date')
+                .from('check_ins')
+                .select('checked_in_at')
                 .eq('user_id', user.id)
-                .order('start_date', { ascending: false })
+                .order('checked_in_at', { ascending: false })
                 .limit(1)
                 .maybeSingle();
-              if (latest?.start_date) {
-                const diffMs = Date.now() - new Date(latest.start_date).getTime();
+              if (latest?.checked_in_at) {
+                const diffMs = Date.now() - new Date(latest.checked_in_at).getTime();
                 hours_since_run = Math.max(0, Math.round((diffMs / 36e5) * 10) / 10);
               }
             } catch {}
