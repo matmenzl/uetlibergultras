@@ -31,8 +31,10 @@ export function usePostHogTracking() {
         .select("strava_id, is_founding_member, user_number")
         .eq("id", userId)
         .maybeSingle();
+      const hasStrava = data?.strava_id !== null && data?.strava_id !== undefined;
       identifyUser(userId, {
-        strava_user: data?.strava_id !== null && data?.strava_id !== undefined,
+        auth_method: hasStrava ? "strava" : "email",
+        strava_user: hasStrava, // legacy, behalten bis Insights migriert
         founding_member: data?.is_founding_member ?? false,
         user_number: data?.user_number ?? undefined,
       });
