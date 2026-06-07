@@ -20,6 +20,13 @@ export default function Auth() {
   const [runnerName, setRunnerName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [cooldown]);
 
   useEffect(() => {
     track('onboarding_auth_page_viewed');
@@ -83,6 +90,7 @@ export default function Auth() {
   };
 
   const handleMagicLink = async () => {
+    if (cooldown > 0) return;
     if (!runnerName.trim()) {
       toast.error('Bitte gib einen Läufernamen ein');
       return;
@@ -109,10 +117,17 @@ export default function Auth() {
       track('login_method_selected', { method: 'email' });
       try { posthog.setPersonProperties?.({ auth_method: 'email' }); } catch {}
       setMagicLinkSent(true);
+      setCooldown(60);
       toast.success('Magic Link gesendet! Schau in dein E-Mail-Postfach.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Magic link error:', error);
-      toast.error('Fehler beim Senden des Magic Links');
+      const msg = String(error?.message || '').toLowerCase();
+      if (error?.status === 429 || msg.includes('rate limit')) {
+        setCooldown(60);
+        toast.error('Bitte warte eine Minute, bevor du einen neuen Link anforderst.');
+      } else {
+        toast.error('Fehler beim Senden des Magic Links');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -225,7 +240,7 @@ export default function Auth() {
 
                   <Button
                     onClick={handleMagicLink}
-                    disabled={isLoading || !runnerName.trim() || !email}
+                    disabled={isLoading || cooldown > 0 || !runnerName.trim() || !email}
                     className="w-full gap-2"
                   >
                     {isLoading ? (
@@ -233,7 +248,7 @@ export default function Auth() {
                     ) : (
                       <Mail className="h-4 w-4" />
                     )}
-                    Magic Link senden
+                    {cooldown > 0 ? `Bitte warten (${cooldown}s)` : 'Magic Link senden'}
                   </Button>
                 </div>
 
