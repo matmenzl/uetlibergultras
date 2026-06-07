@@ -12,7 +12,7 @@ import { Award, Mail, Loader2, CheckCircle, User } from 'lucide-react';
 import stravaConnectButton from '@/assets/btn_strava_connect_with_orange.svg';
 import { toast } from 'sonner';
 import { Seo } from '@/components/Seo';
-import { track } from '@/lib/posthog';
+import { track, posthog } from '@/lib/posthog';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -63,6 +63,8 @@ export default function Auth() {
     track('onboarding_strava_connect_clicked', {
       platform: Capacitor.isNativePlatform() ? 'native' : 'web',
     });
+    track('login_method_selected', { method: 'strava' });
+    try { posthog.setPersonProperties?.({ auth_method: 'strava' }); } catch {}
     const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID || '186560';
     const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
     const redirectUri = `${appUrl}/auth/strava-callback`;
@@ -104,6 +106,8 @@ export default function Auth() {
 
       if (error) throw error;
 
+      track('login_method_selected', { method: 'email' });
+      try { posthog.setPersonProperties?.({ auth_method: 'email' }); } catch {}
       setMagicLinkSent(true);
       toast.success('Magic Link gesendet! Schau in dein E-Mail-Postfach.');
     } catch (error) {
