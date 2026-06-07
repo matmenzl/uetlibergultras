@@ -160,17 +160,23 @@ const Privacy = () => {
             <h2 className="text-2xl font-semibold mb-4">9. Cookies und Tracking</h2>
             <p>
               Wir verwenden nur technisch notwendige Cookies für die Authentifizierung 
-              und Session-Verwaltung. Es werden keine Tracking- oder Werbe-Cookies eingesetzt.
+              und Session-Verwaltung. Für Tracking und Werbung setzen wir keine Cookies ein.
             </p>
             <p className="mt-4">
               <strong>Produkt-Analytics (PostHog):</strong> Zur Verbesserung der App
-              setzen wir PostHog (EU-Hosting, Frankfurt) ein. Wir erfassen
-              pseudonymisierte Nutzungsereignisse (z. B. Seitenaufrufe,
-              Onboarding-Schritte), um zu verstehen, wo Nutzer im Strava-Login
-              abbrechen. Es werden keine Namen, E-Mail-Adressen oder
+              setzen wir PostHog (EU-Hosting, Frankfurt) ein. PostHog speichert
+              Daten ausschliesslich im <strong>LocalStorage</strong> Ihres Browsers
+              und verwendet keine Cookies. Wir erfassen pseudonymisierte
+              Nutzungsereignisse (z. B. Seitenaufrufe, Onboarding-Schritte,
+              Wiederkehrer-Status und Besuchszähler), um zu verstehen, wo Nutzer
+              im Strava-Login abbrechen. Es werden keine Namen, E-Mail-Adressen oder
               Aktivitätsdetails übermittelt; IP-Adressen werden nicht
               gespeichert. Wenn Ihr Browser den Header «Do Not Track» sendet,
               wird PostHog automatisch deaktiviert.
+            </p>
+            <p className="mt-4">
+              Sie können den LocalStorage Ihres Browsers jederzeit löschen;
+              dadurch werden auch die PostHog-Daten entfernt.
             </p>
           </section>
 
