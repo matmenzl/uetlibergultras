@@ -1,10 +1,14 @@
-## Remove misleading App Install prompt
+## Return Visitor Tracking auf der Landing Page
 
-The `InstallPrompt` component shows a fixed banner with "App installieren" text that the user finds misleading. It also has logic for iOS manual install instructions, Android deferred prompt handling, and localStorage dismiss state.
+1. Importiere `posthog` zusätzlich zu `track` aus `@/lib/posthog` in `src/pages/Index.tsx`.
+2. Füge im bestehenden `useEffect` (leeres Dependency Array `[]`) direkt nach dem `track('onboarding_landing_viewed', …)`-Aufruf folgenden Code ein:
 
-### Steps
-1. Remove `<InstallPrompt />` usage from `src/App.tsx` (line 71).
-2. Remove the `import InstallPrompt` statement from `src/App.tsx` (line 22).
-3. Delete `src/components/InstallPrompt.tsx` entirely, since it will no longer be used anywhere in the codebase.
+````text
+  const visits = parseInt(localStorage.getItem('lu_visits') || '0') + 1;
+  localStorage.setItem('lu_visits', String(visits));
+  if (visits > 1) {
+    posthog.setPersonProperties({ is_returning_visitor: true });
+  }
+````
 
-No other changes required.
+Der Code läuft einmalig beim ersten Render, aktualisiert den `lu_visits`-Counter im `localStorage` und markiert bei wiederholten Besuchen die Person in PostHog als `is_returning_visitor`.
