@@ -107,6 +107,10 @@ export default function Index() {
     data: weatherData
   } = useWeather();
   useEffect(() => {
+    // Fire landing view immediately on mount — no async/conditional gating.
+    // Funnel filters by is_guest super-property instead.
+    track('onboarding_landing_viewed');
+
     // Set up auth state listener FIRST
     const {
       data: {
@@ -123,9 +127,6 @@ export default function Index() {
       }
     }) => {
       setUser(session?.user ?? null);
-      if (!session?.user) {
-        track('onboarding_landing_viewed');
-      }
     });
     return () => subscription.unsubscribe();
   }, []);
