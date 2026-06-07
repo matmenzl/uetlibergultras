@@ -119,12 +119,19 @@ export default function Index() {
     } catch {}
     track('onboarding_landing_viewed', { referral_type });
 
-    // Return Visitor Tracking für PostHog
+    // Return Visitor Tracking
     const visits = parseInt(localStorage.getItem('lu_visits') || '0') + 1;
     localStorage.setItem('lu_visits', String(visits));
+
     if (visits > 1) {
-      posthog.setPersonProperties({ is_returning_visitor: true });
+      // Beide Varianten aufrufen – eine davon funktioniert je nach Setup
+      posthog.capture('$set', {
+        $set: { is_returning_visitor: true }
+      });
+      posthog.setPersonProperties?.({ is_returning_visitor: true });
     }
+
+    console.log('[PostHog] lu_visits:', visits); // Debug – kann danach entfernt werden
 
     // Set up auth state listener FIRST
     const {
