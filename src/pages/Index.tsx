@@ -32,7 +32,7 @@ import { useWeather } from "@/hooks/useWeather";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Seo } from "@/components/Seo";
 import { StravaRetentionInfo, isRunRedacted } from "@/components/StravaRetentionInfo";
-import { track } from "@/lib/posthog";
+import { track, posthog } from "@/lib/posthog";
 const MONTHS_FULL_DE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 interface CheckIn {
   id: string;
@@ -118,6 +118,13 @@ export default function Index() {
       sessionStorage.setItem('referral_type', referral_type);
     } catch {}
     track('onboarding_landing_viewed', { referral_type });
+
+    // Return Visitor Tracking für PostHog
+    const visits = parseInt(localStorage.getItem('lu_visits') || '0') + 1;
+    localStorage.setItem('lu_visits', String(visits));
+    if (visits > 1) {
+      posthog.setPersonProperties({ is_returning_visitor: true });
+    }
 
     // Set up auth state listener FIRST
     const {
