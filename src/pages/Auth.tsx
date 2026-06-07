@@ -127,7 +127,7 @@ export default function Auth() {
           <div className="flex justify-center mb-4">
             <Award className="h-16 w-16 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Uetliberg Läufe</h1>
+          <h1 className="text-3xl font-bold mb-2">Uetliberg Ultras</h1>
           <p className="text-muted-foreground">
             Mach mit bei den Uetliberg Ultras. Entweder mit Strava oder per E-Mail.
           </p>
