@@ -22,7 +22,7 @@ export function initPostHog() {
     capture_pageview: false,
     capture_pageleave: true,
     disable_session_recording: true,
-    persistence: "localStorage+cookie",
+    persistence: "localStorage",
     respect_dnt: true,
     ip: false,
     loaded: (ph) => {
