@@ -1,35 +1,26 @@
 ## Ziel
 
-Login-Typ in PostHog eindeutig als `auth_method: 'strava' | 'email'` tracken, statt des semantisch unklaren `strava_user: true/false`.
+Beim Erstellen des Webcam-Screenshots (`capture-webcam` Edge Function) wird bereits eine Liste von Roundshot-Overlays ausgeblendet, bevor ScreenshotOne das Bild aufnimmt. Das neue Angular-Modal `app-camera-offline-modal` (inkl. Material-Dialog-Backdrop) ist dort noch nicht enthalten und erscheint deshalb mitten im aktuellen `latest.jpg`. Wir erweitern die bestehende Ausblend-Logik um dieses Modal.
 
-## Änderungen
+## Änderung
 
-### 1. `src/hooks/usePostHogTracking.ts`
-Beim `identifyUser`-Aufruf zusätzlich `auth_method` setzen:
+Nur eine Datei: `supabase/functions/capture-webcam/index.ts`
 
-```ts
-const authMethod = data?.strava_id ? 'strava' : 'email';
-identifyUser(userId, {
-  auth_method: authMethod,            // 'strava' | 'email' — eindeutig
-  strava_user: data?.strava_id != null, // bleibt für Rückwärtskompatibilität bestehender Insights
-  founding_member: data?.is_founding_member ?? false,
-  user_number: data?.user_number ?? undefined,
-});
-```
+1. **CSS-Block (`customCSS`)** ergänzen um Selektoren, die das Offline-Modal samt Material-Dialog-Backdrop unsichtbar machen:
+   - `app-camera-offline-modal`
+   - `mat-dialog-container`, `.mat-dialog-container`, `.cdk-overlay-container`, `.cdk-overlay-backdrop`, `.mat-dialog-content`, `.mat-dialog-title`
+   - Zusätzlich `[id^="mat-dialog-"]` als Catch-all für künftige Dialoge
 
-`strava_user` lassen wir vorerst stehen, damit bestehende PostHog-Dashboards nicht brechen. Kann nach Migration der Insights entfernt werden.
+   Jeweils mit `display:none !important; visibility:hidden !important; opacity:0 !important; pointer-events:none !important;`.
 
-### 2. `src/pages/Auth.tsx`
-Beim erfolgreichen Login das gewählte Verfahren sofort als Event + Person Property setzen, damit die Information schon vor dem ersten Profile-Read korrekt ist:
+2. **`hideSelectors`-Array** (wird als `hide_selectors[]` an ScreenshotOne übergeben) um dieselben Selektoren erweitern:
+   - `app-camera-offline-modal`
+   - `mat-dialog-container`
+   - `.cdk-overlay-container`
+   - `.cdk-overlay-backdrop`
 
-- In `handleStravaLogin`: vor dem Redirect zusätzlich
-  `posthog.capture('login_method_selected', { method: 'strava' })` und
-  `posthog.setPersonProperties({ auth_method: 'strava' })`.
-- In `handleMagicLink` (nach erfolgreichem `signInWithOtp`): analog mit `method: 'email'`.
+Keine weiteren Änderungen an Rate-Limit, Auth, Upload oder Frontend. Nach Deploy wird der nächste Cron-Lauf (bzw. manueller Trigger im Admin) ein sauberes Bild ohne Offline-Modal hochladen — sofern die Kamera ein Bild liefert. Liefert die Kamera weiterhin nur einen Offline-Zustand, ist das Resultat ein leerer/dunkler Canvas, was im Sinne des Auftrags ist (nur Overlays werden entfernt, nicht der Kamerazustand selbst).
 
-### 3. Doku-Hinweis (optional)
-Kurzer Kommentar in `src/lib/posthog.ts` über dem `identifyUser`, der `auth_method` als kanonische Property dokumentiert.
+## Hinweis
 
-## Nicht-Ziele
-- Keine Änderung an Datenbank/RLS.
-- Kein Entfernen von `strava_user` in diesem Schritt (separate Folgeaufgabe nach Insight-Migration).
+Falls Roundshot das Modal mit Inline-Styles direkt aufs Backdrop legt, das CSS aber durchgreift (Erfahrung aus den bisherigen Selektoren), reicht diese rein deklarative Lösung. Sollte es nach dem Deploy doch noch durchscheinen, ergänzen wir in einem Folgeschritt `body > .cdk-overlay-container` als zusätzliche Sicherung.
