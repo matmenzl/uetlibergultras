@@ -95,9 +95,15 @@ export function SegmentMultiSelect({
   );
 
   const commandList = (
-    <Command shouldFilter>
+    <Command shouldFilter className={isMobile ? 'flex h-full flex-col' : ''}>
       <CommandInput placeholder="Segment suchen..." />
-      <CommandList className={isMobile ? 'max-h-[55vh]' : 'max-h-64'}>
+      <CommandList
+        className={
+          isMobile
+            ? 'flex-1 max-h-none overflow-y-auto overscroll-contain'
+            : 'max-h-64'
+        }
+      >
         <CommandEmpty>Kein Segment gefunden.</CommandEmpty>
         <CommandGroup>
           {segments.map((segment) => {
@@ -138,11 +144,14 @@ export function SegmentMultiSelect({
       {isMobile ? (
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>{triggerButton}</SheetTrigger>
-          <SheetContent side="bottom" className="p-0 h-[80vh] flex flex-col bg-popover">
-            <SheetHeader className="px-4 pt-4 pb-2">
+          <SheetContent
+            side="bottom"
+            className="p-0 flex flex-col bg-popover h-[85dvh] max-h-[85dvh]"
+          >
+            <SheetHeader className="px-4 pt-4 pb-2 shrink-0">
               <SheetTitle>Segmente auswählen</SheetTitle>
             </SheetHeader>
-            <div className="flex-1 overflow-hidden">{commandList}</div>
+            <div className="flex-1 min-h-0 overflow-hidden">{commandList}</div>
           </SheetContent>
         </Sheet>
       ) : (
