@@ -95,8 +95,10 @@ export function SegmentMultiSelect({
   );
 
   const commandList = (
-    <Command shouldFilter className={isMobile ? 'flex h-full flex-col' : ''}>
-      <CommandInput placeholder="Segment suchen..." />
+    <Command shouldFilter className={isMobile ? 'flex h-full flex-col overflow-visible' : ''}>
+      <div className={isMobile ? 'shrink-0' : ''}>
+        <CommandInput placeholder="Segment suchen..." />
+      </div>
       <CommandList
         className={
           isMobile
