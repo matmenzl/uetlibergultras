@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Command,
   CommandEmpty,
@@ -36,6 +38,7 @@ export function SegmentMultiSelect({
   const [open, setOpen] = useState(false);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchSegments = async () => {
@@ -74,64 +77,82 @@ export function SegmentMultiSelect({
     return (meters / 1000).toFixed(1);
   };
 
+  const triggerButton = (
+    <Button
+      variant="outline"
+      role="combobox"
+      aria-expanded={open}
+      disabled={disabled || loading}
+      className="w-full justify-between font-normal"
+    >
+      {loading
+        ? 'Segmente werden geladen...'
+        : selectedSegmentIds.length > 0
+        ? `${selectedSegmentIds.length} Segment${selectedSegmentIds.length > 1 ? 'e' : ''} ausgewählt`
+        : 'Segmente auswählen (optional)...'}
+      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+    </Button>
+  );
+
+  const commandList = (
+    <Command shouldFilter>
+      <CommandInput placeholder="Segment suchen..." />
+      <CommandList className={isMobile ? 'max-h-[55vh]' : 'max-h-64'}>
+        <CommandEmpty>Kein Segment gefunden.</CommandEmpty>
+        <CommandGroup>
+          {segments.map((segment) => {
+            const isSelected = selectedSegmentIds.includes(segment.segment_id);
+            return (
+              <CommandItem
+                key={segment.segment_id}
+                value={segment.name}
+                onSelect={() => toggleSegment(segment.segment_id)}
+                className="cursor-pointer"
+              >
+                <div
+                  className={cn(
+                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                    isSelected
+                      ? 'bg-primary text-primary-foreground'
+                      : 'opacity-50 [&_svg]:invisible'
+                  )}
+                >
+                  <Check className="h-3 w-3" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="truncate font-medium text-sm">{segment.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDistance(segment.distance)} km • {segment.avg_grade.toFixed(1)}% Steigung
+                  </p>
+                </div>
+              </CommandItem>
+            );
+          })}
+        </CommandGroup>
+      </CommandList>
+    </Command>
+  );
+
   return (
     <div className="space-y-2">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            disabled={disabled || loading}
-            className="w-full justify-between font-normal"
-          >
-            {loading
-              ? 'Segmente werden geladen...'
-              : selectedSegmentIds.length > 0
-              ? `${selectedSegmentIds.length} Segment${selectedSegmentIds.length > 1 ? 'e' : ''} ausgewählt`
-              : 'Segmente auswählen (optional)...'}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full min-w-[320px] p-0 z-50 bg-popover" align="start">
-          <Command>
-            <CommandInput placeholder="Segment suchen..." />
-            <CommandList className="max-h-64">
-              <CommandEmpty>Kein Segment gefunden.</CommandEmpty>
-              <CommandGroup>
-                {segments.map((segment) => {
-                  const isSelected = selectedSegmentIds.includes(segment.segment_id);
-                  return (
-                    <CommandItem
-                      key={segment.segment_id}
-                      value={segment.name}
-                      onSelect={() => toggleSegment(segment.segment_id)}
-                      className="cursor-pointer"
-                    >
-                      <div
-                        className={cn(
-                          'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                          isSelected
-                            ? 'bg-primary text-primary-foreground'
-                            : 'opacity-50 [&_svg]:invisible'
-                        )}
-                      >
-                        <Check className="h-3 w-3" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="truncate font-medium text-sm">{segment.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDistance(segment.distance)} km • {segment.avg_grade.toFixed(1)}% Steigung
-                        </p>
-                      </div>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      {isMobile ? (
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>{triggerButton}</SheetTrigger>
+          <SheetContent side="bottom" className="p-0 h-[80vh] flex flex-col bg-popover">
+            <SheetHeader className="px-4 pt-4 pb-2">
+              <SheetTitle>Segmente auswählen</SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 overflow-hidden">{commandList}</div>
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+          <PopoverContent className="w-full min-w-[320px] p-0 z-50 bg-popover" align="start">
+            {commandList}
+          </PopoverContent>
+        </Popover>
+      )}
 
       {/* Selected segments badges */}
       {selectedSegments.length > 0 && (
